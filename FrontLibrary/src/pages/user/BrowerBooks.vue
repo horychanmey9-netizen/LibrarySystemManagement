@@ -1,13 +1,4 @@
 <template>
+    <h1>BrowerBook</h1>
   
 </template>
-
-<script>
-export default {
-
-}
-</script>
-
-<style>
-
-</style>

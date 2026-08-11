@@ -1,13 +1,3 @@
 <template>
-  
+    <h1>MyBorrowings</h1>
 </template>
-
-<script>
-export default {
-
-}
-</script>
-
-<style>
-
-</style>
