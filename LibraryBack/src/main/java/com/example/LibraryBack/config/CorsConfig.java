@@ -18,7 +18,7 @@ public class CorsConfig {
 
         // Frontend URL
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5174")
+                List.of("http://localhost:5173")
         );
 
         // HTTP Methods

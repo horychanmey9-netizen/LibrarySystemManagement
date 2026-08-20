@@ -139,13 +139,12 @@
 
 
 <script>
-import FineCard from "../../components/user/FineCard.vue";
-
+import FineCard from "../../components/user/FineCard.vue"
 export default {
   name: "MyFines",
 
   components: {
-    FineCard
+    FineCard  
   },
 
   data() {

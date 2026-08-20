@@ -1,523 +1,707 @@
-<script setup>
-import { ref } from 'vue'
+<template>
+  <div class="w-full">
 
+    <!-- ========================================
+         MAIN PROFILE CONTAINER
+    ========================================= -->
+    <div
+      class="grid grid-cols-1 lg:grid-cols-[300px_1fr]
+             bg-white rounded-2xl shadow-sm
+             border border-slate-200 overflow-hidden"
+    >
+
+      <!-- ========================================
+           LEFT SIDEBAR
+      ========================================= -->
+      <aside
+        class="bg-gradient-to-b from-slate-50 to-white
+               border-b lg:border-b-0 lg:border-r
+               border-slate-200 p-5 lg:p-6
+               flex flex-col"
+      >
+
+        <!-- Avatar -->
+        <div class="flex flex-col items-center">
+
+          <div
+            class="w-24 h-24 rounded-full
+                   bg-gradient-to-br from-indigo-100 to-purple-100
+                   border-4 border-white
+                   shadow-lg
+                   flex items-center justify-center
+                   overflow-hidden"
+          >
+
+            <!-- =========================
+                 AVATAR FROM BACKEND
+            ========================== -->
+            <img
+              v-if="form.avatar"
+              :src="form.avatar"
+              :alt="form.fullName || 'User'"
+              class="w-full h-full object-cover"
+              @error="avatarError = true"
+            />
+
+            <!-- =========================
+                 INITIAL IF NO AVATAR
+            ========================== -->
+            <span
+              v-if="!form.avatar || avatarError"
+              class="text-2xl font-bold text-indigo-800"
+            >
+              {{ initials }}
+            </span>
+
+          </div>
+
+          <!-- User Name -->
+          <h2
+            class="mt-4 text-xl font-bold text-slate-800"
+          >
+            {{ form.fullName || "User" }}
+          </h2>
+
+          <!-- Role -->
+          <p
+            class="text-sm text-slate-400 mt-1"
+          >
+            Library User
+          </p>
+
+        </div>
+
+
+        <!-- ========================================
+             MENU
+        ========================================= -->
+        <div class="mt-8 space-y-2">
+
+          <!-- Personal Information -->
+          <div
+            class="flex items-center gap-3
+                   px-4 py-3 rounded-xl
+                   bg-gradient-to-r
+                   from-indigo-50 to-pink-50
+                   text-indigo-600
+                   font-semibold"
+          >
+
+            <div
+              class="w-9 h-9 rounded-lg
+                     bg-indigo-100
+                     flex items-center justify-center"
+            >
+              <i class="bi bi-person-fill"></i>
+            </div>
+
+            <span>
+              Personal Information
+            </span>
+
+          </div>
+
+
+          <!-- Login & Password -->
+          <div
+            class="flex items-center gap-3
+                   px-4 py-3 rounded-xl
+                   text-slate-500
+                   hover:bg-slate-50
+                   transition cursor-pointer"
+          >
+
+            <div
+              class="w-9 h-9 rounded-lg
+                     bg-indigo-50
+                     flex items-center justify-center"
+            >
+              <i class="bi bi-lock-fill"></i>
+            </div>
+
+            <span>
+              Login & Password
+            </span>
+
+          </div>
+
+
+          <!-- Logout -->
+          <div
+            class="flex items-center gap-3
+                   px-4 py-3 rounded-xl
+                   text-slate-500
+                   hover:bg-slate-50
+                   transition cursor-pointer"
+          >
+
+            <div
+              class="w-9 h-9 rounded-lg
+                     bg-indigo-50
+                     flex items-center justify-center"
+            >
+              <i class="bi bi-box-arrow-right"></i>
+            </div>
+
+            <span>
+              Log Out
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================
+             SECURITY CARD
+        ========================================= -->
+        <div class="mt-auto pt-8">
+
+          <div
+            class="rounded-2xl
+                   border border-pink-100
+                   bg-gradient-to-br
+                   from-white to-pink-50
+                   p-5"
+          >
+
+            <div
+              class="w-10 h-10 rounded-xl
+                     bg-indigo-100
+                     flex items-center justify-center
+                     text-indigo-600 mb-4"
+            >
+              <i class="bi bi-shield-lock-fill"></i>
+            </div>
+
+            <h3
+              class="font-semibold text-slate-700"
+            >
+              Keep your account secure
+            </h3>
+
+            <p
+              class="text-sm text-slate-400
+                     leading-6 mt-2"
+            >
+              Make sure your personal information
+              and password are always up to date.
+            </p>
+
+          </div>
+
+        </div>
+
+      </aside>
+
+
+      <!-- ========================================
+           RIGHT CONTENT
+      ========================================= -->
+      <section class="p-6 md:p-8 lg:p-10">
+
+        <!-- Header -->
+        <div class="mb-8">
+
+          <h1
+            class="text-2xl md:text-3xl
+                   font-bold text-slate-800"
+          >
+            User Profile
+          </h1>
+
+          <p class="text-slate-400 mt-1">
+            Manage your personal account information
+          </p>
+
+        </div>
+
+
+        <!-- ========================================
+             GENDER
+        ========================================= -->
+        <div class="mb-7">
+
+          <label
+            class="block text-sm font-medium
+                   text-slate-600 mb-3"
+          >
+            Gender
+          </label>
+
+          <div class="flex items-center gap-7">
+
+            <label
+              class="flex items-center gap-2
+                     cursor-pointer text-slate-600"
+            >
+
+              <input
+                v-model="form.gender"
+                type="radio"
+                value="Male"
+                class="w-5 h-5 accent-indigo-500"
+              />
+
+              <span>Male</span>
+
+            </label>
+
+
+            <label
+              class="flex items-center gap-2
+                     cursor-pointer text-slate-600"
+            >
+
+              <input
+                v-model="form.gender"
+                type="radio"
+                value="Female"
+                class="w-5 h-5 accent-indigo-500"
+              />
+
+              <span>Female</span>
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================
+             FULL NAME + PHONE
+        ========================================= -->
+        <div
+          class="grid grid-cols-1 md:grid-cols-2
+                 gap-5 mb-6"
+        >
+
+          <!-- Full Name -->
+          <div>
+
+            <label
+              class="block text-sm font-medium
+                     text-slate-600 mb-2"
+            >
+              Full Name
+            </label>
+
+            <div class="relative">
+
+              <div
+                class="absolute left-3 top-1/2
+                       -translate-y-1/2
+                       w-9 h-9 rounded-lg
+                       bg-indigo-50
+                       flex items-center justify-center
+                       text-indigo-600"
+              >
+                <i class="bi bi-person-fill"></i>
+              </div>
+
+              <input
+                v-model="form.fullName"
+                type="text"
+                class="w-full pl-14 pr-4 py-3
+                       border border-indigo-100
+                       rounded-xl
+                       text-slate-700
+                       outline-none
+                       focus:ring-2 focus:ring-indigo-200
+                       focus:border-indigo-300"
+              />
+
+            </div>
+
+          </div>
+
+
+          <!-- Phone -->
+          <div>
+
+            <label
+              class="block text-sm font-medium
+                     text-slate-600 mb-2"
+            >
+              Phone Number
+            </label>
+
+            <div class="relative">
+
+              <div
+                class="absolute left-3 top-1/2
+                       -translate-y-1/2
+                       w-9 h-9 rounded-lg
+                       bg-pink-50
+                       flex items-center justify-center
+                       text-pink-400"
+              >
+                <i class="bi bi-telephone-fill"></i>
+              </div>
+
+              <input
+                v-model="form.phone"
+                type="tel"
+                placeholder="+855 12 345 678"
+                class="w-full pl-14 pr-4 py-3
+                       border border-pink-100
+                       rounded-xl
+                       text-slate-700
+                       placeholder:text-slate-400
+                       outline-none
+                       focus:ring-2 focus:ring-pink-100
+                       focus:border-pink-200"
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================
+             EMAIL
+        ========================================= -->
+        <div class="mb-6">
+
+          <label
+            class="block text-sm font-medium
+                   text-slate-600 mb-2"
+          >
+            Email
+          </label>
+
+          <div class="relative">
+
+            <div
+              class="absolute left-3 top-1/2
+                     -translate-y-1/2
+                     w-9 h-9 rounded-lg
+                     bg-indigo-50
+                     flex items-center justify-center
+                     text-indigo-500"
+            >
+              <i class="bi bi-envelope-fill"></i>
+            </div>
+
+            <input
+              v-model="form.email"
+              type="email"
+              class="w-full pl-14 pr-28 py-3
+                     border border-indigo-100
+                     rounded-xl
+                     text-slate-700
+                     bg-white
+                     outline-none
+                     focus:ring-2 focus:ring-indigo-200"
+            />
+
+            <span
+              class="absolute right-3 top-1/2
+                     -translate-y-1/2
+                     px-4 py-1.5
+                     rounded-full
+                     bg-emerald-50
+                     text-emerald-500
+                     text-xs font-semibold"
+            >
+              Verified
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================
+             ADDRESS
+        ========================================= -->
+        <div class="mb-6">
+
+          <label
+            class="block text-sm font-medium
+                   text-slate-600 mb-2"
+          >
+            Address
+          </label>
+
+          <div class="relative">
+
+            <div
+              class="absolute left-3 top-1/2
+                     -translate-y-1/2
+                     w-9 h-9 rounded-lg
+                     bg-pink-50
+                     flex items-center justify-center
+                     text-pink-400"
+            >
+              <i class="bi bi-house-fill"></i>
+            </div>
+
+            <input
+              v-model="form.address"
+              type="text"
+              placeholder="Enter your address"
+              class="w-full pl-14 pr-4 py-3
+                     border border-pink-100
+                     rounded-xl
+                     text-slate-700
+                     placeholder:text-slate-400
+                     outline-none
+                     focus:ring-2 focus:ring-pink-100
+                     focus:border-pink-200"
+            />
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================
+             DATE + POSTAL
+        ========================================= -->
+        <div
+          class="grid grid-cols-1 md:grid-cols-2
+                 gap-5"
+        >
+
+          <!-- Date of Birth -->
+          <div>
+
+            <label
+              class="block text-sm font-medium
+                     text-slate-600 mb-2"
+            >
+              Date of Birth
+            </label>
+
+            <div class="relative">
+
+              <div
+                class="absolute left-3 top-1/2
+                       -translate-y-1/2
+                       w-9 h-9 rounded-lg
+                       bg-pink-50
+                       flex items-center justify-center
+                       text-indigo-400
+                       pointer-events-none"
+              >
+                <i class="bi bi-calendar3"></i>
+              </div>
+
+              <input
+                v-model="form.dateOfBirth"
+                type="date"
+                class="w-full pl-14 pr-4 py-3
+                       border border-pink-100
+                       rounded-xl
+                       text-slate-700
+                       outline-none
+                       focus:ring-2 focus:ring-pink-100"
+              />
+
+            </div>
+
+          </div>
+
+
+          <!-- Postal Code -->
+          <div>
+
+            <label
+              class="block text-sm font-medium
+                     text-slate-600 mb-2"
+            >
+              Postal Code
+            </label>
+
+            <div class="relative">
+
+              <div
+                class="absolute left-3 top-1/2
+                       -translate-y-1/2
+                       w-9 h-9 rounded-lg
+                       bg-pink-50
+                       flex items-center justify-center
+                       text-pink-400"
+              >
+                <i class="bi bi-hash"></i>
+              </div>
+
+              <input
+                v-model="form.postalCode"
+                type="text"
+                placeholder="12000"
+                class="w-full pl-14 pr-4 py-3
+                       border border-pink-100
+                       rounded-xl
+                       text-slate-700
+                       placeholder:text-slate-400
+                       outline-none
+                       focus:ring-2 focus:ring-pink-100"
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================
+             BUTTONS
+        ========================================= -->
+        <div
+          class="flex flex-col-reverse sm:flex-row
+                 justify-end gap-3
+                 mt-10 pt-6
+                 border-t border-slate-100"
+        >
+
+          <button
+            type="button"
+            @click="discardChanges"
+            class="px-7 py-3
+                   border border-indigo-200
+                   text-indigo-500
+                   font-semibold
+                   rounded-xl
+                   hover:bg-indigo-50
+                   transition"
+          >
+            Discard Changes
+          </button>
+
+
+          <button
+            type="button"
+            @click="saveChanges"
+            class="px-8 py-3
+                   bg-gradient-to-r
+                   from-indigo-500 to-purple-500
+                   text-white
+                   font-semibold
+                   rounded-xl
+                   shadow-md
+                   hover:shadow-lg
+                   hover:opacity-95
+                   transition"
+          >
+            Save Changes
+          </button>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </div>
+</template>
+
+
+<script setup>
+import {
+  reactive,
+  computed,
+  ref
+} from "vue";
+
+// ========================================
+// PROPS
+// ========================================
 const props = defineProps({
   profile: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-const emit = defineEmits(['save'])
+// ========================================
+// EMIT
+// ========================================
+const emit = defineEmits(["save"]);
 
-const form = ref({
-  fullName: props.profile.fullName || '',
-  gender: props.profile.gender || 'Male',
-  email: props.profile.email || '',
-  address: props.profile.address || '',
-  phone: props.profile.phone || '',
-  dateOfBirth: props.profile.dateOfBirth || '',
-  location: props.profile.location || '',
-  postalCode: props.profile.postalCode || '',
-  avatar: props.profile.avatar || 'https://i.pravatar.cc/150'
-})
+// ========================================
+// AVATAR ERROR
+// ========================================
+const avatarError = ref(false);
 
-const activeMenu = ref('personal')
+// ========================================
+// FORM
+// ========================================
+const form = reactive({
+  fullName: props.profile.fullName || "",
+  email: props.profile.email || "",
 
+  // Profile information
+  gender: props.profile.gender || "Male",
+  phone: props.profile.phone || "",
+  address: props.profile.address || "",
+  dateOfBirth: props.profile.dateOfBirth || "",
+  postalCode: props.profile.postalCode || "",
+
+  // Avatar from Backend
+  avatar: props.profile.avatar || "",
+});
+
+// ========================================
+// ORIGINAL DATA
+// ========================================
+const originalProfile = JSON.parse(
+  JSON.stringify(form)
+);
+
+// ========================================
+// SAVE
+// ========================================
 const saveChanges = () => {
-  emit('save', { ...form.value })
-}
+
+  emit("save", {
+    ...form,
+  });
+
+};
+
+// ========================================
+// DISCARD
+// ========================================
+const discardChanges = () => {
+
+  Object.assign(
+    form,
+    JSON.parse(
+      JSON.stringify(originalProfile)
+    )
+  );
+
+  avatarError.value = false;
+};
+
+// ========================================
+// INITIALS
+// ========================================
+const initials = computed(() => {
+
+  const name = form.fullName?.trim();
+
+  if (!name) {
+    return "US";
+  }
+
+  const names = name.split(/\s+/);
+
+  if (names.length === 1) {
+    return names[0]
+      .substring(0, 2)
+      .toUpperCase();
+  }
+
+  return (
+    names[0].charAt(0) +
+    names[names.length - 1].charAt(0)
+  ).toUpperCase();
+});
 </script>
-
-<template>
-  <div
-    class="min-h-screen bg-gradient-to-br from-[#f5f9ff] via-[#faf7ff] to-[#fff6fa] p-4 sm:p-6"
-  >
-    <!-- ================= MAIN CONTAINER ================= -->
-    <div
-      class="mx-auto flex max-w-6xl flex-col gap-5 rounded-3xl border border-blue-100/70 bg-white/90 p-4 shadow-[0_10px_40px_rgba(100,120,180,0.08)] backdrop-blur md:flex-row md:p-6"
-    >
-
-      <!-- ================= LEFT SIDEBAR ================= -->
-      <aside
-        class="relative w-full overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-b from-[#f8fbff] via-white to-[#fff8fc] p-5 md:w-[270px]"
-      >
-        <!-- Decorative circles -->
-        <div
-          class="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-blue-100/50 blur-2xl"
-        ></div>
-
-        <div
-          class="absolute -bottom-10 -left-10 h-28 w-28 rounded-full bg-pink-100/60 blur-2xl"
-        ></div>
-
-        <!-- ================= AVATAR ================= -->
-        <div class="relative z-10 flex flex-col items-center">
-
-          <div class="relative">
-            <img
-              :src="form.avatar"
-              alt="Profile"
-              class="h-24 w-24 rounded-full border-4 border-white object-cover shadow-[0_5px_20px_rgba(80,120,200,0.15)]"
-            />
-          </div>
-
-          <h2 class="mt-3 text-base font-bold text-[#17365f]">
-            {{ form.fullName }}
-          </h2>
-
-          <p class="text-xs text-[#7b8da8]">
-            User
-          </p>
-        </div>
-
-        <!-- ================= MENU ================= -->
-        <nav class="relative z-10 mt-8 space-y-2">
-
-          <!-- Personal -->
-          <button
-            type="button"
-            @click="activeMenu = 'personal'"
-            class="group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition-all duration-200"
-            :class="
-              activeMenu === 'personal'
-                ? 'bg-gradient-to-r from-blue-50 to-pink-50 font-semibold text-[#3478db] shadow-sm'
-                : 'text-[#7184a3] hover:bg-blue-50/60 hover:text-[#3478db]'
-            "
-          >
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-lg"
-              :class="
-                activeMenu === 'personal'
-                  ? 'bg-blue-100 text-blue-500'
-                  : 'bg-transparent'
-              "
-            >
-              <i class="bi bi-person"></i>
-            </span>
-
-            <span>Personal Information</span>
-          </button>
-
-          <!-- Login -->
-          <button
-            type="button"
-            @click="activeMenu = 'password'"
-            class="group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition-all duration-200"
-            :class="
-              activeMenu === 'password'
-                ? 'bg-gradient-to-r from-blue-50 to-pink-50 font-semibold text-[#3478db] shadow-sm'
-                : 'text-[#7184a3] hover:bg-blue-50/60 hover:text-[#3478db]'
-            "
-          >
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-lg"
-              :class="
-                activeMenu === 'password'
-                  ? 'bg-pink-100 text-pink-500'
-                  : 'bg-transparent'
-              "
-            >
-              <i class="bi bi-lock"></i>
-            </span>
-
-            <span>Login & Password</span>
-          </button>
-
-          <!-- Logout -->
-          <button
-            type="button"
-            class="group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-[#7184a3] transition hover:bg-pink-50 hover:text-pink-500"
-          >
-            <span class="flex h-8 w-8 items-center justify-center">
-              <i class="bi bi-box-arrow-right"></i>
-            </span>
-
-            <span>Log Out</span>
-          </button>
-        </nav>
-
-        <!-- ================= SECURITY CARD ================= -->
-        <div
-          class="relative z-10 mt-12 hidden rounded-2xl border border-pink-100 bg-gradient-to-br from-blue-50/80 via-white to-pink-50/80 p-4 md:block"
-        >
-          <div
-            class="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-pink-100 text-blue-500"
-          >
-            <i class="bi bi-shield-check"></i>
-          </div>
-
-          <h3 class="text-xs font-bold text-[#29466d]">
-            Keep your account secure
-          </h3>
-
-          <p class="mt-1 text-[11px] leading-5 text-[#8495ad]">
-            Make sure to keep your information up to date.
-          </p>
-        </div>
-      </aside>
-
-      <!-- ================= RIGHT CONTENT ================= -->
-      <main
-        class="flex-1 rounded-2xl border border-blue-100/70 bg-white p-3 shadow-sm sm:p-6"
-      >
-
-        <!-- ================= PERSONAL INFORMATION ================= -->
-        <div v-if="activeMenu === 'personal'">
-
-          <!-- Header -->
-          <div>
-            <h1 class="text-2xl font-bold text-[#17365f]">
-              Personal Information
-            </h1>
-
-            <p class="mt-1 text-sm text-[#8a9ab4]">
-              Update your personal information
-            </p>
-          </div>
-
-          <!-- ================= GENDER ================= -->
-          <div class="mt-7">
-
-            <label
-              class="mb-3 block text-xs font-semibold text-[#5d7192]"
-            >
-              Gender
-            </label>
-
-            <div class="flex gap-7">
-
-              <!-- Male -->
-              <label
-                class="flex cursor-pointer items-center gap-2 text-sm text-[#405574]"
-              >
-                <input
-                  v-model="form.gender"
-                  type="radio"
-                  value="Male"
-                  class="h-4 w-4 accent-blue-500"
-                />
-
-                Male
-              </label>
-
-              <!-- Female -->
-              <label
-                class="flex cursor-pointer items-center gap-2 text-sm text-[#405574]"
-              >
-                <input
-                  v-model="form.gender"
-                  type="radio"
-                  value="Female"
-                  class="h-4 w-4 accent-pink-400"
-                />
-
-                Female
-              </label>
-
-            </div>
-          </div>
-
-          <!-- ================= FULL NAME + PHONE ================= -->
-          <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-
-            <!-- Full Name -->
-            <div>
-              <label
-                class="mb-2 block text-xs font-semibold text-[#5d7192]"
-              >
-                Full Name
-              </label>
-
-              <div class="relative">
-                <span
-                  class="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-blue-50 text-blue-400"
-                >
-                  <i class="bi bi-person"></i>
-                </span>
-
-                <input
-                  v-model="form.fullName"
-                  type="text"
-                  class="w-full rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/50 to-pink-50/30 py-3 pl-14 pr-4 text-sm text-[#263b58] outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-50"
-                />
-              </div>
-            </div>
-
-            <!-- Phone -->
-            <div>
-              <label
-                class="mb-2 block text-xs font-semibold text-[#5d7192]"
-              >
-                Phone Number
-              </label>
-
-              <div class="relative">
-                <span
-                  class="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-pink-50 text-pink-400"
-                >
-                  <i class="bi bi-telephone"></i>
-                </span>
-
-                <input
-                  v-model="form.phone"
-                  type="text"
-                  class="w-full rounded-xl border border-pink-100 bg-gradient-to-r from-pink-50/40 to-blue-50/30 py-3 pl-14 pr-4 text-sm text-[#263b58] outline-none transition focus:border-pink-300 focus:bg-white focus:ring-4 focus:ring-pink-50"
-                />
-              </div>
-            </div>
-
-          </div>
-
-          <!-- ================= EMAIL ================= -->
-          <div class="mt-6">
-
-            <label
-              class="mb-2 block text-xs font-semibold text-[#5d7192]"
-            >
-              Email
-            </label>
-
-            <div class="relative">
-
-              <span
-                class="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-blue-50 text-blue-400"
-              >
-                <i class="bi bi-envelope"></i>
-              </span>
-
-              <input
-                v-model="form.email"
-                type="email"
-                class="w-full rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/40 to-pink-50/30 py-3 pl-14 pr-28 text-sm text-[#263b58] outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-50"
-              />
-
-              <span
-                class="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-500"
-              >
-                <i class="bi bi-check-circle-fill"></i>
-                Verified
-              </span>
-
-            </div>
-          </div>
-
-          <!-- ================= ADDRESS ================= -->
-          <div class="mt-6">
-
-            <label
-              class="mb-2 block text-xs font-semibold text-[#5d7192]"
-            >
-              Address
-            </label>
-
-            <div class="relative">
-
-              <span
-                class="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-pink-50 text-pink-400"
-              >
-                <i class="bi bi-geo-alt"></i>
-              </span>
-
-              <input
-                v-model="form.address"
-                type="text"
-                class="w-full rounded-xl border border-pink-100 bg-gradient-to-r from-pink-50/40 to-blue-50/30 py-3 pl-14 pr-4 text-sm text-[#263b58] outline-none transition focus:border-pink-300 focus:bg-white focus:ring-4 focus:ring-pink-50"
-              />
-
-            </div>
-          </div>
-
-          <!-- ================= PHONE + DATE ================= -->
-          <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-
-            <!-- Phone -->
-            <div>
-
-              <label
-                class="mb-2 block text-xs font-semibold text-[#5d7192]"
-              >
-                Phone Number
-              </label>
-
-              <div class="relative">
-
-                <span
-                  class="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-blue-50 text-blue-400"
-                >
-                  <i class="bi bi-telephone"></i>
-                </span>
-
-                <input
-                  v-model="form.phone"
-                  type="text"
-                  class="w-full rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/40 to-pink-50/30 py-3 pl-14 pr-4 text-sm text-[#263b58] outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-50"
-                />
-
-              </div>
-            </div>
-
-            <!-- Date -->
-            <div>
-
-              <label
-                class="mb-2 block text-xs font-semibold text-[#5d7192]"
-              >
-                Date of Birth
-              </label>
-
-              <div class="relative">
-
-                <span
-                  class="absolute left-3 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-pink-50 text-pink-400"
-                >
-                  <i class="bi bi-calendar3"></i>
-                </span>
-
-                <input
-                  v-model="form.dateOfBirth"
-                  type="date"
-                  class="w-full rounded-xl border border-pink-100 bg-gradient-to-r from-pink-50/40 to-blue-50/30 py-3 pl-14 pr-4 text-sm text-[#263b58] outline-none transition focus:border-pink-300 focus:bg-white focus:ring-4 focus:ring-pink-50"
-                />
-
-              </div>
-            </div>
-
-          </div>
-
-          <!-- ================= LOCATION + POSTAL ================= -->
-          <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-
-            <!-- Location -->
-            <div>
-
-              <label
-                class="mb-2 block text-xs font-semibold text-[#5d7192]"
-              >
-                Location
-              </label>
-
-              <div class="relative">
-
-                <span
-                  class="absolute left-3 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-blue-50 text-blue-400"
-                >
-                  <i class="bi bi-geo-alt"></i>
-                </span>
-
-                <select
-                  v-model="form.location"
-                  class="w-full appearance-none rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/40 to-pink-50/30 py-3 pl-14 pr-10 text-sm text-[#263b58] outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-50"
-                >
-                  <option value="">Select location</option>
-
-                  <option value="Phnom Penh, Cambodia">
-                    Phnom Penh, Cambodia
-                  </option>
-
-                  <option value="Siem Reap, Cambodia">
-                    Siem Reap, Cambodia
-                  </option>
-
-                  <option value="Battambang, Cambodia">
-                    Battambang, Cambodia
-                  </option>
-                </select>
-
-                <i
-                  class="bi bi-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-blue-400"
-                ></i>
-
-              </div>
-            </div>
-
-            <!-- Postal -->
-            <div>
-
-              <label
-                class="mb-2 block text-xs font-semibold text-[#5d7192]"
-              >
-                Postal Code
-              </label>
-
-              <div class="relative">
-
-                <span
-                  class="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-pink-50 text-pink-400"
-                >
-                  <i class="bi bi-credit-card-2-front"></i>
-                </span>
-
-                <input
-                  v-model="form.postalCode"
-                  type="text"
-                  class="w-full rounded-xl border border-pink-100 bg-gradient-to-r from-pink-50/40 to-blue-50/30 py-3 pl-14 pr-4 text-sm text-[#263b58] outline-none transition focus:border-pink-300 focus:bg-white focus:ring-4 focus:ring-pink-50"
-                />
-
-              </div>
-            </div>
-
-          </div>
-
-          <!-- ================= BUTTONS ================= -->
-          <div
-            class="mt-9 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"
-          >
-
-            <!-- Discard -->
-            <button
-              type="button"
-              class="rounded-xl border border-blue-200 bg-white px-8 py-3 text-sm font-semibold text-blue-500 transition hover:border-pink-200 hover:bg-pink-50 hover:text-pink-500"
-            >
-              Discard Changes
-            </button>
-
-            <!-- Save -->
-            <button
-              type="button"
-              @click="saveChanges"
-              class="rounded-xl bg-gradient-to-r from-blue-500 via-blue-400 to-pink-400 px-8 py-3 text-sm font-semibold text-white shadow-[0_6px_20px_rgba(80,130,230,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,130,190,0.25)]"
-            >
-              <i class="bi bi-save2 mr-2"></i>
-              Save Changes
-            </button>
-
-          </div>
-
-        </div>
-
-        <!-- ================= LOGIN & PASSWORD ================= -->
-        <div v-else-if="activeMenu === 'password'">
-
-          <h1 class="text-2xl font-bold text-[#17365f]">
-            Login & Password
-          </h1>
-
-          <p class="mt-1 text-sm text-[#8a9ab4]">
-            Manage your login information and password
-          </p>
-
-          <div
-            class="mt-8 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/70 via-white to-pink-50/60 p-6"
-          >
-            <div
-              class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-pink-100 text-blue-500"
-            >
-              <i class="bi bi-shield-lock text-lg"></i>
-            </div>
-
-            <h3 class="mt-4 font-semibold text-[#29466d]">
-              Password Settings
-            </h3>
-
-            <p class="mt-1 text-sm text-[#8192aa]">
-              Password settings can be added here.
-            </p>
-          </div>
-
-        </div>
-
-      </main>
-    </div>
-  </div>
-</template>

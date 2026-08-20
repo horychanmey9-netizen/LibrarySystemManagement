@@ -108,42 +108,42 @@ export default {
       unreadCount: 0,
 
       menuItems: [
-        {
-          label: "Home",
-          path: "/",
-          icon: "bi bi-house-door",
-        },
+  {
+    label: "Home",
+    path: "/user",
+    icon: "bi bi-house-door",
+  },
 
-        {
-          label: "Browse Books",
-          path: "/browse-books",
-          icon: "bi bi-journal-bookmark",
-        },
+  {
+    label: "Browse Books",
+    path: "/user/browse-books",
+    icon: "bi bi-journal-bookmark",
+  },
 
-        {
-          label: "My Borrowings",
-          path: "/my-borrowings",
-          icon: "bi bi-people",
-        },
+  {
+    label: "My Borrowings",
+    path: "/user/my-borrowings",
+    icon: "bi bi-people",
+  },
 
-        {
-          label: "My Fines",
-          path: "/my-fines",
-          icon: "bi bi-search",
-        },
+  {
+    label: "My Fines",
+    path: "/user/my-fines",
+    icon: "bi bi-search",
+  },
 
-        {
-          label: "Notifications",
-          path: "/notifications",
-          icon: "bi bi-bell",
-        },
+  {
+    label: "Notifications",
+    path: "/user/notifications",
+    icon: "bi bi-bell",
+  },
 
-        {
-          label: "Profile",
-          path: "/profile",
-          icon: "bi bi-person",
-        },
-      ],
+  {
+    label: "Profile",
+    path: "/user/profile",
+    icon: "bi bi-person",
+  },
+],
 
     };
   },
