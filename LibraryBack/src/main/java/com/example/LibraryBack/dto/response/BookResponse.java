@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -21,4 +23,6 @@ public class BookResponse {
     private String language;
     private String image;
     private boolean status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
