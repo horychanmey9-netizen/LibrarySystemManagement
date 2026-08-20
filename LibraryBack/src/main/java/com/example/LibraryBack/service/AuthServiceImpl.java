@@ -44,7 +44,6 @@ public class AuthServiceImpl implements AuthService {
         user.setActive(false);
         user = userRepository.save(user);
         otpService.createOtp(user);
-
         return userMapper.registerResponse(user);
     }
 
