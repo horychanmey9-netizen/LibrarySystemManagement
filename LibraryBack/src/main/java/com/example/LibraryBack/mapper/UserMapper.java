@@ -8,6 +8,7 @@ import com.example.LibraryBack.dto.response.RegisterResponse;
 import com.example.LibraryBack.dto.response.UserResponse;
 import com.example.LibraryBack.entity.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -16,5 +17,6 @@ public interface UserMapper {
     User toRegister(RegisterRequest registerRequest);
     RegisterResponse registerResponse(User user);
     User toLogin(LoginRequest loginRequest);
+    @Mapping(target = "userResponse",expression = "java(userResponse(user))")
     LoginResponse loginResponse(User user);
 }
