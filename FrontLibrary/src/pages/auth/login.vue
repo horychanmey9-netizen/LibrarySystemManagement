@@ -233,7 +233,7 @@ const login = async () => {
     if (user.role === "ADMIN") {
       router.push("/admin/dashboard");
     } else {
-      router.push("/user");
+      router.push("/user/home");
     }
 
   } catch (err) {

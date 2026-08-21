@@ -110,7 +110,7 @@ export default {
       menuItems: [
   {
     label: "Home",
-    path: "/user",
+    path: "/user/home",
     icon: "bi bi-house-door",
   },
 
@@ -180,12 +180,12 @@ export default {
     // LOGOUT
     // ===============================
     handleLogout() {
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("role");
+  sessionStorage.removeItem("user");
 
-      localStorage.removeItem("token");
-
-      this.$router.push("/login");
-
-    },
+  this.$router.push("/login");
+}
 
   },
 
