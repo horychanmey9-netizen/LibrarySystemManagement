@@ -1,34 +1,36 @@
 package com.example.LibraryBack.entity;
 
+import com.example.LibraryBack.enums.Gender;
+import com.example.LibraryBack.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tbl_books")
-public class Book {
+@Table(name = "tbl_profiles")
+public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title;
-    private Integer qty;
-    private String description;
-    private String author;
-    private Integer pages;
-    @Column(unique = true)
-    private String isbn;
-    private String language;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    private String phone;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+    private LocalDate dateOfBirth;
+    private String address;
     private String image;
-    private boolean status;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -43,15 +45,4 @@ public class Book {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @OneToMany(mappedBy = "book",cascade = CascadeType.ALL)
-    private List<Borrower> borrowers;
 }

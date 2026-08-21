@@ -22,6 +22,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->auth
                         .requestMatchers("/api/auth/**","/error").permitAll()
                         .requestMatchers("/api/book/**").hasRole("ADMIN")
+                        .requestMatchers("/api/category/**").hasRole("ADMIN")
+                        .requestMatchers("/api/borrowing/**").hasRole("ADMIN")
+                        .requestMatchers("/api/profile/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

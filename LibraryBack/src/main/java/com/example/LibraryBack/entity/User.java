@@ -50,4 +50,10 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Category> categories;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Borrower> borrowers;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Profile profile;
 }
