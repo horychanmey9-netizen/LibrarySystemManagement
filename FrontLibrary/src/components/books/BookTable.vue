@@ -1,35 +1,48 @@
 <template>
   <div class="books-page">
 
-    <!-- Header -->
+    <!-- ================= HEADER ================= -->
     <div class="page-header">
-        <div>
-            <h1>Book Management</h1>
-            <p>Manage all library books</p>
-        </div>
 
-        <button class="add-btn" @click="openAddBook">
-            + Add Book
-        </button>
+      <div>
+        <h1>Book Management</h1>
+        <p>Manage all library books</p>
+      </div>
+
+      <button
+        class="add-btn"
+        @click="openAddBook"
+      >
+        <i class="bi bi-plus-lg"></i>
+        <span>Add Book</span>
+      </button>
+
     </div>
 
-    <!-- Search & Filter -->
+
+    <!-- ================= SEARCH & FILTER ================= -->
     <div class="filter-box">
 
       <!-- Search -->
       <div class="search-box">
-        <span class="search-icon">⌕</span>
+
+        <i class="bi bi-search search-icon"></i>
 
         <input
           v-model="search"
           type="text"
           placeholder="Search books by title, author or ISBN..."
         />
+
       </div>
+
 
       <!-- Category -->
       <select v-model="selectedCategory">
-        <option value="">All Categories</option>
+
+        <option value="">
+          All Categories
+        </option>
 
         <option
           v-for="category in categories"
@@ -38,29 +51,52 @@
         >
           {{ category }}
         </option>
+
       </select>
+
 
       <!-- Status -->
       <select v-model="selectedStatus">
-        <option value="">All Status</option>
 
-        <option value="Available">Available</option>
-        <option value="Borrowed">Borrowed</option>
-        <option value="Overdue">Overdue</option>
+        <option value="">
+          All Status
+        </option>
+
+        <option value="Available">
+          Available
+        </option>
+
+        <option value="Borrowed">
+          Borrowed
+        </option>
+
+        <option value="Overdue">
+          Overdue
+        </option>
+
       </select>
 
+
       <!-- Reset -->
-      <button class="reset-btn" @click="resetFilters">
-        ↻ Reset
+      <button
+        class="reset-btn"
+        @click="resetFilters"
+      >
+        <i class="bi bi-arrow-clockwise"></i>
+        Reset
       </button>
 
     </div>
 
-    <!-- Book Table -->
+
+    <!-- ================= TABLE ================= -->
     <div class="table-container">
 
       <table>
+
+        <!-- Table Header -->
         <thead>
+
           <tr>
             <th>#</th>
             <th>BOOK</th>
@@ -71,87 +107,170 @@
             <th>STATUS</th>
             <th>ACTION</th>
           </tr>
+
         </thead>
 
+
+        <!-- Table Body -->
         <tbody>
 
           <tr
             v-for="(book, index) in filteredBooks"
             :key="book.id"
           >
-            <td>{{ index + 1 }}</td>
 
+            <!-- Number -->
             <td>
-              <div class="book-info">
-                <div class="book-cover">
-                  📕
-                </div>
-
-                <div>
-                  <strong>{{ book.title }}</strong>
-                  <small>{{ book.description }}</small>
-                </div>
-              </div>
+              {{ index + 1 }}
             </td>
 
-            <td>{{ book.author }}</td>
 
+            <!-- Book -->
             <td>
+
+              <div class="book-info">
+
+                <div class="book-cover">
+                  <i class="bi bi-book"></i>
+                </div>
+
+                <div class="book-text">
+
+                  <strong>
+                    {{ book.title }}
+                  </strong>
+
+                  <small>
+                    {{ book.description }}
+                  </small>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Author -->
+            <td>
+              {{ book.author }}
+            </td>
+
+
+            <!-- Category -->
+            <td>
+
               <span class="category">
                 {{ book.category }}
               </span>
+
             </td>
 
-            <td>{{ book.isbn }}</td>
 
-            <td>{{ book.quantity }}</td>
-
+            <!-- ISBN -->
             <td>
+              {{ book.isbn || "-" }}
+            </td>
+
+
+            <!-- Quantity -->
+            <td>
+              {{ book.quantity }}
+            </td>
+
+
+            <!-- Status -->
+            <td>
+
               <span
                 class="status"
                 :class="getStatusClass(book.status)"
               >
                 {{ book.status }}
               </span>
+
             </td>
 
+
+            <!-- Action -->
             <td>
-              <button class="edit-btn">
-                ✏
+
+              <button
+                class="edit-btn"
+                @click="editBook(book)"
+                title="Edit Book"
+              >
+                <i class="bi bi-pencil"></i>
               </button>
 
-              <button class="delete-btn">
-                🗑
+              <button
+                class="delete-btn"
+                @click="deleteBook(book.id)"
+                title="Delete Book"
+              >
+                <i class="bi bi-trash"></i>
               </button>
+
             </td>
 
           </tr>
+
 
           <!-- No Result -->
           <tr v-if="filteredBooks.length === 0">
-            <td colspan="8" class="no-result">
-              No books found.
+
+            <td
+              colspan="8"
+              class="no-result"
+            >
+              <i class="bi bi-book no-result-icon"></i>
+
+              <p>
+                No books found.
+              </p>
             </td>
+
           </tr>
 
         </tbody>
+
       </table>
 
     </div>
 
-    <!-- Pagination -->
+
+    <!-- ================= PAGINATION ================= -->
     <div class="pagination">
+
       <span>
-        Showing {{ filteredBooks.length }} of {{ books.length }} books
+        Showing {{ filteredBooks.length }}
+        of {{ books.length }} books
       </span>
 
-      <div>
-        <button>‹</button>
-        <button class="active">1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>›</button>
+      <div class="pagination-buttons">
+
+        <button title="Previous">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <button class="active">
+          1
+        </button>
+
+        <button>
+          2
+        </button>
+
+        <button>
+          3
+        </button>
+
+        <button title="Next">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+
       </div>
+
     </div>
 
   </div>
@@ -159,245 +278,254 @@
 
 
 <script setup>
-import { ref, computed } from 'vue'
+
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 
 
-// ========================
-// Search & Filter
-// ========================
+// ROUTER
 
-const search = ref('')
-
-const selectedCategory = ref('')
-
-const selectedStatus = ref('')
+const router = useRouter();
 
 
-// ========================
-// Categories
-// ========================
+// SEARCH
+
+const search = ref("");
+
+
+// FILTER
+
+const selectedCategory = ref("");
+
+const selectedStatus = ref("");
+
+
+// CATEGORIES
 
 const categories = [
-  'Programming',
-  'Database',
-  'Networking',
-  'Security',
-  'Web Development'
-]
+  "Programming",
+  "Database",
+  "Networking",
+  "Security",
+  "Web Development",
+  "Business",
+  "Other"
+];
 
 
-// ========================
-// Books Data
-// ========================
+// BOOKS DATA
 
 const books = ref([
+
   {
     id: 1,
-    title: 'Clean Code',
-    description: 'A Handbook of Agile Software Craftsmanship',
-    author: 'Robert C. Martin',
-    category: 'Programming',
-    isbn: '978-0132350884',
+    title: "Clean Code",
+    description:
+      "A Handbook of Agile Software Craftsmanship",
+    author: "Robert C. Martin",
+    category: "Programming",
+    isbn: "978-0132350884",
     quantity: 5,
-    status: 'Available'
+    status: "Available"
   },
 
   {
     id: 2,
-    title: 'Java Programming',
-    description: 'Comprehensive Guide',
-    author: 'John Smith',
-    category: 'Programming',
-    isbn: '978-0321573513',
+    title: "Java Programming",
+    description:
+      "Comprehensive Guide",
+    author: "John Smith",
+    category: "Programming",
+    isbn: "978-0321573513",
     quantity: 3,
-    status: 'Borrowed'
+    status: "Borrowed"
   },
 
   {
     id: 3,
-    title: 'Database System Concepts',
-    description: 'Database Management',
-    author: 'Abraham Silberschatz',
-    category: 'Database',
-    isbn: '978-0078022159',
+    title: "Database System Concepts",
+    description:
+      "Database Management",
+    author: "Abraham Silberschatz",
+    category: "Database",
+    isbn: "978-0078022159",
     quantity: 4,
-    status: 'Available'
+    status: "Available"
   },
 
   {
     id: 4,
-    title: 'Computer Networking',
-    description: 'A Top-Down Approach',
-    author: 'James F. Kurose',
-    category: 'Networking',
-    isbn: '978-0133594140',
+    title: "Computer Networking",
+    description:
+      "A Top-Down Approach",
+    author: "James F. Kurose",
+    category: "Networking",
+    isbn: "978-0133594140",
     quantity: 2,
-    status: 'Borrowed'
+    status: "Borrowed"
   },
 
   {
     id: 5,
-    title: 'Web Development',
-    description: 'Modern Web Development',
-    author: 'David Miller',
-    category: 'Web Development',
-    isbn: '978-1492052203',
+    title: "Web Development",
+    description:
+      "Modern Web Development",
+    author: "David Miller",
+    category: "Web Development",
+    isbn: "978-1492052203",
     quantity: 6,
-    status: 'Available'
+    status: "Available"
   },
 
   {
     id: 6,
-    title: 'Cyber Security',
-    description: 'Introduction to Security',
-    author: 'William Stallings',
-    category: 'Security',
-    isbn: '978-0134091305',
+    title: "Cyber Security",
+    description:
+      "Introduction to Security",
+    author: "William Stallings",
+    category: "Security",
+    isbn: "978-0134091305",
     quantity: 2,
-    status: 'Overdue'
+    status: "Overdue"
   }
-])
+
+]);
 
 
-// ========================
-// Filter Books
-// ========================
-
+// FILTER BOOKS
 const filteredBooks = computed(() => {
-
-  return books.value.filter(book => {
-
+  return books.value.filter((book) => {
+    const searchText =
+      search.value.toLowerCase().trim();
     // Search
-    const searchText = search.value.toLowerCase()
-
     const matchesSearch =
-      book.title.toLowerCase().includes(searchText) ||
-      book.author.toLowerCase().includes(searchText) ||
-      book.isbn.toLowerCase().includes(searchText)
-
-
+      book.title
+        .toLowerCase()
+        .includes(searchText) ||
+      book.author
+        .toLowerCase()
+        .includes(searchText) ||
+      book.isbn
+        .toLowerCase()
+        .includes(searchText);
     // Category
     const matchesCategory =
-      selectedCategory.value === '' ||
-      book.category === selectedCategory.value
-
-
+      selectedCategory.value === "" ||
+      book.category === selectedCategory.value;
     // Status
     const matchesStatus =
-      selectedStatus.value === '' ||
-      book.status === selectedStatus.value
-
-
+      selectedStatus.value === "" ||
+      book.status === selectedStatus.value;
     return (
       matchesSearch &&
       matchesCategory &&
       matchesStatus
-    )
-
-  })
-
-})
-
-
-// ========================
-// Reset Filters
-// ========================
-
+    );
+  });
+});
+// RESET FILTER
 function resetFilters() {
-
-  search.value = ''
-
-  selectedCategory.value = ''
-
-  selectedStatus.value = ''
-
+  search.value = "";
+  selectedCategory.value = "";
+  selectedStatus.value = "";
 }
-
-
-// ========================
-// Status Class
-// ========================
-
+// STATUS CLASS
 function getStatusClass(status) {
-
-  if (status === 'Available') {
-    return 'available'
+  if (status === "Available") {
+    return "available";
   }
-
-  if (status === 'Borrowed') {
-    return 'borrowed'
+  if (status === "Borrowed") {
+    return "borrowed";
   }
-
-  if (status === 'Overdue') {
-    return 'overdue'
+  if (status === "Overdue") {
+    return "overdue";
   }
+  return "";
+}
+// ADD BOOK
+function openAddBook() {
+  router.push("/admin/books/add");
+}
+// EDIT BOOK
 
-  return ''
+function editBook(book) {
 
+  router.push(
+    `/admin/books/edit/${book.id}`
+  );
+}
+// DELETE BOOK
+function deleteBook(id) {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this book?"
+  );
+  if (!confirmDelete) {
+    return;
+  }
+  books.value = books.value.filter(
+    (book) => book.id !== id
+  );
 }
 </script>
 
-
 <style scoped>
-
-/* ========================
-   Page
-======================== */
-
+/* =====================================================
+   PAGE
+===================================================== */
 .books-page {
+  width: 100%;
+  min-height: calc(100vh - 70px);
   padding: 30px;
+  box-sizing: border-box;
   background: #f8f9fc;
-  min-height: 100vh;
   font-family: Arial, sans-serif;
 }
-
-
-/* ========================
-   Header
-======================== */
-
+/* =====================================================
+   HEADER
+===================================================== */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
 }
-
 .page-header h1 {
   margin: 0;
   font-size: 28px;
+  font-weight: 700;
   color: #172033;
 }
-
 .page-header p {
-  margin-top: 6px;
+  margin: 6px 0 0;
   color: #7b8497;
+  font-size: 14px;
 }
-
-
-/* ========================
-   Add Button
-======================== */
-
+/* =====================================================
+   ADD BUTTON
+===================================================== */
 .add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: #5b3df5;
   color: white;
   border: none;
   padding: 12px 20px;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
   font-weight: 600;
+  transition: 0.2s;
 }
-
 .add-btn:hover {
   background: #4930d5;
 }
-
-
-/* ========================
-   Filter Box
-======================== */
-
+.add-btn i {
+  font-size: 16px;
+}
+/* =====================================================
+   FILTER BOX
+===================================================== */
 .filter-box {
   display: flex;
   gap: 12px;
@@ -406,16 +534,16 @@ function getStatusClass(status) {
   padding: 18px;
   border-radius: 10px;
   border: 1px solid #e5e8ef;
+  box-sizing: border-box;
 }
-
-
-/* Search */
-
+/* =====================================================
+   SEARCH
+===================================================== */
 .search-box {
   flex: 1;
   position: relative;
+  min-width: 200px;
 }
-
 .search-box input {
   width: 100%;
   box-sizing: border-box;
@@ -423,22 +551,22 @@ function getStatusClass(status) {
   border: 1px solid #dfe3eb;
   border-radius: 8px;
   outline: none;
+  font-size: 14px;
 }
-
 .search-box input:focus {
   border-color: #5b3df5;
 }
-
 .search-icon {
   position: absolute;
   left: 14px;
-  top: 10px;
-  font-size: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #8a92a3;
 }
-
-
-/* Select */
-
+/* =====================================================
+   SELECT
+===================================================== */
 select {
   width: 180px;
   padding: 12px;
@@ -446,66 +574,68 @@ select {
   border-radius: 8px;
   background: white;
   cursor: pointer;
+  outline: none;
 }
-
-
-/* Reset */
-
+select:focus {
+  border-color: #5b3df5;
+}
+/* =====================================================
+   RESET
+===================================================== */
 .reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   padding: 12px 18px;
   border: 1px solid #dfe3eb;
   background: white;
   border-radius: 8px;
   cursor: pointer;
+  color: #667085;
 }
-
 .reset-btn:hover {
   background: #f1f2f6;
 }
-
-
-/* ========================
-   Table
-======================== */
-
+.reset-btn i {
+  font-size: 15px;
+}
+/* =====================================================
+   TABLE
+===================================================== */
 .table-container {
   background: white;
   border-radius: 10px;
   overflow-x: auto;
   border: 1px solid #e5e8ef;
 }
-
 table {
   width: 100%;
+  min-width: 1000px;
   border-collapse: collapse;
 }
-
 th {
   text-align: left;
   padding: 15px;
   font-size: 12px;
   color: #7c8497;
   background: #fafbfc;
+  white-space: nowrap;
 }
-
 td {
   padding: 15px;
   border-top: 1px solid #edf0f5;
   color: #333b4f;
   font-size: 14px;
+  white-space: nowrap;
 }
-
-
-/* ========================
-   Book Info
-======================== */
-
+/* =====================================================
+   BOOK INFO
+===================================================== */
 .book-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .book-cover {
   width: 38px;
   height: 50px;
@@ -514,23 +644,26 @@ td {
   justify-content: center;
   background: #f0efff;
   border-radius: 5px;
+  flex-shrink: 0;
 }
-
-.book-info strong {
+.book-cover i {
+  color: #5b3df5;
+  font-size: 20px;
+}
+.book-text strong {
   display: block;
 }
-
-.book-info small {
+.book-text small {
   color: #8a92a3;
   display: block;
   margin-top: 4px;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-
-/* ========================
-   Category
-======================== */
-
+/* =====================================================
+   CATEGORY
+===================================================== */
 .category {
   padding: 5px 9px;
   background: #eeeeff;
@@ -538,72 +671,77 @@ td {
   border-radius: 5px;
   font-size: 12px;
 }
-
-
-/* ========================
-   Status
-======================== */
-
+/* =====================================================
+   STATUS
+===================================================== */
 .status {
   padding: 5px 10px;
   border-radius: 5px;
   font-size: 12px;
   font-weight: 600;
 }
-
 .available {
   background: #e5f8ed;
   color: #16864a;
 }
-
 .borrowed {
   background: #fff3d8;
   color: #b77900;
 }
-
 .overdue {
   background: #ffe5e5;
   color: #d93636;
 }
-
-
-/* ========================
-   Actions
-======================== */
-
+/* =====================================================
+   ACTIONS
+===================================================== */
 .edit-btn,
 .delete-btn {
+  width: 34px;
+  height: 34px;
   border: none;
-  padding: 7px 9px;
   border-radius: 5px;
   cursor: pointer;
   margin-right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
 }
-
 .edit-btn {
   background: #eeeaff;
+  color: #5941e8;
 }
-
 .delete-btn {
   background: #ffe7e7;
+  color: #d93636;
 }
-
-
-/* ========================
-   No Result
-======================== */
-
+.edit-btn:hover {
+  background: #ddd7ff;
+}
+.delete-btn:hover {
+  background: #ffd4d4;
+}
+/* =====================================================
+   NO RESULT
+===================================================== */
 .no-result {
   text-align: center;
   padding: 40px;
   color: #888;
 }
-
-
-/* ========================
-   Pagination
-======================== */
-
+.no-result-icon {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 30px;
+  color: #9ca3af;
+}
+.no-result p {
+  margin: 0;
+}
+/* =====================================================
+   PAGINATION
+===================================================== */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -612,7 +750,10 @@ td {
   color: #777;
   font-size: 14px;
 }
-
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+}
 .pagination button {
   width: 35px;
   height: 35px;
@@ -622,34 +763,42 @@ td {
   border-radius: 6px;
   cursor: pointer;
 }
-
+.pagination button:hover {
+  background: #f3f4f6;
+}
 .pagination button.active {
   background: #5b3df5;
   color: white;
   border-color: #5b3df5;
 }
-
-
-/* ========================
-   Responsive
-======================== */
-
+/* =====================================================
+   RESPONSIVE
+===================================================== */
 @media (max-width: 900px) {
-
   .filter-box {
     flex-direction: column;
   }
-
   select {
     width: 100%;
   }
-
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
-
+  .add-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
-
+@media (max-width: 768px) {
+  .books-page {
+    padding: 20px;
+  }
+  .pagination {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
 </style>
