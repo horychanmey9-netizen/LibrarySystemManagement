@@ -1,105 +1,164 @@
 <template>
-  <div class="book-grid">
-    <BookCard
-      v-for="book in books"
-      :key="book.id"
-      :book="book"
-      @view-details="handleViewDetails"
-    />
+  <div
+    class="bg-white border border-slate-200 rounded-2xl p-4
+           hover:-translate-y-1 hover:shadow-lg
+           transition duration-300"
+  >
+
+    <!-- ================= BOOKMARK ================= -->
+    <div class="flex justify-end mb-2">
+      <button
+        type="button"
+        @click.stop="toggleBookmark"
+        class="w-9 h-9 border border-slate-200
+               rounded-lg hover:bg-blue-50
+               transition"
+        :class="
+          book.bookmarked
+            ? 'text-blue-600 bg-blue-50'
+            : 'text-slate-500'
+        "
+        aria-label="Bookmark book"
+      >
+        {{ book.bookmarked ? '♥' : '♡' }}
+      </button>
+    </div>
+
+
+    <!-- ================= BOOK COVER ================= -->
+    <button
+      type="button"
+      @click="viewDetails"
+      class="w-full text-left"
+    >
+      <div
+        class="h-56 bg-slate-100 rounded-xl
+               flex items-center justify-center
+               overflow-hidden mb-4"
+      >
+        <img
+          v-if="book.image"
+          :src="book.image"
+          :alt="book.title"
+          class="h-full w-full object-contain"
+        />
+
+        <!-- Fallback -->
+        <div
+          v-else
+          class="text-slate-400 text-5xl"
+        >
+          📚
+        </div>
+      </div>
+    </button>
+
+
+    <!-- ================= TITLE ================= -->
+    <h3
+      class="font-bold text-lg
+             leading-tight min-h-[48px]"
+    >
+      {{ book.title }}
+    </h3>
+
+
+    <!-- ================= AUTHOR ================= -->
+    <p class="text-sm text-slate-400 mt-1">
+      {{ book.author }}
+    </p>
+
+
+    <!-- ================= CATEGORY ================= -->
+    <span
+      class="inline-block mt-3 px-3 py-1
+             rounded-full bg-blue-50
+             text-blue-600 text-xs font-medium"
+    >
+      {{ book.category }}
+    </span>
+
+
+    <!-- ================= STATUS ================= -->
+    <div class="mt-3">
+
+      <!-- Available -->
+      <span
+        v-if="book.status === true"
+        class="inline-flex items-center gap-1
+               px-3 py-1 rounded-full
+               bg-emerald-50 text-emerald-600
+               text-xs font-medium"
+      >
+        ✓ Available
+      </span>
+
+      <!-- Borrowed -->
+      <span
+        v-else
+        class="inline-flex items-center gap-1
+               px-3 py-1 rounded-full
+               bg-red-50 text-red-500
+               text-xs font-medium"
+      >
+        × Borrowed
+      </span>
+
+    </div>
+
+
+    <!-- ================= VIEW DETAILS ================= -->
+    <button
+      type="button"
+      @click="viewDetails"
+      class="w-full mt-4
+             border-2 border-blue-500
+             text-blue-600
+             hover:bg-blue-600
+             hover:text-white
+             py-2.5 rounded-xl
+             font-medium
+             transition"
+    >
+      View Details
+    </button>
+
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from "vue";
-// import axios from "axios"; // ❌ បិទបណ្តោះអាសន្ន (ប្រើ Fake data ជំនួស)
-import BookCard from "./BookCard.vue";
 
-const books = ref([]);
+<script>
+export default {
+  name: "BookCard",
 
-// ✅ Fake data សម្រាប់សាកល្បង design (comment ចេញពេលចង់ប្រើ backend ពិត)
-const fakeBooks = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    cover: "https://covers.openlibrary.org/b/id/8432047-L.jpg",
-    rating: 4.5,
-    reviews: 128
+  props: {
+    book: {
+      type: Object,
+      required: true
+    }
   },
-  {
-    id: 2,
-    title: "1984",
-    author: "George Orwell",
-    cover: "https://covers.openlibrary.org/b/id/7222246-L.jpg",
-    rating: 4.8,
-    reviews: 342
-  },
-  {
-    id: 3,
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    cover: "https://covers.openlibrary.org/b/id/8231856-L.jpg",
-    rating: 4.7,
-    reviews: 210
-  },
-  {
-    id: 4,
-    title: "Pride and Prejudice",
-    author: "Jane Austen",
-    cover: "https://covers.openlibrary.org/b/id/8479394-L.jpg",
-    rating: 4.6,
-    reviews: 178
-  },
-  {
-    id: 5,
-    title: "The Hobbit",
-    author: "J.R.R. Tolkien",
-    cover: "https://covers.openlibrary.org/b/id/6979861-L.jpg",
-    rating: 4.9,
-    reviews: 512
-  },
-  {
-    id: 6,
-    title: "Sapiens",
-    author: "Yuval Noah Harari",
-    cover: "https://covers.openlibrary.org/b/id/8406786-L.jpg",
-    rating: 4.4,
-    reviews: 95
+
+  emits: [
+    "bookmark",
+    "view-details"
+  ],
+
+  methods: {
+
+    // ============================
+    // BOOKMARK
+    // ============================
+    toggleBookmark() {
+      this.$emit("bookmark", this.book);
+    },
+
+    // ============================
+    // VIEW DETAILS
+    // ============================
+    viewDetails() {
+      this.$emit("view-details", this.book);
+    }
+
   }
-];
-
-// --- Real API fetch (កូដចាស់ រក្សាទុកមិនលុប — កុំលុប!) ---
-// const fetchBooks = async () => {
-//   try {
-//     const res = await axios.get("http://localhost:8080/api/books");
-//     books.value = res.data;
-//   } catch (err) {
-//     console.error("Fetch books error:", err);
-//   }
-// };
-
-onMounted(() => {
-  // ✅ ប្រើ Fake data ដើម្បីមើល design (កំពុងប្រើសកម្ម)
-  books.value = fakeBooks;
-
-  // 👉 ពេលចង់ភ្ជាប់ backend ពិតវិញ៖
-  // 1. Uncomment "import axios" ខាងលើ
-  // 2. Uncomment function fetchBooks() ខាងលើ
-  // 3. Comment បន្ទាត់ "books.value = fakeBooks;" ខាងលើនេះ
-  // 4. Uncomment បន្ទាត់ខាងក្រោម
-  // fetchBooks();
-});
-
-const handleViewDetails = (book) => {
-  console.log("View details:", book);
 };
 </script>
-
-<style scoped>
-.book-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 1rem;
-}
-</style>
