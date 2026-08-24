@@ -1,32 +1,56 @@
 <template>
+
   <div class="edit-book-page">
 
-    <!-- Header -->
+    <!-- ================= HEADER ================= -->
+
     <div class="page-header">
+
       <div>
-        <h1>Edit Book</h1>
-        <p>Update book information</p>
+
+        <h1>
+          Edit Book
+        </h1>
+
+        <p>
+          Update book information
+        </p>
+
       </div>
+
 
       <button
         class="back-btn"
+        type="button"
         @click="goBack"
       >
+
         ← Back
+
       </button>
+
     </div>
 
 
-    <!-- Form -->
+    <!-- ================= FORM ================= -->
+
     <div class="form-card">
 
-      <form @submit.prevent="updateBook">
+      <form
+        @submit.prevent="updateBook"
+      >
 
-        <!-- Row 1 -->
+        <!-- ================= ROW 1 ================= -->
+
         <div class="form-row">
 
+          <!-- Title -->
+
           <div class="form-group">
-            <label>Book Title</label>
+
+            <label>
+              Book Title
+            </label>
 
             <input
               v-model="form.title"
@@ -34,11 +58,17 @@
               placeholder="Enter book title"
               required
             />
+
           </div>
 
 
+          <!-- Author -->
+
           <div class="form-group">
-            <label>Author</label>
+
+            <label>
+              Author
+            </label>
 
             <input
               v-model="form.author"
@@ -46,21 +76,29 @@
               placeholder="Enter author"
               required
             />
+
           </div>
 
         </div>
 
 
-        <!-- Row 2 -->
+        <!-- ================= ROW 2 ================= -->
+
         <div class="form-row">
 
+          <!-- Category -->
+
           <div class="form-group">
-            <label>Category</label>
+
+            <label>
+              Category
+            </label>
 
             <select
               v-model="form.category"
               required
             >
+
               <option value="">
                 Select Category
               </option>
@@ -70,30 +108,46 @@
                 :key="category"
                 :value="category"
               >
+
                 {{ category }}
+
               </option>
+
             </select>
+
           </div>
 
 
+          <!-- ISBN -->
+
           <div class="form-group">
-            <label>ISBN</label>
+
+            <label>
+              ISBN
+            </label>
 
             <input
               v-model="form.isbn"
               type="text"
               placeholder="Enter ISBN"
             />
+
           </div>
 
         </div>
 
 
-        <!-- Row 3 -->
+        <!-- ================= ROW 3 ================= -->
+
         <div class="form-row">
 
+          <!-- Quantity -->
+
           <div class="form-group">
-            <label>Quantity</label>
+
+            <label>
+              Quantity
+            </label>
 
             <input
               v-model.number="form.quantity"
@@ -101,16 +155,23 @@
               min="0"
               required
             />
+
           </div>
 
 
+          <!-- Status -->
+
           <div class="form-group">
-            <label>Status</label>
+
+            <label>
+              Status
+            </label>
 
             <select
               v-model="form.status"
               required
             >
+
               <option value="Available">
                 Available
               </option>
@@ -122,16 +183,21 @@
               <option value="Overdue">
                 Overdue
               </option>
+
             </select>
+
           </div>
 
         </div>
 
 
-        <!-- Description -->
+        <!-- ================= DESCRIPTION ================= -->
+
         <div class="form-group full">
 
-          <label>Description</label>
+          <label>
+            Description
+          </label>
 
           <textarea
             v-model="form.description"
@@ -142,7 +208,8 @@
         </div>
 
 
-        <!-- Buttons -->
+        <!-- ================= ACTIONS ================= -->
+
         <div class="form-actions">
 
           <button
@@ -150,14 +217,19 @@
             class="cancel-btn"
             @click="goBack"
           >
+
             Cancel
+
           </button>
+
 
           <button
             type="submit"
             class="save-btn"
           >
+
             Save Changes
+
           </button>
 
         </div>
@@ -167,17 +239,40 @@
     </div>
 
   </div>
+
 </template>
 
 
 <script setup>
 
-import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import {
+  ref,
+  watch
+} from "vue";
 
 
-const route = useRoute();
-const router = useRouter();
+// =====================================================
+// PROPS
+// =====================================================
+
+const props = defineProps({
+
+  book: {
+    type: Object,
+    default: null
+  }
+
+});
+
+
+// =====================================================
+// EVENTS
+// =====================================================
+
+const emit = defineEmits([
+  "close",
+  "updated"
+]);
 
 
 // =====================================================
@@ -196,112 +291,105 @@ const categories = [
 
 
 // =====================================================
-// BOOK DATA
-// =====================================================
-
-// Temporary data
-// Later this will come from API / database
-
-const books = [
-  {
-    id: 1,
-    title: "Clean Code",
-    description:
-      "A Handbook of Agile Software Craftsmanship",
-    author: "Robert C. Martin",
-    category: "Programming",
-    isbn: "978-0132350884",
-    quantity: 5,
-    status: "Available"
-  },
-
-  {
-    id: 2,
-    title: "Java Programming",
-    description:
-      "Comprehensive Guide",
-    author: "John Smith",
-    category: "Programming",
-    isbn: "978-0321573513",
-    quantity: 3,
-    status: "Borrowed"
-  },
-
-  {
-    id: 3,
-    title: "Database System Concepts",
-    description:
-      "Database Management",
-    author: "Abraham Silberschatz",
-    category: "Database",
-    isbn: "978-0078022159",
-    quantity: 4,
-    status: "Available"
-  },
-
-  {
-    id: 4,
-    title: "Computer Networking",
-    description:
-      "A Top-Down Approach",
-    author: "James F. Kurose",
-    category: "Networking",
-    isbn: "978-0133594140",
-    quantity: 2,
-    status: "Borrowed"
-  },
-
-  {
-    id: 5,
-    title: "Web Development",
-    description:
-      "Modern Web Development",
-    author: "David Miller",
-    category: "Web Development",
-    isbn: "978-1492052203",
-    quantity: 6,
-    status: "Available"
-  },
-
-  {
-    id: 6,
-    title: "Cyber Security",
-    description:
-      "Introduction to Security",
-    author: "William Stallings",
-    category: "Security",
-    isbn: "978-0134091305",
-    quantity: 2,
-    status: "Overdue"
-  }
-];
-
-
-// =====================================================
-// FIND BOOK
-// =====================================================
-
-const bookId = Number(route.params.id);
-
-const book = books.find(
-  (item) => item.id === bookId
-);
-
-
-// =====================================================
 // FORM
 // =====================================================
 
 const form = ref({
-  id: book?.id || null,
-  title: book?.title || "",
-  description: book?.description || "",
-  author: book?.author || "",
-  category: book?.category || "",
-  isbn: book?.isbn || "",
-  quantity: book?.quantity || 0,
-  status: book?.status || "Available"
+
+  id: null,
+
+  title: "",
+
+  description: "",
+
+  author: "",
+
+  category: "",
+
+  isbn: "",
+
+  quantity: 0,
+
+  status: "Available"
+
 });
+
+
+// =====================================================
+// LOAD BOOK INTO FORM
+// =====================================================
+
+function loadBook(book) {
+
+  if (!book) {
+
+    form.value = {
+
+      id: null,
+
+      title: "",
+
+      description: "",
+
+      author: "",
+
+      category: "",
+
+      isbn: "",
+
+      quantity: 0,
+
+      status: "Available"
+
+    };
+
+    return;
+
+  }
+
+
+  form.value = {
+
+    id: book.id,
+
+    title: book.title || "",
+
+    description: book.description || "",
+
+    author: book.author || "",
+
+    category: book.category || "",
+
+    isbn: book.isbn || "",
+
+    quantity: book.quantity ?? 0,
+
+    status: book.status || "Available"
+
+  };
+
+}
+
+
+// =====================================================
+// WATCH BOOK
+// =====================================================
+
+watch(
+
+  () => props.book,
+
+  (newBook) => {
+
+    loadBook(newBook);
+
+  },
+
+  {
+    immediate: true
+  }
+
+);
 
 
 // =====================================================
@@ -310,27 +398,55 @@ const form = ref({
 
 function updateBook() {
 
-  if (!book) {
+  if (!props.book) {
+
     alert("Book not found.");
+
     return;
+
   }
 
 
-  // Update temporary object
-  book.title = form.value.title;
-  book.description = form.value.description;
-  book.author = form.value.author;
-  book.category = form.value.category;
-  book.isbn = form.value.isbn;
-  book.quantity = form.value.quantity;
-  book.status = form.value.status;
+  const updatedBook = {
+
+    id: props.book.id,
+
+    title: form.value.title,
+
+    description: form.value.description,
+
+    author: form.value.author,
+
+    category: form.value.category,
+
+    isbn: form.value.isbn,
+
+    quantity: form.value.quantity,
+
+    status: form.value.status
+
+  };
 
 
-  alert("Book updated successfully!");
+  console.log(
+    "Updated Book:",
+    updatedBook
+  );
 
 
-  // Back to Book Management
-  router.push("/admin/books");
+  alert(
+    "Book updated successfully!"
+  );
+
+
+  // Send updated book
+  // back to Books.vue
+
+  emit(
+    "updated",
+    updatedBook
+  );
+
 }
 
 
@@ -339,7 +455,9 @@ function updateBook() {
 // =====================================================
 
 function goBack() {
-  router.push("/admin/books");
+
+  emit("close");
+
 }
 
 </script>
@@ -352,11 +470,21 @@ function goBack() {
 ===================================================== */
 
 .edit-book-page {
-  min-height: calc(100vh - 70px);
+
+  min-height:
+    calc(100vh - 70px);
+
   padding: 30px;
+
   background: #f8f9fc;
-  font-family: Arial, sans-serif;
-  box-sizing: border-box;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  box-sizing:
+    border-box;
+
 }
 
 
@@ -365,22 +493,39 @@ function goBack() {
 ===================================================== */
 
 .page-header {
+
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
   margin-bottom: 25px;
+
 }
+
 
 .page-header h1 {
+
   margin: 0;
+
   font-size: 28px;
+
   color: #172033;
+
 }
 
+
 .page-header p {
+
   margin-top: 6px;
+
   color: #7b8497;
+
   font-size: 14px;
+
 }
 
 
@@ -389,17 +534,38 @@ function goBack() {
 ===================================================== */
 
 .back-btn {
-  padding: 11px 18px;
-  border: 1px solid #dfe3eb;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #667085;
-  font-weight: 600;
+
+  padding:
+    11px
+    18px;
+
+  border:
+    1px solid
+    #dfe3eb;
+
+  background:
+    white;
+
+  border-radius:
+    8px;
+
+  cursor:
+    pointer;
+
+  color:
+    #667085;
+
+  font-weight:
+    600;
+
 }
 
+
 .back-btn:hover {
-  background: #f1f2f6;
+
+  background:
+    #f1f2f6;
+
 }
 
 
@@ -408,11 +574,23 @@ function goBack() {
 ===================================================== */
 
 .form-card {
-  background: white;
-  border: 1px solid #e5e8ef;
-  border-radius: 12px;
-  padding: 30px;
-  max-width: 1000px;
+
+  background:
+    white;
+
+  border:
+    1px solid
+    #e5e8ef;
+
+  border-radius:
+    12px;
+
+  padding:
+    30px;
+
+  max-width:
+    1000px;
+
 }
 
 
@@ -421,10 +599,19 @@ function goBack() {
 ===================================================== */
 
 .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
+
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:
+    20px;
+
+  margin-bottom:
+    20px;
+
 }
 
 
@@ -433,19 +620,38 @@ function goBack() {
 ===================================================== */
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    8px;
+
 }
+
 
 .form-group.full {
-  margin-bottom: 20px;
+
+  margin-bottom:
+    20px;
+
 }
 
+
 .form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #344054;
+
+  font-size:
+    14px;
+
+  font-weight:
+    600;
+
+  color:
+    #344054;
+
 }
 
 
@@ -456,20 +662,44 @@ function goBack() {
 .form-group input,
 .form-group select,
 .form-group textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 12px 14px;
-  border: 1px solid #dfe3eb;
-  border-radius: 8px;
-  outline: none;
-  font-size: 14px;
-  font-family: Arial, sans-serif;
+
+  width:
+    100%;
+
+  box-sizing:
+    border-box;
+
+  padding:
+    12px
+    14px;
+
+  border:
+    1px solid
+    #dfe3eb;
+
+  border-radius:
+    8px;
+
+  outline:
+    none;
+
+  font-size:
+    14px;
+
+  font-family:
+    Arial,
+    sans-serif;
+
 }
+
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #5b3df5;
+
+  border-color:
+    #5b3df5;
+
 }
 
 
@@ -478,7 +708,10 @@ function goBack() {
 ===================================================== */
 
 .form-group textarea {
-  resize: vertical;
+
+  resize:
+    vertical;
+
 }
 
 
@@ -487,11 +720,23 @@ function goBack() {
 ===================================================== */
 
 .form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding-top: 20px;
-  border-top: 1px solid #edf0f5;
+
+  display:
+    flex;
+
+  justify-content:
+    flex-end;
+
+  gap:
+    12px;
+
+  padding-top:
+    20px;
+
+  border-top:
+    1px solid
+    #edf0f5;
+
 }
 
 
@@ -500,17 +745,38 @@ function goBack() {
 ===================================================== */
 
 .cancel-btn {
-  padding: 12px 22px;
-  border: 1px solid #dfe3eb;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #667085;
-  font-weight: 600;
+
+  padding:
+    12px
+    22px;
+
+  border:
+    1px solid
+    #dfe3eb;
+
+  background:
+    white;
+
+  border-radius:
+    8px;
+
+  cursor:
+    pointer;
+
+  color:
+    #667085;
+
+  font-weight:
+    600;
+
 }
 
+
 .cancel-btn:hover {
-  background: #f1f2f6;
+
+  background:
+    #f1f2f6;
+
 }
 
 
@@ -519,17 +785,37 @@ function goBack() {
 ===================================================== */
 
 .save-btn {
-  padding: 12px 22px;
-  border: none;
-  background: #5b3df5;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
+
+  padding:
+    12px
+    22px;
+
+  border:
+    none;
+
+  background:
+    #5b3df5;
+
+  color:
+    white;
+
+  border-radius:
+    8px;
+
+  cursor:
+    pointer;
+
+  font-weight:
+    600;
+
 }
 
+
 .save-btn:hover {
-  background: #4930d5;
+
+  background:
+    #4930d5;
+
 }
 
 
@@ -540,30 +826,57 @@ function goBack() {
 @media (max-width: 768px) {
 
   .edit-book-page {
-    padding: 20px;
+
+    padding:
+      20px;
+
   }
+
 
   .form-row {
-    grid-template-columns: 1fr;
+
+    grid-template-columns:
+      1fr;
+
   }
+
 
   .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+
+    flex-direction:
+      column;
+
+    align-items:
+      flex-start;
+
+    gap:
+      15px;
+
   }
+
 
   .form-card {
-    padding: 20px;
+
+    padding:
+      20px;
+
   }
 
+
   .form-actions {
-    flex-direction: column;
+
+    flex-direction:
+      column;
+
   }
+
 
   .cancel-btn,
   .save-btn {
-    width: 100%;
+
+    width:
+      100%;
+
   }
 
 }

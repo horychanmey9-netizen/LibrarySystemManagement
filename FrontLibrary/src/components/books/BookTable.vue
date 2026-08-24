@@ -1,30 +1,44 @@
 <template>
+
   <div class="books-page">
 
     <!-- ================= HEADER ================= -->
+
     <div class="page-header">
 
       <div>
         <h1>Book Management</h1>
-        <p>Manage all library books</p>
+
+        <p>
+          Manage all library books
+        </p>
       </div>
 
+
       <!-- Add Book -->
+
       <button
         class="add-btn"
         @click="openAddBook"
       >
+
         <i class="bi bi-plus-lg"></i>
-        <span>Add Book</span>
+
+        <span>
+          Add Book
+        </span>
+
       </button>
 
     </div>
 
 
     <!-- ================= SEARCH & FILTER ================= -->
+
     <div class="filter-box">
 
       <!-- Search -->
+
       <div class="search-box">
 
         <i class="bi bi-search search-icon"></i>
@@ -39,7 +53,10 @@
 
 
       <!-- Category -->
-      <select v-model="selectedCategory">
+
+      <select
+        v-model="selectedCategory"
+      >
 
         <option value="">
           All Categories
@@ -57,7 +74,10 @@
 
 
       <!-- Status -->
-      <select v-model="selectedStatus">
+
+      <select
+        v-model="selectedStatus"
+      >
 
         <option value="">
           All Status
@@ -79,38 +99,56 @@
 
 
       <!-- Reset -->
+
       <button
         class="reset-btn"
         @click="resetFilters"
       >
+
         <i class="bi bi-arrow-clockwise"></i>
+
         Reset
+
       </button>
 
     </div>
 
 
     <!-- ================= TABLE ================= -->
+
     <div class="table-container">
 
       <table>
 
         <!-- Table Header -->
+
         <thead>
+
           <tr>
+
             <th>#</th>
+
             <th>BOOK</th>
+
             <th>AUTHOR</th>
+
             <th>CATEGORY</th>
+
             <th>ISBN</th>
+
             <th>QUANTITY</th>
+
             <th>STATUS</th>
+
             <th>ACTION</th>
+
           </tr>
+
         </thead>
 
 
         <!-- Table Body -->
+
         <tbody>
 
           <tr
@@ -119,12 +157,14 @@
           >
 
             <!-- Number -->
+
             <td>
               {{ index + 1 }}
             </td>
 
 
             <!-- Book -->
+
             <td>
 
               <div class="book-info">
@@ -134,6 +174,7 @@
                   <i class="bi bi-book"></i>
 
                 </div>
+
 
                 <div class="book-text">
 
@@ -153,12 +194,14 @@
 
 
             <!-- Author -->
+
             <td>
               {{ book.author }}
             </td>
 
 
             <!-- Category -->
+
             <td>
 
               <span class="category">
@@ -169,50 +212,64 @@
 
 
             <!-- ISBN -->
+
             <td>
               {{ book.isbn || "-" }}
             </td>
 
 
             <!-- Quantity -->
+
             <td>
               {{ book.quantity }}
             </td>
 
 
             <!-- Status -->
+
             <td>
 
               <span
                 class="status"
                 :class="getStatusClass(book.status)"
               >
+
                 {{ book.status }}
+
               </span>
 
             </td>
 
 
             <!-- Action -->
+
             <td>
 
-              <!-- Edit -->
+              <!-- ================= EDIT ================= -->
+
               <button
                 class="edit-btn"
-                @click="editBook(book)"
+                type="button"
+                @click="editBook(book.id)"
                 title="Edit Book"
               >
+
                 <i class="bi bi-pencil"></i>
+
               </button>
 
 
-              <!-- Delete -->
+              <!-- ================= DELETE ================= -->
+
               <button
                 class="delete-btn"
+                type="button"
                 @click="deleteBook(book.id)"
                 title="Delete Book"
               >
+
                 <i class="bi bi-trash"></i>
+
               </button>
 
             </td>
@@ -221,6 +278,7 @@
 
 
           <!-- No Result -->
+
           <tr
             v-if="filteredBooks.length === 0"
           >
@@ -250,11 +308,17 @@
 
 
     <!-- ================= PAGINATION ================= -->
+
     <div class="pagination">
 
       <span>
-        Showing {{ filteredBooks.length }}
-        of {{ books.length }} books
+
+        Showing
+        {{ filteredBooks.length }}
+        of
+        {{ books.length }}
+        books
+
       </span>
 
 
@@ -262,30 +326,43 @@
 
         <button
           title="Previous"
+          type="button"
         >
+
           <i class="bi bi-chevron-left"></i>
+
         </button>
 
 
-        <button class="active">
+        <button
+          class="active"
+          type="button"
+        >
           1
         </button>
 
 
-        <button>
+        <button
+          type="button"
+        >
           2
         </button>
 
 
-        <button>
+        <button
+          type="button"
+        >
           3
         </button>
 
 
         <button
           title="Next"
+          type="button"
         >
+
           <i class="bi bi-chevron-right"></i>
+
         </button>
 
       </div>
@@ -293,6 +370,7 @@
     </div>
 
   </div>
+
 </template>
 
 
@@ -305,11 +383,27 @@ import {
 
 
 // =====================================================
+// PROPS
+// =====================================================
+
+const props = defineProps({
+
+  books: {
+    type: Array,
+    default: () => []
+  }
+
+});
+
+
+// =====================================================
 // EVENTS
 // =====================================================
 
 const emit = defineEmits([
-  "add-book"
+  "add-book",
+  "edit-book",
+  "delete-book"
 ]);
 
 
@@ -345,93 +439,12 @@ const categories = [
 
 
 // =====================================================
-// BOOKS DATA
-// =====================================================
-
-const books = ref([
-
-  {
-    id: 1,
-    title: "Clean Code",
-    description:
-      "A Handbook of Agile Software Craftsmanship",
-    author: "Robert C. Martin",
-    category: "Programming",
-    isbn: "978-0132350884",
-    quantity: 5,
-    status: "Available"
-  },
-
-  {
-    id: 2,
-    title: "Java Programming",
-    description:
-      "Comprehensive Guide",
-    author: "John Smith",
-    category: "Programming",
-    isbn: "978-0321573513",
-    quantity: 3,
-    status: "Borrowed"
-  },
-
-  {
-    id: 3,
-    title: "Database System Concepts",
-    description:
-      "Database Management",
-    author: "Abraham Silberschatz",
-    category: "Database",
-    isbn: "978-0078022159",
-    quantity: 4,
-    status: "Available"
-  },
-
-  {
-    id: 4,
-    title: "Computer Networking",
-    description:
-      "A Top-Down Approach",
-    author: "James F. Kurose",
-    category: "Networking",
-    isbn: "978-0133594140",
-    quantity: 2,
-    status: "Borrowed"
-  },
-
-  {
-    id: 5,
-    title: "Web Development",
-    description:
-      "Modern Web Development",
-    author: "David Miller",
-    category: "Web Development",
-    isbn: "978-1492052203",
-    quantity: 6,
-    status: "Available"
-  },
-
-  {
-    id: 6,
-    title: "Cyber Security",
-    description:
-      "Introduction to Security",
-    author: "William Stallings",
-    category: "Security",
-    isbn: "978-0134091305",
-    quantity: 2,
-    status: "Overdue"
-  }
-
-]);
-
-
-// =====================================================
 // FILTER BOOKS
 // =====================================================
 
 const filteredBooks = computed(() => {
 
-  return books.value.filter((book) => {
+  return props.books.filter((book) => {
 
     const searchText =
       search.value
@@ -440,6 +453,7 @@ const filteredBooks = computed(() => {
 
 
     // Search
+
     const matchesSearch =
 
       book.title
@@ -460,6 +474,7 @@ const filteredBooks = computed(() => {
 
 
     // Category
+
     const matchesCategory =
 
       selectedCategory.value === ""
@@ -471,6 +486,7 @@ const filteredBooks = computed(() => {
 
 
     // Status
+
     const matchesStatus =
 
       selectedStatus.value === ""
@@ -545,15 +561,18 @@ function openAddBook() {
 // EDIT BOOK
 // =====================================================
 
-function editBook(book) {
+function editBook(bookId) {
 
   console.log(
-    "Edit book:",
-    book
+    "Edit book ID:",
+    bookId
   );
 
-  // Later:
-  // Open EditBook form
+  emit(
+    "edit-book",
+    bookId
+  );
+
 }
 
 
@@ -561,24 +580,12 @@ function editBook(book) {
 // DELETE BOOK
 // =====================================================
 
-function deleteBook(id) {
+function deleteBook(bookId) {
 
-  const confirmDelete =
-    window.confirm(
-      "Are you sure you want to delete this book?"
-    );
-
-
-  if (!confirmDelete) {
-    return;
-  }
-
-
-  books.value =
-    books.value.filter(
-      (book) =>
-        book.id !== id
-    );
+  emit(
+    "delete-book",
+    bookId
+  );
 
 }
 
@@ -1187,7 +1194,8 @@ td {
 
   display: flex;
 
-  align-items: center;
+  align-items:
+    center;
 
 }
 
@@ -1288,7 +1296,8 @@ td {
 
     flex-direction: column;
 
-    align-items: flex-start;
+    align-items:
+      flex-start;
 
     gap: 15px;
 
