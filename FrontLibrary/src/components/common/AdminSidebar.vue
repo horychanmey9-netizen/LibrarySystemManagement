@@ -1,4 +1,5 @@
 <template>
+
   <aside
     class="sidebar"
     :class="{ 'sidebar-open': isOpen }"
@@ -7,6 +8,7 @@
     <!-- =========================
          Logo
     ========================== -->
+
     <div class="logo-section">
 
       <div class="logo-icon">
@@ -14,16 +16,29 @@
       </div>
 
       <div class="logo-text">
-        <h1>Library</h1>
-        <span>Management System</span>
+
+        <h1>
+          Library
+        </h1>
+
+        <span>
+          Management System
+        </span>
+
       </div>
 
-      <!-- Close button Mobile -->
+
+      <!-- Mobile Close -->
+
       <button
+        type="button"
         class="mobile-close"
+        title="Close Menu"
         @click="closeSidebar"
       >
+
         <i class="bi bi-x-lg"></i>
+
       </button>
 
     </div>
@@ -32,7 +47,10 @@
     <!-- =========================
          Navigation
     ========================== -->
+
     <nav class="navigation">
+
+      <!-- Main Menu -->
 
       <RouterLink
         v-for="item in mainMenu"
@@ -42,15 +60,26 @@
         active-class="active"
         @click="closeSidebarOnMobile"
       >
+
         <span class="icon">
-          <i :class="item.icon"></i>
+
+          <i
+            :class="item.icon"
+          ></i>
+
         </span>
 
-        <span>{{ item.label }}</span>
+        <span>
+          {{ item.label }}
+        </span>
+
       </RouterLink>
 
 
-      <!-- Management -->
+      <!-- =========================
+           Management
+      ========================== -->
+
       <p class="menu-title">
         MANAGEMENT
       </p>
@@ -64,11 +93,19 @@
         active-class="active"
         @click="closeSidebarOnMobile"
       >
+
         <span class="icon">
-          <i :class="item.icon"></i>
+
+          <i
+            :class="item.icon"
+          ></i>
+
         </span>
 
-        <span>{{ item.label }}</span>
+        <span>
+          {{ item.label }}
+        </span>
+
       </RouterLink>
 
     </nav>
@@ -77,20 +114,41 @@
     <!-- =========================
          Bottom Profile
     ========================== -->
+
     <div class="sidebar-bottom">
 
       <button
+        type="button"
         class="admin-profile"
+        title="Admin Profile"
         @click="goToProfile"
       >
 
-        <!-- Avatar -->
+        <!-- =========================
+             Profile Image
+        ========================== -->
+
         <div class="avatar">
-          {{ getInitial(adminName) }}
+
+          <img
+            v-if="adminImage"
+            :src="adminImage"
+            :alt="adminName"
+            class="avatar-image"
+            @error="handleImageError"
+          />
+
+          <span v-else>
+            {{ getInitial(adminName) }}
+          </span>
+
         </div>
 
 
-        <!-- Admin Information -->
+        <!-- =========================
+             Admin Information
+        ========================== -->
+
         <div class="admin-info">
 
           <strong>
@@ -113,6 +171,7 @@
   <!-- =========================
        Mobile Overlay
   ========================== -->
+
   <div
     v-if="isOpen"
     class="sidebar-overlay"
@@ -124,181 +183,275 @@
 
 <script setup>
 
-import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import {
+  computed,
+  ref,
+  onMounted,
+  onUnmounted
+} from "vue";
+
+import {
+  useRouter
+} from "vue-router";
+
+import {
+  getProfile
+} from "../../service/profileservice";
 
 
-import { onMounted, onUnmounted } from "vue";
-
-
-function handleToggleSidebar() {
-  toggleSidebar();
-}
-
-
-onMounted(() => {
-
-  window.addEventListener(
-    "toggle-admin-sidebar",
-    handleToggleSidebar
-  );
-
-});
-
-
-onUnmounted(() => {
-
-  window.removeEventListener(
-    "toggle-admin-sidebar",
-    handleToggleSidebar
-  );
-
-});
-
-
-/* =========================
-   Router
-========================= */
+// ========================================
+// ROUTER
+// ========================================
 
 const router = useRouter();
 
 
-/* =========================
-   Sidebar State
-========================= */
+// ========================================
+// SIDEBAR STATE
+// ========================================
 
 const isOpen = ref(false);
 
 
-/*
-  Expose method to parent
-  Example:
-  ref="sidebar"
-  sidebar.value?.toggleSidebar()
-*/
+// ========================================
+// ADMIN PROFILE
+// ========================================
 
-function toggleSidebar() {
-  isOpen.value = !isOpen.value;
-}
+const admin = ref({
 
-function closeSidebar() {
-  isOpen.value = false;
-}
+  name: "",
 
-function closeSidebarOnMobile() {
+  email: "",
 
-  if (window.innerWidth <= 768) {
-    isOpen.value = false;
-  }
+  image: "",
 
-}
-
-
-/* =========================
-   Expose
-========================= */
-
-defineExpose({
-  toggleSidebar,
-  closeSidebar
 });
 
 
-/* =========================
-   Main Menu
-========================= */
+// ========================================
+// LOAD ADMIN PROFILE
+// ========================================
 
-const mainMenu = [
+const loadAdminProfile = async () => {
 
-  {
-    label: "Dashboard",
-    to: "/admin/dashboard",
-    icon: "bi bi-grid"
-  },
+  try {
 
-  {
-    label: "Books",
-    to: "/admin/books",
-    icon: "bi bi-book"
-  },
+    // ====================================
+    // GET PROFILE FROM BACKEND
+    // ====================================
 
-  {
-    label: "Categories",
-    to: "/admin/categories",
-    icon: "bi bi-tags"
-  },
+    const response =
+      await getProfile();
 
-  {
-    label: "Borrowings",
-    to: "/admin/borrowings",
-    icon: "bi bi-journal-arrow-down"
-  },
 
-  {
-    label: "Returns",
-    to: "/admin/returns",
-    icon: "bi bi-arrow-return-left"
+    console.log(
+      "ADMIN SIDEBAR PROFILE:",
+      response
+    );
+
+
+    const data =
+      response?.data;
+
+
+    if (!data) {
+
+      console.warn(
+        "No profile data found"
+      );
+
+      return;
+
+    }
+
+
+    // ====================================
+    // SET ADMIN PROFILE
+    // SAME AS NAVBAR
+    // ====================================
+
+    admin.value = {
+
+      name:
+        data.name ||
+        data.fullName ||
+        "Admin",
+
+      email:
+        data.email ||
+        "",
+
+      image:
+        data.image ||
+        "",
+
+    };
+
+
+    console.log(
+      "ADMIN SIDEBAR NAME:",
+      admin.value.name
+    );
+
+
+    console.log(
+      "ADMIN SIDEBAR IMAGE:",
+      admin.value.image
+    );
+
+
+    // ====================================
+    // UPDATE SESSION STORAGE
+    // ====================================
+
+    try {
+
+      const currentUser =
+        JSON.parse(
+          sessionStorage.getItem(
+            "user"
+          ) || "{}"
+        );
+
+
+      const updatedUser = {
+
+        ...currentUser,
+
+        name:
+          admin.value.name,
+
+        email:
+          admin.value.email,
+
+        image:
+          admin.value.image,
+
+      };
+
+
+      sessionStorage.setItem(
+        "user",
+        JSON.stringify(
+          updatedUser
+        )
+      );
+
+
+    } catch (sessionError) {
+
+      console.error(
+        "Failed to update session user:",
+        sessionError
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Failed to load admin profile:",
+      error
+    );
+
+
+    // ====================================
+    // FALLBACK TO SESSION STORAGE
+    // ====================================
+
+    try {
+
+      const storedUser =
+        sessionStorage.getItem(
+          "user"
+        );
+
+
+      if (!storedUser) {
+
+        return;
+
+      }
+
+
+      const user =
+        JSON.parse(
+          storedUser
+        );
+
+
+      admin.value = {
+
+        name:
+          user?.name ||
+          user?.fullName ||
+          "Admin",
+
+        email:
+          user?.email ||
+          "",
+
+        image:
+          user?.image ||
+          "",
+
+      };
+
+
+    } catch (sessionError) {
+
+      console.error(
+        "Failed to load session user:",
+        sessionError
+      );
+
+    }
+
   }
 
-];
+};
 
 
-/* =========================
-   Management Menu
-========================= */
-
-const managementMenu = [
-
-  {
-    label: "Users",
-    to: "/admin/users",
-    icon: "bi bi-people"
-  },
-
-  {
-    label: "Reports",
-    to: "/admin/reports",
-    icon: "bi bi-bar-chart"
-  },
-
-  {
-    label: "Fines",
-    to: "/admin/fines",
-    icon: "bi bi-cash-coin"
-  },
-
-  {
-    label: "Notifications",
-    to: "/admin/notifications",
-    icon: "bi bi-bell"
-  }
-
-];
-
-
-/* =========================
-   Admin Name
-========================= */
+// ========================================
+// ADMIN NAME
+// ========================================
 
 const adminName = computed(() => {
 
   return (
-    localStorage.getItem("adminName") ||
+    admin.value.name ||
     "Admin"
   );
 
 });
 
 
-/* =========================
-   Get Initial
-========================= */
+// ========================================
+// ADMIN IMAGE
+// ========================================
+
+const adminImage = computed(() => {
+
+  return (
+    admin.value.image ||
+    ""
+  );
+
+});
+
+
+// ========================================
+// GET INITIAL
+// ========================================
 
 function getInitial(name) {
 
   if (!name) {
+
     return "A";
+
   }
+
 
   return name
     .charAt(0)
@@ -307,17 +460,269 @@ function getInitial(name) {
 }
 
 
-/* =========================
-   Go To Profile
-========================= */
+// ========================================
+// IMAGE ERROR
+// ========================================
+
+function handleImageError(event) {
+
+  console.error(
+    "Admin sidebar image failed to load:",
+    event.target.src
+  );
+
+
+  admin.value.image = "";
+
+}
+
+
+// ========================================
+// TOGGLE SIDEBAR
+// ========================================
+
+function toggleSidebar() {
+
+  isOpen.value =
+    !isOpen.value;
+
+}
+
+
+// ========================================
+// CLOSE SIDEBAR
+// ========================================
+
+function closeSidebar() {
+
+  isOpen.value = false;
+
+}
+
+
+// ========================================
+// CLOSE ON MOBILE
+// ========================================
+
+function closeSidebarOnMobile() {
+
+  if (
+    window.innerWidth <= 768
+  ) {
+
+    isOpen.value = false;
+
+  }
+
+}
+
+
+// ========================================
+// GO TO PROFILE
+// ========================================
 
 function goToProfile() {
 
-  router.push("/admin/profile");
+  router.push(
+    "/admin/profile"
+  );
+
 
   closeSidebar();
 
 }
+
+
+// ========================================
+// PROFILE UPDATED EVENT
+// ========================================
+
+async function handleProfileUpdated() {
+
+  console.log(
+    "Profile updated → reload Admin Sidebar"
+  );
+
+
+  await loadAdminProfile();
+
+}
+
+
+// ========================================
+// TOGGLE EVENT
+// ========================================
+
+function handleToggleSidebar() {
+
+  toggleSidebar();
+
+}
+
+
+// ========================================
+// MOUNT
+// ========================================
+
+onMounted(() => {
+
+  // ====================================
+  // LOAD PROFILE
+  // ====================================
+
+  loadAdminProfile();
+
+
+  // ====================================
+  // SIDEBAR TOGGLE
+  // ====================================
+
+  window.addEventListener(
+    "toggle-admin-sidebar",
+    handleToggleSidebar
+  );
+
+
+  // ====================================
+  // PROFILE UPDATED
+  // ====================================
+
+  window.addEventListener(
+    "profile-updated",
+    handleProfileUpdated
+  );
+
+});
+
+
+// ========================================
+// UNMOUNT
+// ========================================
+
+onUnmounted(() => {
+
+  window.removeEventListener(
+    "toggle-admin-sidebar",
+    handleToggleSidebar
+  );
+
+
+  window.removeEventListener(
+    "profile-updated",
+    handleProfileUpdated
+  );
+
+});
+
+
+// ========================================
+// EXPOSE
+// ========================================
+
+defineExpose({
+
+  toggleSidebar,
+
+  closeSidebar
+
+});
+
+
+// ========================================
+// MAIN MENU
+// ========================================
+
+const mainMenu = [
+
+  {
+    label: "Dashboard",
+
+    to: "/admin/dashboard",
+
+    icon: "bi bi-grid"
+  },
+
+
+  {
+    label: "Books",
+
+    to: "/admin/books",
+
+    icon: "bi bi-book"
+  },
+
+
+  {
+    label: "Categories",
+
+    to: "/admin/categories",
+
+    icon: "bi bi-tags"
+  },
+
+
+  {
+    label: "Borrowings",
+
+    to: "/admin/borrowings",
+
+    icon: "bi bi-journal-arrow-down"
+  },
+
+
+  {
+    label: "Returns",
+
+    to: "/admin/returns",
+
+    icon: "bi bi-arrow-return-left"
+  }
+
+];
+
+
+// ========================================
+// MANAGEMENT MENU
+// ========================================
+
+const managementMenu = [
+
+  {
+    label: "Users",
+
+    to: "/admin/users",
+
+    icon: "bi bi-people"
+  },
+
+
+  {
+    label: "Reports",
+
+    to: "/admin/reports",
+
+    icon: "bi bi-bar-chart"
+  },
+
+
+  {
+    label: "Fines",
+
+    to: "/admin/fines",
+
+    icon: "bi bi-cash-coin"
+  },
+
+
+  {
+    label: "Notifications",
+
+    to: "/admin/notifications",
+
+    icon: "bi bi-bell"
+  }
+
+];
 
 </script>
 
@@ -325,16 +730,19 @@ function goToProfile() {
 <style scoped>
 
 /* ========================================
-   Sidebar
+   SIDEBAR
 ======================================== */
 
 .sidebar {
 
   width: 250px;
+
   height: 100vh;
 
   position: fixed;
+
   top: 0;
+
   left: 0;
 
   background: #ffffff;
@@ -342,6 +750,7 @@ function goToProfile() {
   border-right: 1px solid #e5e7eb;
 
   display: flex;
+
   flex-direction: column;
 
   box-sizing: border-box;
@@ -354,15 +763,17 @@ function goToProfile() {
 
 
 /* ========================================
-   Logo
+   LOGO
 ======================================== */
 
 .logo-section {
 
   height: 75px;
+
   min-height: 75px;
 
   display: flex;
+
   align-items: center;
 
   gap: 12px;
@@ -379,12 +790,15 @@ function goToProfile() {
 .logo-icon {
 
   width: 42px;
+
   height: 42px;
 
   min-width: 42px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   background: #5b3df5;
@@ -425,7 +839,7 @@ function goToProfile() {
 
 
 /* ========================================
-   Navigation
+   NAVIGATION
 ======================================== */
 
 .navigation {
@@ -435,6 +849,7 @@ function goToProfile() {
   padding: 20px 14px;
 
   overflow-y: auto;
+
   overflow-x: hidden;
 
   box-sizing: border-box;
@@ -442,15 +857,19 @@ function goToProfile() {
 }
 
 
-/* Scrollbar */
-
 .navigation::-webkit-scrollbar {
+
   width: 5px;
+
 }
+
 
 .navigation::-webkit-scrollbar-track {
+
   background: transparent;
+
 }
+
 
 .navigation::-webkit-scrollbar-thumb {
 
@@ -462,7 +881,7 @@ function goToProfile() {
 
 
 /* ========================================
-   Menu Title
+   MENU TITLE
 ======================================== */
 
 .menu-title {
@@ -481,7 +900,7 @@ function goToProfile() {
 
 
 /* ========================================
-   Navigation Item
+   NAV ITEM
 ======================================== */
 
 .nav-item {
@@ -536,7 +955,7 @@ function goToProfile() {
 
 
 /* ========================================
-   Icon
+   ICON
 ======================================== */
 
 .icon {
@@ -557,7 +976,7 @@ function goToProfile() {
 
 
 /* ========================================
-   Bottom Profile
+   SIDEBAR BOTTOM
 ======================================== */
 
 .sidebar-bottom {
@@ -574,6 +993,10 @@ function goToProfile() {
 
 }
 
+
+/* ========================================
+   ADMIN PROFILE
+======================================== */
 
 .admin-profile {
 
@@ -610,20 +1033,16 @@ function goToProfile() {
 
 
 /* ========================================
-   Avatar
+   AVATAR
 ======================================== */
 
 .avatar {
 
   width: 38px;
+
   height: 38px;
 
   min-width: 38px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
 
   border-radius: 50%;
 
@@ -633,11 +1052,36 @@ function goToProfile() {
 
   font-weight: 600;
 
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  overflow: hidden;
+
 }
 
 
 /* ========================================
-   Admin Info
+   AVATAR IMAGE
+======================================== */
+
+.avatar-image {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+}
+
+
+/* ========================================
+   ADMIN INFO
 ======================================== */
 
 .admin-info {
@@ -678,7 +1122,7 @@ function goToProfile() {
 
 
 /* ========================================
-   Mobile Close Button
+   MOBILE CLOSE
 ======================================== */
 
 .mobile-close {
@@ -688,6 +1132,7 @@ function goToProfile() {
   margin-left: auto;
 
   width: 36px;
+
   height: 36px;
 
   border: none;
@@ -715,7 +1160,7 @@ function goToProfile() {
 
 
 /* ========================================
-   Overlay
+   OVERLAY
 ======================================== */
 
 .sidebar-overlay {
@@ -745,11 +1190,13 @@ function goToProfile() {
 
   }
 
+
   .logo-section {
 
     padding: 0 18px;
 
   }
+
 
   .navigation {
 
@@ -767,29 +1214,30 @@ function goToProfile() {
 @media (max-width: 768px) {
 
   .sidebar {
+
     width: 270px;
+
     max-width: 85vw;
 
     position: fixed;
+
     top: 0;
+
     left: 0;
+
     right: auto;
 
     transform: translateX(-100%);
 
-    transition: transform 0.3s ease;
+    transition:
+      transform 0.3s ease;
 
-    box-shadow: 8px 0 25px rgba(0, 0, 0, 0.08);
+    box-shadow:
+      8px 0 25px
+      rgba(0, 0, 0, 0.08);
+
   }
 
-  .sidebar.sidebar-open {
-    transform: translateX(0);
-  }
-
-
-
-
-  /* Open Sidebar */
 
   .sidebar.sidebar-open {
 
@@ -797,8 +1245,6 @@ function goToProfile() {
 
   }
 
-
-  /* Logo */
 
   .logo-section {
 
@@ -823,12 +1269,11 @@ function goToProfile() {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
   }
 
-
-  /* Navigation */
 
   .navigation {
 
@@ -862,8 +1307,6 @@ function goToProfile() {
   }
 
 
-  /* Profile */
-
   .admin-profile {
 
     justify-content: flex-start;
@@ -879,8 +1322,6 @@ function goToProfile() {
 
   }
 
-
-  /* Overlay */
 
   .sidebar-overlay {
 
