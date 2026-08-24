@@ -254,24 +254,27 @@
 
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import NotificationBell from "../user/NotificationBell.vue";
-
+import { getProfile } from "@/service/profileservice";
 
 // ========================================
 // EMIT
 // ========================================
 defineEmits(["toggle-sidebar"]);
 
-
 // ========================================
 // PROFILE DROPDOWN
 // ========================================
 const showProfile = ref(false);
 
+// ========================================
+// PROFILE IMAGE FROM BACKEND
+// ========================================
+const profileImage = ref("");
 
 // ========================================
-// GET USER FROM LOGIN
+// GET USER FROM SESSION
 // ========================================
 const storedUser = sessionStorage.getItem("user");
 
@@ -282,14 +285,9 @@ try {
     ? JSON.parse(storedUser)
     : null;
 } catch (error) {
-  console.error(
-    "Invalid user data:",
-    error
-  );
-
+  console.error("Invalid user data:", error);
   user = null;
 }
-
 
 // ========================================
 // USER NAME
@@ -302,7 +300,6 @@ const userName = computed(() => {
   );
 });
 
-
 // ========================================
 // USER EMAIL
 // ========================================
@@ -310,14 +307,75 @@ const userEmail = computed(() => {
   return user?.email || "";
 });
 
+// ========================================
+// LOAD PROFILE FROM BACKEND
+// ========================================
+const loadProfile = async () => {
+  try {
+    const response = await getProfile();
+
+    console.log("NAVBAR PROFILE RESPONSE:", response);
+
+    const data = response?.data;
+
+    if (!data) {
+      profileImage.value = "";
+      return;
+    }
+
+    // ========================================
+    // GET IMAGE
+    // ========================================
+    if (data.image) {
+
+      // Backend returns full URL
+      if (data.image.startsWith("http")) {
+        profileImage.value = data.image;
+      }
+
+      // Backend returns /uploads/...
+      else {
+        profileImage.value =
+          `http://localhost:8080${data.image}`;
+      }
+
+      console.log(
+        "NAVBAR PROFILE IMAGE:",
+        profileImage.value
+      );
+    }
+
+  } catch (error) {
+    console.error(
+      "Failed to load profile in Navbar:",
+      error
+    );
+
+    // fallback to sessionStorage
+    profileImage.value =
+      user?.avatar ||
+      user?.image ||
+      "";
+  }
+};
 
 // ========================================
 // USER AVATAR
 // ========================================
 const userAvatar = computed(() => {
-  return user?.avatar || user?.image || "";
-});
 
+  // Backend profile image first
+  if (profileImage.value) {
+    return profileImage.value;
+  }
+
+  // Session fallback
+  return (
+    user?.avatar ||
+    user?.image ||
+    ""
+  );
+});
 
 // ========================================
 // USER INITIALS
@@ -344,5 +402,43 @@ const userInitials = computed(() => {
     names[0].charAt(0) +
     names[names.length - 1].charAt(0)
   ).toUpperCase();
+});
+
+// ========================================
+// PROFILE UPDATED EVENT
+// ========================================
+const handleProfileUpdated = () => {
+  console.log(
+    "Profile updated → Reload Navbar profile"
+  );
+
+  loadProfile();
+};
+
+// ========================================
+// MOUNT
+// ========================================
+onMounted(() => {
+
+  // Load profile image every time Navbar starts
+  loadProfile();
+
+  // Listen for profile update
+  window.addEventListener(
+    "profile-updated",
+    handleProfileUpdated
+  );
+});
+
+// ========================================
+// UNMOUNT
+// ========================================
+onUnmounted(() => {
+
+  window.removeEventListener(
+    "profile-updated",
+    handleProfileUpdated
+  );
+
 });
 </script>

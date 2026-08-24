@@ -13,13 +13,61 @@
     </div>
 
 
-    <!-- ================= PROFILE CARD ================= -->
+    <!-- ================= LOADING ================= -->
+    <div
+      v-if="loading"
+      class="flex items-center justify-center py-20"
+    >
+      <div class="text-center">
+
+        <div
+          class="w-10 h-10 border-4 border-gray-200
+                 border-t-indigo-600 rounded-full
+                 animate-spin mx-auto"
+        ></div>
+
+        <p class="text-gray-500 mt-4">
+          Loading profile...
+        </p>
+
+      </div>
+    </div>
+
+
+    <!-- ================= PROFILE ================= -->
     <ProfileCard
-  :profile="profile"
-  :saving="saving"
-  role="ADMIN"
-  @save="saveProfile"
-/>
+      v-else-if="profile"
+      :profile="profile"
+      :saving="saving"
+      role="ADMIN"
+      @save="saveProfile"
+    />
+
+
+    <!-- ================= ERROR ================= -->
+    <div
+      v-else
+      class="bg-white rounded-2xl shadow-sm
+             border border-gray-100 p-8 text-center"
+    >
+
+      <i
+        class="bi bi-person-x text-4xl
+               text-gray-400"
+      ></i>
+
+      <h2
+        class="text-xl font-semibold
+               text-gray-700 mt-4"
+      >
+        Profile not found
+      </h2>
+
+      <p class="text-gray-500 mt-2">
+        Unable to load your profile information.
+      </p>
+
+    </div>
 
   </div>
 </template>
@@ -30,128 +78,348 @@ import { ref, onMounted } from "vue";
 
 import ProfileCard from "@/components/user/ProfileCard.vue";
 
+import {
+  getProfile,
+  createProfile,
+  updateProfile,
+} from "../../service/profileservice";
+
 
 // ========================================
-// PROFILE DATA
+// USER FROM SESSION
 // ========================================
+const storedUser =
+  sessionStorage.getItem("user");
 
+let user = null;
+
+try {
+  user = storedUser
+    ? JSON.parse(storedUser)
+    : null;
+} catch (error) {
+  console.error(
+    "Invalid user data:",
+    error
+  );
+
+  user = null;
+}
+
+
+// ========================================
+// PROFILE
+// ========================================
 const profile = ref({
+  id: "",
 
-  fullName: "John Doe",
+  fullName:
+    user?.name ||
+    user?.fullName ||
+    "",
 
-  email: "john@gmail.com",
+  email:
+    user?.email ||
+    "",
 
-  gender: "Male",
-
-  phone: "+855 12 345 678",
-
-  address: "Phnom Penh, Cambodia",
-
-  dateOfBirth: "2000-05-15",
+  gender: "",
+  phone: "",
+  address: "",
+  dateOfBirth: "",
 
   avatar: "",
-
 });
 
 
 // ========================================
-// SAVING
+// STATES
 // ========================================
-
+const loading = ref(true);
 const saving = ref(false);
+const errorMessage = ref("");
 
 
 // ========================================
-// LOAD PROFILE
+// GET PROFILE
 // ========================================
+const loadProfile = async () => {
 
-onMounted(() => {
+  try {
 
-  const savedProfile =
-    localStorage.getItem("userProfile");
+    loading.value = true;
+    errorMessage.value = "";
 
-  if (savedProfile) {
+    const response =
+      await getProfile();
 
-    try {
+    console.log(
+      "ADMIN PROFILE RESPONSE:",
+      response
+    );
+
+    const data =
+      response?.data;
+
+    console.log(
+      "ADMIN PROFILE DATA:",
+      data
+    );
+
+    if (data) {
+
+      console.log(
+        "ADMIN PROFILE IMAGE:",
+        data.image
+      );
 
       profile.value = {
-        ...profile.value,
-        ...JSON.parse(savedProfile),
+
+        id:
+          data.id ||
+          "",
+
+        fullName:
+          data.fullName ||
+          data.name ||
+          user?.name ||
+          "",
+
+        email:
+          data.email ||
+          user?.email ||
+          "",
+
+        gender:
+          data.gender ||
+          "",
+
+        phone:
+          data.phone ||
+          "",
+
+        address:
+          data.address ||
+          "",
+
+        dateOfBirth:
+          data.dateOfBirth ||
+          "",
+
+        avatar:
+          data.image ||
+          data.avatar ||
+          "",
       };
 
-    } catch (error) {
+    } else {
 
-      console.error(
-        "Failed to load profile:",
-        error
-      );
+      profile.value = null;
 
     }
 
+  } catch (error) {
+
+    console.error(
+      "Get admin profile error:",
+      error
+    );
+
+    errorMessage.value =
+      error.message ||
+      "Failed to load profile";
+
+  } finally {
+
+    loading.value = false;
+
   }
 
-});
+};
 
 
 // ========================================
 // SAVE PROFILE
 // ========================================
-
-const handleSave = async (updatedProfile) => {
+const saveProfile = async (
+  updatedProfile
+) => {
 
   try {
 
     saving.value = true;
+    errorMessage.value = "";
 
     console.log(
-      "Updated Profile:",
+      "Updated admin profile:",
       updatedProfile
     );
 
 
-    // ====================================
-    // SAVE TO LOCAL STORAGE FOR NOW
-    // ====================================
-
-    profile.value = {
-      ...profile.value,
-      ...updatedProfile,
-    };
+    // ========================================
+    // IMAGE FILE
+    // ========================================
+    const imageFile =
+      updatedProfile.imageFile ||
+      null;
 
 
-    localStorage.setItem(
-      "userProfile",
-      JSON.stringify(profile.value)
+    let response;
+
+
+    // ========================================
+    // UPDATE EXISTING PROFILE
+    // ========================================
+    if (profile.value?.id) {
+
+      response =
+        await updateProfile(
+          updatedProfile,
+          imageFile
+        );
+
+    }
+
+
+    // ========================================
+    // CREATE NEW PROFILE
+    // ========================================
+    else {
+
+      response =
+        await createProfile(
+          updatedProfile,
+          imageFile
+        );
+
+    }
+
+
+    console.log(
+      "SAVE ADMIN PROFILE RESPONSE:",
+      response
     );
 
 
-    // ====================================
-    // BACKEND API
-    // ====================================
-    //
-    // Later you can replace the localStorage
-    // part with your backend API:
-    //
-    // await profileService.updateProfile(
-    //   updatedProfile
-    // );
-    //
-    // ====================================
+    // ========================================
+    // RESPONSE DATA
+    // ========================================
+    const data =
+      response?.data;
+
+
+    if (data) {
+
+      profile.value = {
+
+        ...profile.value,
+
+        id:
+          data.id ||
+          profile.value.id,
+
+        fullName:
+          data.fullName ||
+          data.name ||
+          updatedProfile.fullName,
+
+        email:
+          data.email ||
+          updatedProfile.email,
+
+        gender:
+          data.gender ||
+          updatedProfile.gender,
+
+        phone:
+          data.phone ||
+          updatedProfile.phone,
+
+        address:
+          data.address ||
+          updatedProfile.address,
+
+        dateOfBirth:
+          data.dateOfBirth ||
+          updatedProfile.dateOfBirth,
+
+        avatar:
+          data.image ||
+          data.avatar ||
+          profile.value.avatar,
+      };
+
+    }
+
+
+    // ========================================
+    // UPDATE SESSION USER
+    // ========================================
+    const currentUser =
+      JSON.parse(
+        sessionStorage.getItem(
+          "user"
+        ) || "{}"
+      );
+
+
+    const updatedUser = {
+
+      ...currentUser,
+
+      name:
+        profile.value.fullName,
+
+      email:
+        profile.value.email,
+
+      avatar:
+        profile.value.avatar,
+    };
+
+
+    sessionStorage.setItem(
+      "user",
+      JSON.stringify(
+        updatedUser
+      )
+    );
+
+
+    console.log(
+      "Updated session user:",
+      updatedUser
+    );
+
+
+    // ========================================
+    // NOTIFY NAVBAR
+    // ========================================
+    window.dispatchEvent(
+      new Event(
+        "profile-updated"
+      )
+    );
 
 
     alert(
       "Profile updated successfully!"
     );
 
+
   } catch (error) {
 
     console.error(
-      "Update profile error:",
+      "Save admin profile error:",
       error
     );
 
+    errorMessage.value =
+      error.message ||
+      "Failed to save profile";
+
+
     alert(
-      "Failed to update profile."
+      errorMessage.value
     );
 
   } finally {
@@ -162,6 +430,15 @@ const handleSave = async (updatedProfile) => {
 
 };
 
+
+// ========================================
+// LOAD PROFILE WHEN PAGE OPENS
+// ========================================
+onMounted(() => {
+
+  loadProfile();
+
+});
 </script>
 
 

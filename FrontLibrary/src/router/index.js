@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 // Layouts
 
-import UserLayout from "../layouts/UserLayout.vue";
+import UserLayout from "../Layouts/UserLayout.vue";
 import AdminLayout from "../Layouts/AdminLayout.vue";
 
 // User Page
@@ -11,7 +11,7 @@ import BrowseBooks from "../pages/user/BrowseBooks.vue";
 import MyBorrowings from "../pages/user/MyBorrowings.vue";
 import MyFines from "../pages/user/MyFines.vue";
 import Notification from "../pages/user/Notification.vue";
-import Profile from "../pages/user/Profile.vue";
+import UserProfile from "../pages/user/UserProfile.vue";
 
 
 // Admin Pages
@@ -27,8 +27,8 @@ import AdminProfile from "../pages/admin/AdminProfile.vue";
 import Login from "../pages/auth/login.vue";
 import Register from "../pages/auth/Register.vue"
 import OTPForm from "../pages/auth/OTPForm.vue";
-import CategoryCard from "../components/books/CategoryCard.vue";
 import Categories from "../pages/admin/Categories.vue";
+
 
 const routes = [
   // ================= AUTH =================
@@ -99,8 +99,8 @@ const routes = [
 
       {
         path: "profile",
-        name: "Profile",
-        component: Profile,
+        name: "UserProfile",
+        component: UserProfile,
       },
     ],
   },
