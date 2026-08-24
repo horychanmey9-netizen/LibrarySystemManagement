@@ -50,4 +50,7 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Category> categories;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Fine> fines;
 }

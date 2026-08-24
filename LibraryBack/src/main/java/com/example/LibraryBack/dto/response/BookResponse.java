@@ -1,5 +1,6 @@
 package com.example.LibraryBack.dto.response;
 
+import com.example.LibraryBack.enums.Status;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +23,7 @@ public class BookResponse {
     private String isbn;
     private String language;
     private String image;
-    private boolean status;
+    private Status status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
