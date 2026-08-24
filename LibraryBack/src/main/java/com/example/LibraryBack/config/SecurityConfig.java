@@ -24,6 +24,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/profile/**").hasRole("USER")
                         .requestMatchers("/api/book/**").hasRole("ADMIN")
                         .requestMatchers("/api/category/**").hasRole("ADMIN")
+                        .requestMatchers("/api/fine/**").hasRole("ADMIN")
+                        .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

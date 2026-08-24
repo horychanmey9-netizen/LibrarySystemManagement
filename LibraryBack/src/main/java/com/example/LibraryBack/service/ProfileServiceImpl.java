@@ -10,7 +10,6 @@ import com.example.LibraryBack.mapper.ProfileMapper;
 import com.example.LibraryBack.repositoy.ProfileRepository;
 import com.example.LibraryBack.repositoy.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,63 +30,198 @@ public class ProfileServiceImpl implements ProfileService {
     private final ProfileMapper profileMapper;
 
     private User getCurrentUser() {
+
         Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
         String email = authentication.getName();
+
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotException("User not found"));
+                .orElseThrow(
+                        () -> new NotException("User not found")
+                );
     }
 
+
+    // =========================================
+    // GET PROFILE
+    // =========================================
     @Override
     public ProfileResponse getProfile() {
+
         User user = getCurrentUser();
-        Profile profile = profileRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new NotException("Profile not found"));
+
+        Profile profile =
+                profileRepository
+                        .findByUserId(user.getId())
+                        .orElseThrow(
+                                () -> new NotException(
+                                        "Profile not found"
+                                )
+                        );
+
         return profileMapper.toResponse(profile);
     }
 
+
+    // =========================================
+    // CREATE PROFILE
+    // =========================================
     @Override
-    public ProfileResponse createProfile(ProfileRequest profileRequest, MultipartFile image) throws IOException {
+    public ProfileResponse createProfile(
+            ProfileRequest profileRequest,
+            MultipartFile image
+    ) throws IOException {
+
         User user = getCurrentUser();
+
         if (profileRepository.existsByUserId(user.getId())) {
-            throw new RuntimeException("Profile already exists");
+            throw new RuntimeException(
+                    "Profile already exists"
+            );
         }
-        Profile profile = profileMapper.toEntity(profileRequest);
+
+        Profile profile =
+                profileMapper.toEntity(profileRequest);
+
         profile.setUser(user);
-        String fileName = image.getOriginalFilename();
-        String fileUrl = UUID.randomUUID() + "_" + fileName;
-        Path path = Paths.get("uploads/profile");
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
+
+
+        // ==============================
+        // SAVE IMAGE
+        // ==============================
+        if (image != null && !image.isEmpty()) {
+
+            String originalFileName =
+                    image.getOriginalFilename();
+
+            String fileName =
+                    UUID.randomUUID()
+                            + "_"
+                            + originalFileName;
+
+            Path uploadPath =
+                    Paths.get("uploads/profile");
+
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath =
+                    uploadPath.resolve(fileName);
+
+            Files.copy(
+                    image.getInputStream(),
+                    filePath
+            );
+
+            String imageUrl =
+                    "http://localhost:8080/uploads/profile/"
+                            + fileName;
+
+            profile.setImage(imageUrl);
         }
-        Files.copy(image.getInputStream(), path.resolve(fileUrl));
-        String imageUrl = "http://localhost:8080/uploads/profile/" + fileUrl;
-        profile.setImage(imageUrl);
-        Profile savedProfile = profileRepository.save(profile);
+
+
+        Profile savedProfile =
+                profileRepository.save(profile);
+
         return profileMapper.toResponse(savedProfile);
     }
 
+
+    // =========================================
+    // UPDATE PROFILE
+    // =========================================
     @Override
-    public ProfileResponse updateProfile(ProfileRequest profileRequest, MultipartFile image) throws IOException {
+    public ProfileResponse updateProfile(
+            ProfileRequest profileRequest,
+            MultipartFile image
+    ) throws IOException {
+
         User user = getCurrentUser();
-        Profile profile = profileRepository.findByUserId(user.getId())
-                        .orElseThrow(() -> new NotException("Profile not found"));
-        profile.setPhone(profileRequest.getPhone());
-        profile.setGender(Gender.valueOf(profileRequest.getGender()));
-        profile.setDateOfBirth(profileRequest.getDateOfBirth());
-        profile.setAddress(profileRequest.getAddress());
-        String fileName = image.getOriginalFilename();
-        String fileUrl = UUID.randomUUID() + "_" + fileName;
-        Path path = Paths.get("uploads/profile");
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
+
+        Profile profile =
+                profileRepository
+                        .findByUserId(user.getId())
+                        .orElseThrow(
+                                () -> new NotException(
+                                        "Profile not found"
+                                )
+                        );
+
+
+        // ==============================
+        // UPDATE PROFILE DATA
+        // ==============================
+
+        profile.setPhone(
+                profileRequest.getPhone()
+        );
+
+        profile.setGender(
+                Gender.valueOf(
+                        profileRequest.getGender()
+                )
+        );
+
+        profile.setDateOfBirth(
+                profileRequest.getDateOfBirth()
+        );
+
+        profile.setAddress(
+                profileRequest.getAddress()
+        );
+
+
+        // ==============================
+        // UPDATE IMAGE ONLY IF NEW IMAGE
+        // ==============================
+
+        if (image != null && !image.isEmpty()) {
+
+            String originalFileName =
+                    image.getOriginalFilename();
+
+            String fileName =
+                    UUID.randomUUID()
+                            + "_"
+                            + originalFileName;
+
+            Path uploadPath =
+                    Paths.get("uploads/profile");
+
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            Path filePath =
+                    uploadPath.resolve(fileName);
+
+            Files.copy(
+                    image.getInputStream(),
+                    filePath
+            );
+
+            String imageUrl =
+                    "http://localhost:8080/uploads/profile/"
+                            + fileName;
+
+            profile.setImage(imageUrl);
         }
 
-        Files.copy(image.getInputStream(), path.resolve(fileUrl));
-        String imageUrl = "http://localhost:8080/uploads/profile/" + fileUrl;
-        profile.setImage(imageUrl);
+
+        // ==============================
+        // SAVE DATABASE
+        // ==============================
+
         Profile updatedProfile =
                 profileRepository.save(profile);
-        return profileMapper.toResponse(updatedProfile);
+
+        return profileMapper.toResponse(
+                updatedProfile
+        );
     }
 }
