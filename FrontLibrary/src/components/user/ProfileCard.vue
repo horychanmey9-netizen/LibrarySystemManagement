@@ -1,18 +1,18 @@
 <template>
   <div class="w-full">
 
-    <!-- ========================================
+    <!-- =====================================================
          MAIN PROFILE CONTAINER
-    ========================================= -->
+    ====================================================== -->
     <div
       class="grid grid-cols-1 lg:grid-cols-[300px_1fr]
              bg-white rounded-2xl shadow-sm
              border border-slate-200 overflow-hidden"
     >
 
-      <!-- ========================================
+      <!-- =====================================================
            LEFT SIDEBAR
-      ========================================= -->
+      ====================================================== -->
       <aside
         class="bg-gradient-to-b from-slate-50 to-white
                border-b lg:border-b-0 lg:border-r
@@ -20,7 +20,9 @@
                flex flex-col"
       >
 
-        <!-- Avatar -->
+        <!-- ===================================================
+             AVATAR
+        ==================================================== -->
         <div class="flex flex-col items-center">
 
           <div
@@ -32,22 +34,18 @@
                    overflow-hidden"
           >
 
-            <!-- =========================
-                 AVATAR FROM BACKEND
-            ========================== -->
+            <!-- REAL AVATAR -->
             <img
-              v-if="form.avatar"
+              v-if="form.avatar && !avatarError"
               :src="form.avatar"
-              :alt="form.fullName || 'User'"
+              :alt="form.fullName || defaultName"
               class="w-full h-full object-cover"
-              @error="avatarError = true"
+              @error="handleAvatarError"
             />
 
-            <!-- =========================
-                 INITIAL IF NO AVATAR
-            ========================== -->
+            <!-- INITIALS -->
             <span
-              v-if="!form.avatar || avatarError"
+              v-else
               class="text-2xl font-bold text-indigo-800"
             >
               {{ initials }}
@@ -55,29 +53,63 @@
 
           </div>
 
-          <!-- User Name -->
+
+          <!-- =================================================
+               CHANGE PHOTO
+          ================================================== -->
+          <label
+            class="mt-4 cursor-pointer
+                   px-4 py-2 rounded-xl
+                   bg-indigo-50
+                   text-indigo-600
+                   text-sm font-semibold
+                   hover:bg-indigo-100
+                   transition"
+          >
+
+            <i class="bi bi-camera-fill mr-2"></i>
+
+            Change Photo
+
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="handleImageChange"
+            />
+
+          </label>
+
+
+          <!-- =================================================
+               NAME
+          ================================================== -->
           <h2
             class="mt-4 text-xl font-bold text-slate-800"
           >
-            {{ form.fullName || "User" }}
+            {{ form.fullName || defaultName }}
           </h2>
 
-          <!-- Role -->
+
+          <!-- =================================================
+               ROLE
+          ================================================== -->
           <p
             class="text-sm text-slate-400 mt-1"
           >
-            Library User
+            {{ profileType }}
           </p>
 
         </div>
 
 
-        <!-- ========================================
+        <!-- =====================================================
              MENU
-        ========================================= -->
+        ====================================================== -->
         <div class="mt-8 space-y-2">
 
-          <!-- Personal Information -->
+          <!-- PERSONAL INFORMATION -->
           <div
             class="flex items-center gap-3
                    px-4 py-3 rounded-xl
@@ -102,13 +134,14 @@
           </div>
 
 
-          <!-- Login & Password -->
+          <!-- LOGIN & PASSWORD -->
           <div
             class="flex items-center gap-3
                    px-4 py-3 rounded-xl
                    text-slate-500
                    hover:bg-slate-50
                    transition cursor-pointer"
+            @click="handlePasswordClick"
           >
 
             <div
@@ -120,19 +153,20 @@
             </div>
 
             <span>
-              Login & Password
+              Login &amp; Password
             </span>
 
           </div>
 
 
-          <!-- Logout -->
+          <!-- LOG OUT -->
           <div
             class="flex items-center gap-3
                    px-4 py-3 rounded-xl
                    text-slate-500
                    hover:bg-slate-50
                    transition cursor-pointer"
+            @click="handleLogout"
           >
 
             <div
@@ -152,9 +186,9 @@
         </div>
 
 
-        <!-- ========================================
+        <!-- =====================================================
              SECURITY CARD
-        ========================================= -->
+        ====================================================== -->
         <div class="mt-auto pt-8">
 
           <div
@@ -174,18 +208,19 @@
               <i class="bi bi-shield-lock-fill"></i>
             </div>
 
+
             <h3
               class="font-semibold text-slate-700"
             >
-              Keep your account secure
+              {{ securityTitle }}
             </h3>
+
 
             <p
               class="text-sm text-slate-400
                      leading-6 mt-2"
             >
-              Make sure your personal information
-              and password are always up to date.
+              {{ securityDescription }}
             </p>
 
           </div>
@@ -195,31 +230,36 @@
       </aside>
 
 
-      <!-- ========================================
+      <!-- =====================================================
            RIGHT CONTENT
-      ========================================= -->
+      ====================================================== -->
       <section class="p-6 md:p-8 lg:p-10">
 
-        <!-- Header -->
+        <!-- ===================================================
+             HEADER
+        ==================================================== -->
         <div class="mb-8">
 
           <h1
             class="text-2xl md:text-3xl
                    font-bold text-slate-800"
           >
-            User Profile
+            {{ profileTitle }}
           </h1>
 
-          <p class="text-slate-400 mt-1">
-            Manage your personal account information
+
+          <p
+            class="text-slate-400 mt-1"
+          >
+            {{ profileDescription }}
           </p>
 
         </div>
 
 
-        <!-- ========================================
+        <!-- ===================================================
              GENDER
-        ========================================= -->
+        ==================================================== -->
         <div class="mb-7">
 
           <label
@@ -229,8 +269,10 @@
             Gender
           </label>
 
+
           <div class="flex items-center gap-7">
 
+            <!-- MALE -->
             <label
               class="flex items-center gap-2
                      cursor-pointer text-slate-600"
@@ -243,11 +285,14 @@
                 class="w-5 h-5 accent-indigo-500"
               />
 
-              <span>Male</span>
+              <span>
+                Male
+              </span>
 
             </label>
 
 
+            <!-- FEMALE -->
             <label
               class="flex items-center gap-2
                      cursor-pointer text-slate-600"
@@ -260,7 +305,9 @@
                 class="w-5 h-5 accent-indigo-500"
               />
 
-              <span>Female</span>
+              <span>
+                Female
+              </span>
 
             </label>
 
@@ -269,15 +316,15 @@
         </div>
 
 
-        <!-- ========================================
+        <!-- ===================================================
              FULL NAME + PHONE
-        ========================================= -->
+        ==================================================== -->
         <div
           class="grid grid-cols-1 md:grid-cols-2
                  gap-5 mb-6"
         >
 
-          <!-- Full Name -->
+          <!-- FULL NAME -->
           <div>
 
             <label
@@ -286,6 +333,7 @@
             >
               Full Name
             </label>
+
 
             <div class="relative">
 
@@ -299,6 +347,7 @@
               >
                 <i class="bi bi-person-fill"></i>
               </div>
+
 
               <input
                 v-model="form.fullName"
@@ -317,7 +366,7 @@
           </div>
 
 
-          <!-- Phone -->
+          <!-- PHONE -->
           <div>
 
             <label
@@ -326,6 +375,7 @@
             >
               Phone Number
             </label>
+
 
             <div class="relative">
 
@@ -339,6 +389,7 @@
               >
                 <i class="bi bi-telephone-fill"></i>
               </div>
+
 
               <input
                 v-model="form.phone"
@@ -361,9 +412,9 @@
         </div>
 
 
-        <!-- ========================================
+        <!-- ===================================================
              EMAIL
-        ========================================= -->
+        ==================================================== -->
         <div class="mb-6">
 
           <label
@@ -372,6 +423,7 @@
           >
             Email
           </label>
+
 
           <div class="relative">
 
@@ -386,6 +438,7 @@
               <i class="bi bi-envelope-fill"></i>
             </div>
 
+
             <input
               v-model="form.email"
               type="email"
@@ -398,7 +451,10 @@
                      focus:ring-2 focus:ring-indigo-200"
             />
 
+
+            <!-- VERIFIED -->
             <span
+              v-if="showVerified"
               class="absolute right-3 top-1/2
                      -translate-y-1/2
                      px-4 py-1.5
@@ -415,9 +471,9 @@
         </div>
 
 
-        <!-- ========================================
+        <!-- ===================================================
              ADDRESS
-        ========================================= -->
+        ==================================================== -->
         <div class="mb-6">
 
           <label
@@ -426,6 +482,7 @@
           >
             Address
           </label>
+
 
           <div class="relative">
 
@@ -439,6 +496,7 @@
             >
               <i class="bi bi-house-fill"></i>
             </div>
+
 
             <input
               v-model="form.address"
@@ -459,100 +517,53 @@
         </div>
 
 
-        <!-- ========================================
-             DATE + POSTAL
-        ========================================= -->
-        <div
-          class="grid grid-cols-1 md:grid-cols-2
-                 gap-5"
-        >
+        <!-- ===================================================
+             DATE OF BIRTH
+        ==================================================== -->
+        <div class="mb-6">
 
-          <!-- Date of Birth -->
-          <div>
+          <label
+            class="block text-sm font-medium
+                   text-slate-600 mb-2"
+          >
+            Date of Birth
+          </label>
 
-            <label
-              class="block text-sm font-medium
-                     text-slate-600 mb-2"
+
+          <div class="relative">
+
+            <div
+              class="absolute left-3 top-1/2
+                     -translate-y-1/2
+                     w-9 h-9 rounded-lg
+                     bg-pink-50
+                     flex items-center justify-center
+                     text-indigo-400
+                     pointer-events-none"
             >
-              Date of Birth
-            </label>
-
-            <div class="relative">
-
-              <div
-                class="absolute left-3 top-1/2
-                       -translate-y-1/2
-                       w-9 h-9 rounded-lg
-                       bg-pink-50
-                       flex items-center justify-center
-                       text-indigo-400
-                       pointer-events-none"
-              >
-                <i class="bi bi-calendar3"></i>
-              </div>
-
-              <input
-                v-model="form.dateOfBirth"
-                type="date"
-                class="w-full pl-14 pr-4 py-3
-                       border border-pink-100
-                       rounded-xl
-                       text-slate-700
-                       outline-none
-                       focus:ring-2 focus:ring-pink-100"
-              />
-
+              <i class="bi bi-calendar3"></i>
             </div>
 
-          </div>
 
-
-          <!-- Postal Code -->
-          <div>
-
-            <label
-              class="block text-sm font-medium
-                     text-slate-600 mb-2"
-            >
-              Postal Code
-            </label>
-
-            <div class="relative">
-
-              <div
-                class="absolute left-3 top-1/2
-                       -translate-y-1/2
-                       w-9 h-9 rounded-lg
-                       bg-pink-50
-                       flex items-center justify-center
-                       text-pink-400"
-              >
-                <i class="bi bi-hash"></i>
-              </div>
-
-              <input
-                v-model="form.postalCode"
-                type="text"
-                placeholder="12000"
-                class="w-full pl-14 pr-4 py-3
-                       border border-pink-100
-                       rounded-xl
-                       text-slate-700
-                       placeholder:text-slate-400
-                       outline-none
-                       focus:ring-2 focus:ring-pink-100"
-              />
-
-            </div>
+            <input
+              v-model="form.dateOfBirth"
+              type="date"
+              class="w-full pl-14 pr-4 py-3
+                     border border-pink-100
+                     rounded-xl
+                     text-slate-700
+                     outline-none
+                     focus:ring-2 focus:ring-pink-100"
+            />
 
           </div>
 
         </div>
 
 
-        <!-- ========================================
+        <!-- ===================================================
              BUTTONS
-        ========================================= -->
+        ==================================================== -->
         <div
           class="flex flex-col-reverse sm:flex-row
                  justify-end gap-3
@@ -560,24 +571,30 @@
                  border-t border-slate-100"
         >
 
+          <!-- DISCARD -->
           <button
             type="button"
             @click="discardChanges"
+            :disabled="saving"
             class="px-7 py-3
                    border border-indigo-200
                    text-indigo-500
                    font-semibold
                    rounded-xl
                    hover:bg-indigo-50
-                   transition"
+                   transition
+                   disabled:opacity-50
+                   disabled:cursor-not-allowed"
           >
             Discard Changes
           </button>
 
 
+          <!-- SAVE -->
           <button
             type="button"
             @click="saveChanges"
+            :disabled="saving"
             class="px-8 py-3
                    bg-gradient-to-r
                    from-indigo-500 to-purple-500
@@ -587,9 +604,19 @@
                    shadow-md
                    hover:shadow-lg
                    hover:opacity-95
-                   transition"
+                   transition
+                   disabled:opacity-50
+                   disabled:cursor-not-allowed"
           >
-            Save Changes
+
+            <span v-if="saving">
+              Saving...
+            </span>
+
+            <span v-else>
+              Save Changes
+            </span>
+
           </button>
 
         </div>
@@ -606,102 +633,449 @@
 import {
   reactive,
   computed,
-  ref
+  ref,
+  watch,
 } from "vue";
 
-// ========================================
+
+// =====================================================
 // PROPS
-// ========================================
+// =====================================================
+
 const props = defineProps({
+
+  /*
+   * Profile data from backend
+   */
   profile: {
     type: Object,
     required: true,
   },
+
+
+  /*
+   * Loading state
+   */
+  saving: {
+    type: Boolean,
+    default: false,
+  },
+
+
+  /*
+   * USER or ADMIN
+   *
+   * Example:
+   *
+   * role="USER"
+   *
+   * role="ADMIN"
+   */
+  role: {
+    type: String,
+    default: "USER",
+  },
+
 });
 
-// ========================================
-// EMIT
-// ========================================
-const emit = defineEmits(["save"]);
 
-// ========================================
-// AVATAR ERROR
-// ========================================
+// =====================================================
+// EMITS
+// =====================================================
+
+const emit = defineEmits([
+  "save",
+  "password",
+  "logout",
+]);
+
+
+// =====================================================
+// ROLE
+// =====================================================
+
+const isAdmin = computed(() => {
+
+  return (
+    props.role?.toUpperCase() === "ADMIN"
+  );
+
+});
+
+
+// =====================================================
+// DYNAMIC TEXT
+// =====================================================
+
+const profileTitle = computed(() => {
+
+  return isAdmin.value
+    ? "Admin Profile"
+    : "User Profile";
+
+});
+
+
+const profileDescription = computed(() => {
+
+  return isAdmin.value
+    ? "Manage your administrator account information"
+    : "Manage your personal account information";
+
+});
+
+
+const profileType = computed(() => {
+
+  return isAdmin.value
+    ? "Administrator"
+    : "Library User";
+
+});
+
+
+const defaultName = computed(() => {
+
+  return isAdmin.value
+    ? "Admin"
+    : "User";
+
+});
+
+
+const securityTitle = computed(() => {
+
+  return isAdmin.value
+    ? "Keep your admin account secure"
+    : "Keep your account secure";
+
+});
+
+
+const securityDescription = computed(() => {
+
+  return isAdmin.value
+    ? "Make sure your administrator information and password are always up to date."
+    : "Make sure your personal information and password are always up to date.";
+
+});
+
+
+/*
+ * Email verified
+ *
+ * Backend may send:
+ *
+ * emailVerified: true
+ *
+ * If it doesn't exist, we show Verified
+ * for compatibility with your current UI.
+ */
+const showVerified = computed(() => {
+
+  if (
+    props.profile.emailVerified === false
+  ) {
+    return false;
+  }
+
+  return true;
+
+});
+
+
+// =====================================================
+// AVATAR
+// =====================================================
+
 const avatarError = ref(false);
 
-// ========================================
+const selectedImageFile = ref(null);
+
+const fileInput = ref(null);
+
+
+// =====================================================
 // FORM
-// ========================================
+// =====================================================
+
 const form = reactive({
-  fullName: props.profile.fullName || "",
-  email: props.profile.email || "",
 
-  // Profile information
-  gender: props.profile.gender || "Male",
-  phone: props.profile.phone || "",
-  address: props.profile.address || "",
-  dateOfBirth: props.profile.dateOfBirth || "",
-  postalCode: props.profile.postalCode || "",
+  fullName:
+    props.profile.fullName || "",
 
-  // Avatar from Backend
-  avatar: props.profile.avatar || "",
+  email:
+    props.profile.email || "",
+
+  gender:
+    props.profile.gender || "Male",
+
+  phone:
+    props.profile.phone || "",
+
+  address:
+    props.profile.address || "",
+
+  dateOfBirth:
+    props.profile.dateOfBirth || "",
+
+  avatar:
+    props.profile.avatar || "",
+
 });
 
-// ========================================
-// ORIGINAL DATA
-// ========================================
-const originalProfile = JSON.parse(
-  JSON.stringify(form)
+
+// =====================================================
+// ORIGINAL PROFILE
+// =====================================================
+
+const originalProfile = ref(
+  JSON.parse(
+    JSON.stringify(form)
+  )
 );
 
-// ========================================
+
+// =====================================================
+// WATCH BACKEND PROFILE
+// =====================================================
+
+watch(
+  () => props.profile,
+
+  (newProfile) => {
+
+    if (!newProfile) {
+      return;
+    }
+
+    console.log(
+      "PROFILE CARD:",
+      newProfile
+    );
+
+    console.log(
+      "PROFILE CARD AVATAR:",
+      newProfile.avatar
+    );
+
+
+    Object.assign(form, {
+
+      fullName:
+        newProfile.fullName || "",
+
+      email:
+        newProfile.email || "",
+
+      gender:
+        newProfile.gender || "Male",
+
+      phone:
+        newProfile.phone || "",
+
+      address:
+        newProfile.address || "",
+
+      dateOfBirth:
+        newProfile.dateOfBirth || "",
+
+      avatar:
+        newProfile.avatar || "",
+
+    });
+
+
+    /*
+     * Save fresh original data
+     */
+    originalProfile.value =
+      JSON.parse(
+        JSON.stringify(form)
+      );
+
+
+    avatarError.value = false;
+
+    selectedImageFile.value = null;
+
+  },
+
+  {
+    deep: true,
+    immediate: true,
+  }
+
+);
+
+
+// =====================================================
+// IMAGE CHANGE
+// =====================================================
+
+const handleImageChange = (event) => {
+
+  const file =
+    event.target.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+
+  /*
+   * Save actual image file
+   */
+  selectedImageFile.value = file;
+
+
+  /*
+   * Preview
+   */
+  const previewUrl =
+    URL.createObjectURL(file);
+
+  form.avatar = previewUrl;
+
+  avatarError.value = false;
+
+};
+
+
+// =====================================================
 // SAVE
-// ========================================
+// =====================================================
+
 const saveChanges = () => {
 
   emit("save", {
+
     ...form,
+
+    imageFile:
+      selectedImageFile.value,
+
   });
 
 };
 
-// ========================================
+
+// =====================================================
 // DISCARD
-// ========================================
+// =====================================================
+
 const discardChanges = () => {
 
   Object.assign(
     form,
+
     JSON.parse(
-      JSON.stringify(originalProfile)
+      JSON.stringify(
+        originalProfile.value
+      )
     )
+
   );
 
+
+  selectedImageFile.value = null;
+
   avatarError.value = false;
-};
 
-// ========================================
-// INITIALS
-// ========================================
-const initials = computed(() => {
 
-  const name = form.fullName?.trim();
+  /*
+   * Reset file input
+   */
+  if (fileInput.value) {
 
-  if (!name) {
-    return "US";
+    fileInput.value.value = "";
+
   }
 
-  const names = name.split(/\s+/);
+};
 
+
+// =====================================================
+// AVATAR ERROR
+// =====================================================
+
+const handleAvatarError = () => {
+
+  console.error(
+    "Failed to load avatar:",
+    form.avatar
+  );
+
+  avatarError.value = true;
+
+};
+
+
+// =====================================================
+// INITIALS
+// =====================================================
+
+const initials = computed(() => {
+
+  const name =
+    form.fullName?.trim();
+
+
+  if (!name) {
+
+    return isAdmin.value
+      ? "AD"
+      : "US";
+
+  }
+
+
+  const names =
+    name.split(/\s+/);
+
+
+  /*
+   * One word
+   */
   if (names.length === 1) {
+
     return names[0]
       .substring(0, 2)
       .toUpperCase();
+
   }
 
+
+  /*
+   * First + Last
+   */
   return (
     names[0].charAt(0) +
     names[names.length - 1].charAt(0)
   ).toUpperCase();
+
 });
+
+
+// =====================================================
+// PASSWORD
+// =====================================================
+
+const handlePasswordClick = () => {
+
+  emit("password");
+
+};
+
+
+// =====================================================
+// LOGOUT
+// =====================================================
+
+const handleLogout = () => {
+
+  emit("logout");
+
+};
+
 </script>

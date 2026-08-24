@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 // Layouts
 
 import UserLayout from "../layouts/UserLayout.vue";
-import AdminLayout from "../layouts/AdminLayout.vue";
+import AdminLayout from "../Layouts/AdminLayout.vue";
 
 // User Page
 import Home from "../pages/user/Home.vue";
@@ -17,13 +17,9 @@ import Profile from "../pages/user/Profile.vue";
 // Admin Pages
 import AdminDashboard from "../pages/admin/AdminDashboard.vue";
 import Books from "../pages/admin/Books.vue";
-import AddBook from "../pages/admin/AddBook.vue";
-// import BookEdit from "../pages/admin/BookEdit.vue";
-import CategoryCard from "../components/books/CategoryCard.vue";
 import Borrowings from "../pages/admin/Borrowings.vue";
 import Returns from "../pages/admin/Returns.vue";
 import Users from "../pages/admin/Users.vue";
-import Roles from "../pages/admin/Roles.vue";
 import Reports from "../pages/admin/Reports.vue";
 import Fines from "../pages/admin/Fines.vue";
 import AdminNotification from "../pages/admin/AdminNotification.vue";
@@ -31,6 +27,8 @@ import AdminProfile from "../pages/admin/AdminProfile.vue";
 import Login from "../pages/auth/login.vue";
 import Register from "../pages/auth/Register.vue"
 import OTPForm from "../pages/auth/OTPForm.vue";
+import CategoryCard from "../components/books/CategoryCard.vue";
+import Categories from "../pages/admin/Categories.vue";
 
 const routes = [
   // ================= AUTH =================
@@ -131,17 +129,10 @@ const routes = [
         name: "AdminBooks",
         component: Books,
       },
-
-      {
-        path: "books/add",
-        name: "AddBook",
-        component: AddBook,
-      },
-
       {
         path: "categories",
         name: "AdminCategories",
-        component: CategoryCard,
+        component: Categories,
       },
 
       {
@@ -160,12 +151,6 @@ const routes = [
         path: "users",
         name: "AdminUsers",
         component: Users,
-      },
-
-      {
-        path: "roles",
-        name: "AdminRoles",
-        component: Roles,
       },
 
       {

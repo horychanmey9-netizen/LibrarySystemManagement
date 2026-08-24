@@ -315,7 +315,7 @@ const userEmail = computed(() => {
 // USER AVATAR
 // ========================================
 const userAvatar = computed(() => {
-  return user?.avatar || "";
+  return user?.avatar || user?.image || "";
 });
 
 

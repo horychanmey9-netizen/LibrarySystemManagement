@@ -1,9 +1,17 @@
 <template>
-  <div class="p-6 bg-gray-50 min-h-screen">
 
-    <!-- ================= HEADER ================= -->
-    <div class="flex items-center justify-between mb-6">
+  <div class="min-h-screen bg-gray-50 p-6">
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <div
+      class="flex items-center justify-between mb-6"
+    >
+
       <div>
+
         <h1 class="text-2xl font-bold text-gray-800">
           Category Management
         </h1>
@@ -11,178 +19,257 @@
         <p class="text-gray-500 mt-1">
           Manage book categories
         </p>
+
       </div>
 
-      <!-- Add Category Button -->
+
+      <!-- Add Category -->
+
       <button
         @click="openAddModal"
-        class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        class="flex items-center gap-2
+               px-4 py-2.5
+               bg-blue-600
+               text-white
+               rounded-lg
+               hover:bg-blue-700
+               transition"
       >
+
         <i class="bi bi-plus-lg"></i>
-        Add Category
+
+        <span>
+          Add Category
+        </span>
+
       </button>
+
     </div>
 
 
-    <!-- ================= CATEGORY TABLE ================= -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <!-- =================================================
+         STATISTICS
+    ================================================== -->
 
-      <div class="overflow-x-auto">
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
+             gap-4 mb-6"
+    >
 
-        <table class="w-full text-left">
+      <!-- Total Categories -->
 
-          <!-- Table Header -->
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
+      <div
+        class="bg-white rounded-xl border border-gray-100
+               shadow-sm p-5"
+      >
 
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
-                ID
-              </th>
+        <div class="flex items-center justify-between">
 
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
-                Category Name
-              </th>
+          <div>
 
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
-                Description
-              </th>
+            <p class="text-sm text-gray-500">
+              Total Categories
+            </p>
 
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
-                Books
-              </th>
-
-              <th
-                class="px-6 py-4 text-sm font-semibold text-gray-600 text-center"
-              >
-                Action
-              </th>
-
-            </tr>
-          </thead>
-
-
-          <!-- Table Body -->
-          <tbody>
-
-            <tr
-              v-for="category in categories"
-              :key="category.id"
-              class="border-b border-gray-100 hover:bg-gray-50 transition"
+            <h2
+              class="text-2xl font-bold text-gray-800 mt-1"
             >
+              {{ categories.length }}
+            </h2>
 
-              <!-- ID -->
-              <td class="px-6 py-4 text-gray-600">
-                #{{ category.id }}
-              </td>
-
-
-              <!-- Category Name -->
-              <td class="px-6 py-4">
-
-                <div class="font-medium text-gray-800">
-                  {{ category.name }}
-                </div>
-
-              </td>
+          </div>
 
 
-              <!-- Description -->
-              <td class="px-6 py-4 text-gray-500">
-                {{ category.description }}
-              </td>
+          <div
+            class="w-11 h-11 rounded-lg
+                   bg-blue-50
+                   text-blue-600
+                   flex items-center justify-center"
+          >
+
+            <i class="bi bi-grid text-xl"></i>
+
+          </div>
+
+        </div>
+
+      </div>
 
 
-              <!-- Books -->
-              <td class="px-6 py-4 text-gray-600">
-                {{ category.books }}
-              </td>
+      <!-- Total Books -->
+
+      <div
+        class="bg-white rounded-xl border border-gray-100
+               shadow-sm p-5"
+      >
+
+        <div class="flex items-center justify-between">
+
+          <div>
+
+            <p class="text-sm text-gray-500">
+              Total Books
+            </p>
+
+            <h2
+              class="text-2xl font-bold text-gray-800 mt-1"
+            >
+              {{ totalBooks }}
+            </h2>
+
+          </div>
 
 
-              <!-- Actions -->
-              <td class="px-6 py-4">
+          <div
+            class="w-11 h-11 rounded-lg
+                   bg-green-50
+                   text-green-600
+                   flex items-center justify-center"
+          >
 
-                <div class="flex justify-center gap-2">
+            <i class="bi bi-book text-xl"></i>
 
-                  <!-- Edit -->
-                  <button
-                    @click="editCategory(category)"
-                    class="w-9 h-9 flex items-center justify-center
-                           rounded-lg bg-blue-50 text-blue-600
-                           hover:bg-blue-100 transition"
-                    title="Edit"
-                  >
-                    <i class="bi bi-pencil"></i>
-                  </button>
+          </div>
 
-
-                  <!-- Delete -->
-                  <button
-                    @click="deleteCategory(category.id)"
-                    class="w-9 h-9 flex items-center justify-center
-                           rounded-lg bg-red-50 text-red-600
-                           hover:bg-red-100 transition"
-                    title="Delete"
-                  >
-                    <i class="bi bi-trash"></i>
-                  </button>
-
-                </div>
-
-              </td>
-
-            </tr>
-
-
-            <!-- Empty -->
-            <tr v-if="categories.length === 0">
-
-              <td
-                colspan="5"
-                class="px-6 py-10 text-center text-gray-500"
-              >
-                No categories found.
-              </td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
+        </div>
 
       </div>
 
     </div>
 
 
-    <!-- ================= ADD / EDIT MODAL ================= -->
+    <!-- =================================================
+         CATEGORY CARDS
+    ================================================== -->
+
     <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      v-if="categories.length > 0"
+      class="grid grid-cols-1 sm:grid-cols-2
+             lg:grid-cols-3 xl:grid-cols-4
+             gap-5"
     >
 
-      <div class="bg-white w-full max-w-md rounded-xl shadow-xl p-6">
+      <AdminCategory
+        v-for="category in categories"
+        :key="category.id"
+        :category="category"
+        @edit="editCategory"
+        @delete="deleteCategory"
+      />
+
+    </div>
+
+
+    <!-- =================================================
+         EMPTY
+    ================================================== -->
+
+    <div
+      v-else
+      class="bg-white rounded-xl
+             border border-gray-100
+             p-12 text-center"
+    >
+
+      <i
+        class="bi bi-folder-x
+               text-5xl text-gray-300"
+      ></i>
+
+      <h3
+        class="text-lg font-semibold
+               text-gray-700 mt-4"
+      >
+        No categories found
+      </h3>
+
+      <p class="text-gray-500 mt-1">
+        Add your first book category.
+      </p>
+
+      <button
+        @click="openAddModal"
+        class="mt-4 px-4 py-2
+               bg-blue-600 text-white
+               rounded-lg
+               hover:bg-blue-700"
+      >
+        Add Category
+      </button>
+
+    </div>
+
+
+    <!-- =================================================
+         MODAL
+    ================================================== -->
+
+    <div
+      v-if="showModal"
+      class="fixed inset-0
+             bg-black/40
+             flex items-center justify-center
+             z-50 p-4"
+      @click.self="closeModal"
+    >
+
+      <div
+        class="bg-white
+               w-full max-w-md
+               rounded-xl
+               shadow-xl
+               p-6"
+      >
 
         <!-- Modal Header -->
-        <div class="flex items-center justify-between mb-5">
 
-          <h2 class="text-xl font-bold text-gray-800">
-            {{ isEditing ? 'Edit Category' : 'Add Category' }}
+        <div
+          class="flex items-center
+                 justify-between mb-5"
+        >
+
+          <h2
+            class="text-xl font-bold
+                   text-gray-800"
+          >
+            {{ isEditing
+              ? "Edit Category"
+              : "Add Category"
+            }}
           </h2>
+
 
           <button
             @click="closeModal"
-            class="text-gray-400 hover:text-gray-600"
+            class="w-8 h-8
+                   flex items-center
+                   justify-center
+                   rounded-lg
+                   text-gray-400
+                   hover:bg-gray-100
+                   hover:text-gray-600"
           >
+
             <i class="bi bi-x-lg"></i>
+
           </button>
 
         </div>
 
 
-        <!-- ================= CATEGORY NAME ================= -->
+        <!-- =================================================
+             NAME
+        ================================================== -->
+
         <div class="mb-4">
 
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            class="block
+                   text-sm
+                   font-medium
+                   text-gray-700
+                   mb-2"
+          >
             Category Name
           </label>
 
@@ -190,17 +277,31 @@
             v-model="form.name"
             type="text"
             placeholder="Enter category name"
-            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg
-                   focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full
+                   px-4 py-2.5
+                   border border-gray-200
+                   rounded-lg
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-blue-500"
           />
 
         </div>
 
 
-        <!-- ================= DESCRIPTION ================= -->
+        <!-- =================================================
+             DESCRIPTION
+        ================================================== -->
+
         <div class="mb-4">
 
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            class="block
+                   text-sm
+                   font-medium
+                   text-gray-700
+                   mb-2"
+          >
             Description
           </label>
 
@@ -208,17 +309,31 @@
             v-model="form.description"
             rows="3"
             placeholder="Enter description"
-            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg
-                   focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full
+                   px-4 py-2.5
+                   border border-gray-200
+                   rounded-lg
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-blue-500"
           ></textarea>
 
         </div>
 
 
-        <!-- ================= NUMBER OF BOOKS ================= -->
+        <!-- =================================================
+             NUMBER OF BOOKS
+        ================================================== -->
+
         <div class="mb-6">
 
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            class="block
+                   text-sm
+                   font-medium
+                   text-gray-700
+                   mb-2"
+          >
             Number of Books
           </label>
 
@@ -227,33 +342,49 @@
             type="number"
             min="0"
             placeholder="Enter number of books"
-            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg
-                   focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full
+                   px-4 py-2.5
+                   border border-gray-200
+                   rounded-lg
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-blue-500"
           />
 
         </div>
 
 
-        <!-- ================= BUTTONS ================= -->
-        <div class="flex justify-end gap-3">
+        <!-- =================================================
+             BUTTONS
+        ================================================== -->
 
-          <!-- Cancel -->
+        <div
+          class="flex justify-end gap-3"
+        >
+
           <button
             @click="closeModal"
-            class="px-4 py-2 border border-gray-200 rounded-lg
-                   text-gray-600 hover:bg-gray-50"
+            class="px-4 py-2
+                   border border-gray-200
+                   rounded-lg
+                   text-gray-600
+                   hover:bg-gray-50"
           >
             Cancel
           </button>
 
 
-          <!-- Save / Update -->
           <button
             @click="saveCategory"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg
+            class="px-4 py-2
+                   bg-blue-600
+                   text-white
+                   rounded-lg
                    hover:bg-blue-700"
           >
-            {{ isEditing ? 'Update' : 'Save' }}
+
+            {{ isEditing ? "Update" : "Save" }}
+
           </button>
 
         </div>
@@ -263,183 +394,282 @@
     </div>
 
   </div>
+
 </template>
 
 
 <script setup>
-import { ref } from 'vue'
+
+import { ref, computed } from "vue";
 
 
+// =====================================================
+// COMPONENT
+// =====================================================
+
+import AdminCategory from "../../components/admin/AdminCategory.vue";
+
+// =====================================================
 // MODAL
+// =====================================================
 
-const showModal = ref(false)
+const showModal = ref(false);
 
-const isEditing = ref(false)
+const isEditing = ref(false);
 
 
+// =====================================================
 // FORM
+// =====================================================
 
 const form = ref({
+
   id: null,
-  name: '',
-  description: '',
+
+  name: "",
+
+  description: "",
+
   books: 0
-})
+
+});
 
 
+// =====================================================
 // CATEGORY DATA
+// =====================================================
 
 const categories = ref([
+
   {
     id: 1,
-    name: 'Fiction',
-    description: 'Fictional stories and novels',
+    name: "Fiction",
+    description: "Fictional stories and novels",
     books: 120
   },
 
   {
     id: 2,
-    name: 'Science',
-    description: 'Science and technology books',
+    name: "Science",
+    description: "Science and technology books",
     books: 85
   },
 
   {
     id: 3,
-    name: 'History',
-    description: 'Historical books and documents',
+    name: "History",
+    description: "Historical books and documents",
     books: 64
   },
 
   {
     id: 4,
-    name: 'Programming',
-    description: 'Programming and software development',
+    name: "Programming",
+    description: "Programming and software development",
     books: 95
   },
 
   {
     id: 5,
-    name: 'Business',
-    description: 'Business and management books',
+    name: "Business",
+    description: "Business and management books",
     books: 42
   }
-])
 
-// OPEN ADD MODAL
+]);
 
-const openAddModal = () => {
 
-  isEditing.value = false
+// =====================================================
+// TOTAL BOOKS
+// =====================================================
+
+const totalBooks = computed(() => {
+
+  return categories.value.reduce(
+    (total, category) => {
+      return total + Number(category.books || 0);
+    },
+    0
+  );
+
+});
+
+
+// =====================================================
+// OPEN ADD
+// =====================================================
+
+function openAddModal() {
+
+  isEditing.value = false;
 
   form.value = {
+
     id: null,
-    name: '',
-    description: '',
-    books: 0
-  }
 
-  showModal.value = true
+    name: "",
+
+    description: "",
+
+    books: 0
+
+  };
+
+  showModal.value = true;
+
 }
 
-// EDIT CATEGORY
 
-const editCategory = (category) => {
+// =====================================================
+// EDIT
+// =====================================================
 
-  isEditing.value = true
+function editCategory(category) {
+
+  isEditing.value = true;
 
   form.value = {
-    ...category
-  }
 
-  showModal.value = true
+    ...category
+
+  };
+
+  showModal.value = true;
+
 }
 
-// SAVE / UPDATE CATEGORY
 
-const saveCategory = () => {
+// =====================================================
+// SAVE / UPDATE
+// =====================================================
 
-  // Validate category name
-  if (!form.value.name.trim()) {
+function saveCategory() {
 
-    alert('Please enter category name.')
+  const name = form.value.name.trim();
 
-    return
+
+  // Validation
+
+  if (!name) {
+
+    alert("Please enter category name.");
+
+    return;
+
   }
 
-  // Validate number of books
-  if (form.value.books < 0) {
 
-    alert('Number of books cannot be negative.')
+  if (Number(form.value.books) < 0) {
 
-    return
+    alert("Number of books cannot be negative.");
+
+    return;
+
   }
 
-  // ================= EDIT =================
+
+  // ===================================================
+  // EDIT
+  // ===================================================
 
   if (isEditing.value) {
 
-    const index = categories.value.findIndex(
-      category => category.id === form.value.id
-    )
+    const index =
+      categories.value.findIndex(
+        category =>
+          category.id === form.value.id
+      );
+
 
     if (index !== -1) {
 
       categories.value[index] = {
+
         ...form.value,
+
+        name,
+
         books: Number(form.value.books)
-      }
+
+      };
+
     }
+
   }
 
-  // ================= ADD =================
+
+  // ===================================================
+  // ADD
+  // ===================================================
 
   else {
 
-    const newCategory = {
+    const newId =
+      categories.value.length > 0
+        ? Math.max(
+            ...categories.value.map(
+              category => category.id
+            )
+          ) + 1
+        : 1;
 
-      id:
-        categories.value.length > 0
-          ? Math.max(
-              ...categories.value.map(category => category.id)
-            ) + 1
-          : 1,
 
-      name: form.value.name,
+    categories.value.push({
 
-      description: form.value.description,
+      id: newId,
+
+      name,
+
+      description:
+        form.value.description.trim(),
 
       books: Number(form.value.books)
 
-    }
-
-    categories.value.push(newCategory)
+    });
 
   }
 
-  // Close modal
-  closeModal()
-}
 
-// DELETE CATEGORY
-
-const deleteCategory = (id) => {
-
-  const confirmed = confirm(
-    'Are you sure you want to delete this category?'
-  )
-
-  if (!confirmed) return
-  categories.value = categories.value.filter(
-    category => category.id !== id
-  )
-}
-
-// CLOSE MODAL
-
-const closeModal = () => {
-
-  showModal.value = false
+  closeModal();
 
 }
+
+
+// =====================================================
+// DELETE
+// =====================================================
+
+function deleteCategory(id) {
+
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this category?"
+  );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  categories.value =
+    categories.value.filter(
+      category =>
+        category.id !== id
+    );
+
+}
+
+
+// =====================================================
+// CLOSE
+// =====================================================
+
+function closeModal() {
+
+  showModal.value = false;
+
+}
+
 </script>

@@ -2,9 +2,10 @@
 
   <div class="p-6 bg-gray-50 min-h-screen">
 
-    <!-- =========================
-         Header
-    ========================== -->
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
     <div class="mb-6">
 
@@ -19,27 +20,36 @@
     </div>
 
 
-    <!-- =========================
-         Search & Filter
-    ========================== -->
+    <!-- =====================================================
+         SEARCH & FILTER
+    ====================================================== -->
 
-    <div class="bg-white p-4 rounded-xl shadow-sm mb-6">
+    <div
+      class="bg-white p-4 rounded-xl
+             shadow-sm mb-6"
+    >
 
-      <div class="flex items-center gap-3">
+      <div
+        class="flex flex-wrap
+               items-center gap-3"
+      >
 
-        <!-- Search -->
+
+        <!-- SEARCH -->
 
         <div class="relative w-72">
 
           <i
-            class="bi bi-search absolute left-3 top-1/2
-                   -translate-y-1/2 text-gray-400"
+            class="bi bi-search
+                   absolute left-3 top-1/2
+                   -translate-y-1/2
+                   text-gray-400"
           ></i>
 
           <input
             v-model="search"
             type="text"
-            placeholder="Search..."
+            placeholder="Search user or book..."
             class="w-full pl-9 pr-3 py-2
                    border border-gray-200
                    rounded-lg text-sm
@@ -51,11 +61,11 @@
         </div>
 
 
-        <!-- Status Filter -->
+        <!-- STATUS -->
 
         <select
           v-model="statusFilter"
-          class="w-32 px-3 py-2
+          class="w-36 px-3 py-2
                  border border-gray-200
                  rounded-lg text-sm
                  text-gray-600
@@ -65,7 +75,7 @@
         >
 
           <option value="All">
-            All
+            All Status
           </option>
 
           <option value="Returned">
@@ -76,94 +86,253 @@
             Late
           </option>
 
+          <option value="Borrowed">
+            Borrowed
+          </option>
+
         </select>
+
+
+        <!-- RESET -->
+
+        <button
+          v-if="search || statusFilter !== 'All'"
+          type="button"
+          @click="resetFilter"
+          class="px-4 py-2
+                 border border-gray-200
+                 rounded-lg
+                 text-sm text-gray-600
+                 hover:bg-gray-50
+                 transition"
+        >
+
+          <i class="bi bi-arrow-counterclockwise mr-1"></i>
+
+          Reset
+
+        </button>
 
       </div>
 
     </div>
 
 
-    <!-- =========================
-         Return Table
-    ========================== -->
+    <!-- =====================================================
+         SUMMARY
+    ====================================================== -->
 
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div
+      class="grid grid-cols-1
+             sm:grid-cols-2
+             lg:grid-cols-4
+             gap-4 mb-6"
+    >
+
+      <!-- Total -->
+
+      <div
+        class="bg-white rounded-xl
+               shadow-sm p-5
+               border border-gray-100"
+      >
+
+        <div class="flex items-center justify-between">
+
+          <div>
+
+            <p class="text-sm text-gray-500">
+              Total Returns
+            </p>
+
+            <h2 class="text-2xl font-bold text-gray-800 mt-1">
+              {{ returns.length }}
+            </h2>
+
+          </div>
+
+          <div
+            class="w-11 h-11 rounded-lg
+                   bg-blue-50 text-blue-600
+                   flex items-center justify-center"
+          >
+
+            <i class="bi bi-arrow-return-left text-xl"></i>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Returned -->
+
+      <div
+        class="bg-white rounded-xl
+               shadow-sm p-5
+               border border-gray-100"
+      >
+
+        <div class="flex items-center justify-between">
+
+          <div>
+
+            <p class="text-sm text-gray-500">
+              Returned
+            </p>
+
+            <h2 class="text-2xl font-bold text-green-600 mt-1">
+              {{ returnedCount }}
+            </h2>
+
+          </div>
+
+          <div
+            class="w-11 h-11 rounded-lg
+                   bg-green-50 text-green-600
+                   flex items-center justify-center"
+          >
+
+            <i class="bi bi-check-circle text-xl"></i>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Late -->
+
+      <div
+        class="bg-white rounded-xl
+               shadow-sm p-5
+               border border-gray-100"
+      >
+
+        <div class="flex items-center justify-between">
+
+          <div>
+
+            <p class="text-sm text-gray-500">
+              Late Returns
+            </p>
+
+            <h2 class="text-2xl font-bold text-red-600 mt-1">
+              {{ lateCount }}
+            </h2>
+
+          </div>
+
+          <div
+            class="w-11 h-11 rounded-lg
+                   bg-red-50 text-red-600
+                   flex items-center justify-center"
+          >
+
+            <i class="bi bi-clock-history text-xl"></i>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Fine -->
+
+      <div
+        class="bg-white rounded-xl
+               shadow-sm p-5
+               border border-gray-100"
+      >
+
+        <div class="flex items-center justify-between">
+
+          <div>
+
+            <p class="text-sm text-gray-500">
+              Total Fine
+            </p>
+
+            <h2 class="text-2xl font-bold text-orange-600 mt-1">
+              ${{ totalFine.toFixed(2) }}
+            </h2>
+
+          </div>
+
+          <div
+            class="w-11 h-11 rounded-lg
+                   bg-orange-50 text-orange-600
+                   flex items-center justify-center"
+          >
+
+            <i class="bi bi-cash-stack text-xl"></i>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLE
+    ====================================================== -->
+
+    <div
+      class="bg-white rounded-xl
+             shadow-sm overflow-hidden"
+    >
 
       <div class="overflow-x-auto">
 
         <table class="w-full text-left">
 
-          <!-- =========================
-               Table Header
-          ========================== -->
 
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <!-- TABLE HEADER -->
+
+          <thead
+            class="bg-gray-50
+                   border-b border-gray-200"
+          >
 
             <tr>
 
-              <th
-                class="px-6 py-4 text-sm
-                       font-semibold text-gray-600"
-              >
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
                 ID
               </th>
 
-
-              <th
-                class="px-6 py-4 text-sm
-                       font-semibold text-gray-600"
-              >
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
                 User
               </th>
 
-
-              <th
-                class="px-6 py-4 text-sm
-                       font-semibold text-gray-600"
-              >
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
                 Book
               </th>
 
-
-              <th
-                class="px-6 py-4 text-sm
-                       font-semibold text-gray-600"
-              >
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
                 Borrow Date
               </th>
 
-
-              <th
-                class="px-6 py-4 text-sm
-                       font-semibold text-gray-600"
-              >
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
                 Due Date
               </th>
 
-
-              <th
-                class="px-6 py-4 text-sm
-                       font-semibold text-gray-600"
-              >
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
                 Return Date
               </th>
 
-
-              <th
-                class="px-6 py-4 text-sm
-                       font-semibold text-gray-600"
-              >
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
                 Fine
               </th>
 
-
-              <th
-                class="px-6 py-4 text-sm
-                       font-semibold text-gray-600"
-              >
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600">
                 Status
               </th>
-
 
               <th
                 class="px-6 py-4 text-sm
@@ -178,192 +347,20 @@
           </thead>
 
 
-          <!-- =========================
-               Table Body
-          ========================== -->
+          <!-- TABLE BODY -->
 
           <tbody>
 
-            <tr
+            <ReturnCard
               v-for="item in filteredReturns"
               :key="item.id"
-              class="border-b border-gray-100
-                     hover:bg-gray-50 transition"
-            >
+              :item="item"
+              @view="viewReturn"
+              @delete="deleteReturn"
+            />
 
-              <!-- ID -->
 
-              <td class="px-6 py-4 text-gray-600">
-
-                #{{ item.id }}
-
-              </td>
-
-
-              <!-- User -->
-
-              <td class="px-6 py-4">
-
-                <div class="flex items-center gap-3">
-
-                  <div
-                    class="w-9 h-9 rounded-full
-                           bg-blue-100 text-blue-600
-                           flex items-center
-                           justify-center
-                           font-semibold"
-                  >
-
-                    {{ item.user.charAt(0) }}
-
-                  </div>
-
-
-                  <div>
-
-                    <p class="font-medium text-gray-800">
-
-                      {{ item.user }}
-
-                    </p>
-
-
-                    <p class="text-xs text-gray-400">
-
-                      {{ item.email }}
-
-                    </p>
-
-                  </div>
-
-                </div>
-
-              </td>
-
-
-              <!-- Book -->
-
-              <td class="px-6 py-4">
-
-                <span class="font-medium text-gray-800">
-
-                  {{ item.book }}
-
-                </span>
-
-              </td>
-
-
-              <!-- Borrow Date -->
-
-              <td class="px-6 py-4 text-gray-600">
-
-                {{ item.borrowDate }}
-
-              </td>
-
-
-              <!-- Due Date -->
-
-              <td class="px-6 py-4 text-gray-600">
-
-                {{ item.dueDate }}
-
-              </td>
-
-
-              <!-- Return Date -->
-
-              <td class="px-6 py-4 text-gray-600">
-
-                {{ item.returnDate }}
-
-              </td>
-
-
-              <!-- Fine -->
-
-              <td class="px-6 py-4">
-
-                <span
-                  :class="
-                    item.fine > 0
-                      ? 'text-red-600 font-medium'
-                      : 'text-green-600 font-medium'
-                  "
-                >
-
-                  ${{ Number(item.fine).toFixed(2) }}
-
-                </span>
-
-              </td>
-
-
-              <!-- Status -->
-
-              <td class="px-6 py-4">
-
-                <span
-                  :class="getStatusClass(item.status)"
-                  class="px-3 py-1 rounded-full
-                         text-xs font-medium"
-                >
-
-                  {{ item.status }}
-
-                </span>
-
-              </td>
-
-
-              <!-- Action -->
-
-              <td class="px-6 py-4">
-
-                <div class="flex justify-center gap-2">
-
-                  <!-- View -->
-
-                  <button
-                    @click="viewReturn(item)"
-                    class="w-9 h-9 flex items-center
-                           justify-center rounded-lg
-                           bg-gray-100 text-gray-600
-                           hover:bg-gray-200 transition"
-                    title="View"
-                  >
-
-                    <i class="bi bi-eye"></i>
-
-                  </button>
-
-
-                  <!-- Delete -->
-
-                  <button
-                    @click="deleteReturn(item.id)"
-                    class="w-9 h-9 flex items-center
-                           justify-center rounded-lg
-                           bg-red-50 text-red-600
-                           hover:bg-red-100 transition"
-                    title="Delete"
-                  >
-
-                    <i class="bi bi-trash"></i>
-
-                  </button>
-
-                </div>
-
-              </td>
-
-            </tr>
-
-
-            <!-- =========================
-                 Empty
-            ========================== -->
+            <!-- EMPTY -->
 
             <tr
               v-if="filteredReturns.length === 0"
@@ -371,11 +368,27 @@
 
               <td
                 colspan="9"
-                class="px-6 py-10
+                class="px-6 py-12
                        text-center text-gray-500"
               >
 
-                No return records found.
+                <div class="flex flex-col items-center">
+
+                  <i
+                    class="bi bi-inbox
+                           text-4xl text-gray-300
+                           mb-3"
+                  ></i>
+
+                  <p class="font-medium">
+                    No return records found
+                  </p>
+
+                  <p class="text-sm text-gray-400 mt-1">
+                    Try changing your search or filter.
+                  </p>
+
+                </div>
 
               </td>
 
@@ -390,10 +403,9 @@
     </div>
 
 
-    <!-- =================================================
-         View Return Modal
-         Same style as Borrowing Details
-    ================================================== -->
+    <!-- =====================================================
+         VIEW RETURN MODAL
+    ====================================================== -->
 
     <div
       v-if="selectedReturn"
@@ -403,26 +415,43 @@
 
       <div class="modal">
 
-        <!-- =========================
-             Modal Header
-        ========================== -->
+
+        <!-- HEADER -->
 
         <div class="modal-header">
 
           <div>
 
-            <h2>
-              Return Details
-            </h2>
+            <div class="flex items-center gap-3">
 
-            <p>
-              View detailed information about this return
-            </p>
+              <div
+                class="w-10 h-10 rounded-lg
+                       bg-blue-50 text-blue-600
+                       flex items-center justify-center"
+              >
+
+                <i class="bi bi-arrow-return-left"></i>
+
+              </div>
+
+              <div>
+
+                <h2>
+                  Return Details
+                </h2>
+
+                <p>
+                  Return #{{ selectedReturn.id }}
+                </p>
+
+              </div>
+
+            </div>
 
           </div>
 
 
-          <!-- Close Icon -->
+          <!-- CLOSE -->
 
           <button
             class="close-icon"
@@ -436,28 +465,12 @@
         </div>
 
 
-        <!-- =========================
-             Details
-        ========================== -->
+        <!-- BODY -->
 
         <div class="details-body">
 
-          <!-- Return ID -->
 
-          <div class="detail-row">
-
-            <span>
-              Return ID
-            </span>
-
-            <strong>
-              #{{ selectedReturn.id }}
-            </strong>
-
-          </div>
-
-
-          <!-- User -->
+          <!-- USER -->
 
           <div class="detail-row">
 
@@ -465,29 +478,22 @@
               User
             </span>
 
-            <strong>
-              {{ selectedReturn.user }}
-            </strong>
+            <div class="text-right">
+
+              <strong class="block">
+                {{ selectedReturn.user }}
+              </strong>
+
+              <small class="text-gray-400">
+                {{ selectedReturn.email }}
+              </small>
+
+            </div>
 
           </div>
 
 
-          <!-- Email -->
-
-          <div class="detail-row">
-
-            <span>
-              Email
-            </span>
-
-            <strong>
-              {{ selectedReturn.email }}
-            </strong>
-
-          </div>
-
-
-          <!-- Book -->
+          <!-- BOOK -->
 
           <div class="detail-row">
 
@@ -502,7 +508,7 @@
           </div>
 
 
-          <!-- Borrow Date -->
+          <!-- BORROW DATE -->
 
           <div class="detail-row">
 
@@ -517,7 +523,7 @@
           </div>
 
 
-          <!-- Due Date -->
+          <!-- DUE DATE -->
 
           <div class="detail-row">
 
@@ -539,7 +545,7 @@
           </div>
 
 
-          <!-- Return Date -->
+          <!-- RETURN DATE -->
 
           <div class="detail-row">
 
@@ -549,14 +555,17 @@
 
             <strong>
 
-              {{ selectedReturn.returnDate || "Not returned" }}
+              {{
+                selectedReturn.returnDate ||
+                "Not returned"
+              }}
 
             </strong>
 
           </div>
 
 
-          <!-- Fine -->
+          <!-- FINE -->
 
           <div class="detail-row">
 
@@ -567,25 +576,24 @@
             <strong
               :class="{
                 fine:
-                  selectedReturn.fine > 0
+                  Number(selectedReturn.fine) > 0
               }"
             >
 
-              ${{ Number(selectedReturn.fine).toFixed(2) }}
+              ${{ Number(selectedReturn.fine || 0).toFixed(2) }}
 
             </strong>
 
           </div>
 
 
-          <!-- Status -->
+          <!-- STATUS -->
 
           <div class="detail-row">
 
             <span>
               Status
             </span>
-
 
             <span
               class="status-badge"
@@ -604,7 +612,6 @@
                 "
               ></i>
 
-
               {{ selectedReturn.status }}
 
             </span>
@@ -614,9 +621,7 @@
         </div>
 
 
-        <!-- =========================
-             Modal Footer
-        ========================== -->
+        <!-- FOOTER -->
 
         <div class="modal-footer">
 
@@ -645,121 +650,121 @@
 import {
   ref,
   computed
-} from 'vue'
+} from "vue"
+
+import ReturnCard from "@/components/admin/ReturnCard.vue"
 
 
-/* =========================
-   Search
-========================= */
+// =====================================================
+// SEARCH
+// =====================================================
 
-const search = ref('')
-
-
-/* =========================
-   Status Filter
-========================= */
-
-const statusFilter = ref('All')
+const search = ref("")
 
 
-/* =========================
-   Selected Return
-========================= */
+// =====================================================
+// STATUS FILTER
+// =====================================================
+
+const statusFilter = ref("All")
+
+
+// =====================================================
+// SELECTED RETURN
+// =====================================================
 
 const selectedReturn = ref(null)
 
 
-/* =========================
-   Return Data
-========================= */
+// =====================================================
+// RETURN DATA
+// =====================================================
 
 const returns = ref([
 
   {
     id: 1,
-    user: 'Dara Sok',
-    email: 'dara@gmail.com',
-    book: 'Clean Code',
-    borrowDate: '2026-07-20',
-    dueDate: '2026-08-03',
-    returnDate: '2026-08-02',
+    user: "Dara Sok",
+    email: "dara@gmail.com",
+    book: "Clean Code",
+    borrowDate: "2026-07-20",
+    dueDate: "2026-08-03",
+    returnDate: "2026-08-02",
     fine: 0,
-    status: 'Returned'
+    status: "Returned"
   },
-
 
   {
     id: 2,
-    user: 'Sreyneang Kim',
-    email: 'sreyneang@gmail.com',
-    book: 'Java Programming',
-    borrowDate: '2026-07-15',
-    dueDate: '2026-07-29',
-    returnDate: '2026-08-01',
+    user: "Sreyneang Kim",
+    email: "sreyneang@gmail.com",
+    book: "Java Programming",
+    borrowDate: "2026-07-15",
+    dueDate: "2026-07-29",
+    returnDate: "2026-08-01",
     fine: 1.50,
-    status: 'Late'
+    status: "Late"
   },
-
 
   {
     id: 3,
-    user: 'Rithy Chan',
-    email: 'rithy@gmail.com',
-    book: 'Database System',
-    borrowDate: '2026-07-10',
-    dueDate: '2026-07-24',
-    returnDate: '2026-07-24',
+    user: "Rithy Chan",
+    email: "rithy@gmail.com",
+    book: "Database System",
+    borrowDate: "2026-07-10",
+    dueDate: "2026-07-24",
+    returnDate: "2026-07-24",
     fine: 0,
-    status: 'Returned'
+    status: "Returned"
   },
-
 
   {
     id: 4,
-    user: 'Sokha Lim',
-    email: 'sokha@gmail.com',
-    book: 'Web Development',
-    borrowDate: '2026-07-05',
-    dueDate: '2026-07-19',
-    returnDate: '2026-07-23',
+    user: "Sokha Lim",
+    email: "sokha@gmail.com",
+    book: "Web Development",
+    borrowDate: "2026-07-05",
+    dueDate: "2026-07-19",
+    returnDate: "2026-07-23",
     fine: 2.00,
-    status: 'Late'
+    status: "Late"
   },
-
 
   {
     id: 5,
-    user: 'Vanna Chea',
-    email: 'vanna@gmail.com',
-    book: 'Python Programming',
-    borrowDate: '2026-07-25',
-    dueDate: '2026-08-08',
-    returnDate: '2026-08-07',
+    user: "Vanna Chea",
+    email: "vanna@gmail.com",
+    book: "Python Programming",
+    borrowDate: "2026-07-25",
+    dueDate: "2026-08-08",
+    returnDate: "2026-08-07",
     fine: 0,
-    status: 'Returned'
+    status: "Returned"
   }
 
 ])
 
 
-/* =========================
-   Search + Filter
-========================= */
+// =====================================================
+// FILTERED RETURNS
+// =====================================================
 
 const filteredReturns = computed(() => {
 
+  const keyword =
+    search.value
+      .toLowerCase()
+      .trim()
+
+
   return returns.value.filter(item => {
-
-    const keyword =
-      search.value
-        .toLowerCase()
-        .trim()
-
-
-    /* Search User or Book */
 
     const matchesSearch =
       item.user
+        .toLowerCase()
+        .includes(keyword) ||
+
+      item.email
         .toLowerCase()
         .includes(keyword) ||
 
@@ -768,10 +773,8 @@ const filteredReturns = computed(() => {
         .includes(keyword)
 
 
-    /* Status */
-
     const matchesStatus =
-      statusFilter.value === 'All' ||
+      statusFilter.value === "All" ||
 
       item.status ===
       statusFilter.value
@@ -787,34 +790,50 @@ const filteredReturns = computed(() => {
 })
 
 
-/* =========================
-   Status Style
-========================= */
+// =====================================================
+// TOTAL RETURNED
+// =====================================================
 
-const getStatusClass = (status) => {
+const returnedCount = computed(() => {
 
-  if (status === 'Returned') {
+  return returns.value.filter(
+    item => item.status === "Returned"
+  ).length
 
-    return 'bg-green-100 text-green-700'
-
-  }
-
-
-  if (status === 'Late') {
-
-    return 'bg-red-100 text-red-700'
-
-  }
+})
 
 
-  return 'bg-gray-100 text-gray-700'
+// =====================================================
+// TOTAL LATE
+// =====================================================
 
-}
+const lateCount = computed(() => {
+
+  return returns.value.filter(
+    item => item.status === "Late"
+  ).length
+
+})
 
 
-/* =========================
-   View Return
-========================= */
+// =====================================================
+// TOTAL FINE
+// =====================================================
+
+const totalFine = computed(() => {
+
+  return returns.value.reduce(
+    (total, item) =>
+      total + Number(item.fine || 0),
+    0
+  )
+
+})
+
+
+// =====================================================
+// VIEW RETURN
+// =====================================================
 
 const viewReturn = (item) => {
 
@@ -823,9 +842,9 @@ const viewReturn = (item) => {
 }
 
 
-/* =========================
-   Close Modal
-========================= */
+// =====================================================
+// CLOSE MODAL
+// =====================================================
 
 const closeModal = () => {
 
@@ -834,21 +853,19 @@ const closeModal = () => {
 }
 
 
-/* =========================
-   Delete Return
-========================= */
+// =====================================================
+// DELETE RETURN
+// =====================================================
 
 const deleteReturn = (id) => {
 
   const confirmed = confirm(
-    'Are you sure you want to delete this return record?'
+    "Are you sure you want to delete this return record?"
   )
 
 
   if (!confirmed) {
-
     return
-
   }
 
 
@@ -857,14 +874,6 @@ const deleteReturn = (id) => {
       item => item.id !== id
     )
 
-
-  /*
-
-    If the deleted return is
-    currently open in the modal,
-    close the modal.
-
-  */
 
   if (
     selectedReturn.value?.id === id
@@ -876,14 +885,27 @@ const deleteReturn = (id) => {
 
 }
 
+
+// =====================================================
+// RESET FILTER
+// =====================================================
+
+const resetFilter = () => {
+
+  search.value = ""
+
+  statusFilter.value = "All"
+
+}
+
 </script>
 
 
 <style scoped>
 
-/* =========================
-   Modal Overlay
-========================= */
+/* =====================================================
+   MODAL OVERLAY
+===================================================== */
 
 .modal-overlay {
 
@@ -907,32 +929,34 @@ const deleteReturn = (id) => {
 }
 
 
-/* =========================
-   Modal
-========================= */
+/* =====================================================
+   MODAL
+===================================================== */
 
 .modal {
 
-  width: 500px;
+  width: 520px;
 
   max-width: 100%;
 
-  overflow: hidden;
+  max-height: 90vh;
+
+  overflow-y: auto;
 
   background: white;
 
-  border-radius: 12px;
+  border-radius: 16px;
 
   box-shadow:
     0 20px 50px
-    rgba(0, 0, 0, 0.2);
+    rgba(0, 0, 0, 0.20);
 
 }
 
 
-/* =========================
-   Modal Header
-========================= */
+/* =====================================================
+   MODAL HEADER
+===================================================== */
 
 .modal-header {
 
@@ -958,29 +982,31 @@ const deleteReturn = (id) => {
 
   font-size: 20px;
 
+  font-weight: 700;
+
 }
 
 
 .modal-header p {
 
-  margin: 5px 0 0;
+  margin: 3px 0 0;
 
-  color: #6b7280;
+  color: #9ca3af;
 
   font-size: 13px;
 
 }
 
 
-/* =========================
-   Close Icon
-========================= */
+/* =====================================================
+   CLOSE ICON
+===================================================== */
 
 .close-icon {
 
-  width: 32px;
+  width: 34px;
 
-  height: 32px;
+  height: 34px;
 
   display: flex;
 
@@ -990,7 +1016,7 @@ const deleteReturn = (id) => {
 
   border: none;
 
-  border-radius: 6px;
+  border-radius: 8px;
 
   background: #f3f4f6;
 
@@ -999,6 +1025,8 @@ const deleteReturn = (id) => {
   font-size: 22px;
 
   cursor: pointer;
+
+  transition: 0.2s;
 
 }
 
@@ -1010,9 +1038,9 @@ const deleteReturn = (id) => {
 }
 
 
-/* =========================
-   Details
-========================= */
+/* =====================================================
+   DETAILS BODY
+===================================================== */
 
 .details-body {
 
@@ -1021,9 +1049,13 @@ const deleteReturn = (id) => {
 }
 
 
+/* =====================================================
+   DETAIL ROW
+===================================================== */
+
 .detail-row {
 
-  min-height: 45px;
+  min-height: 50px;
 
   display: flex;
 
@@ -1066,9 +1098,9 @@ const deleteReturn = (id) => {
 }
 
 
-/* =========================
-   Late
-========================= */
+/* =====================================================
+   LATE
+===================================================== */
 
 .detail-row .late {
 
@@ -1077,9 +1109,9 @@ const deleteReturn = (id) => {
 }
 
 
-/* =========================
-   Fine
-========================= */
+/* =====================================================
+   FINE
+===================================================== */
 
 .detail-row .fine {
 
@@ -1090,9 +1122,9 @@ const deleteReturn = (id) => {
 }
 
 
-/* =========================
-   Status
-========================= */
+/* =====================================================
+   STATUS
+===================================================== */
 
 .status-badge {
 
@@ -1100,9 +1132,10 @@ const deleteReturn = (id) => {
 
   align-items: center;
 
-  gap: 5px;
+  gap: 6px;
 
-  padding: 5px 10px;
+  padding:
+    6px 11px;
 
   border-radius: 999px;
 
@@ -1140,9 +1173,9 @@ const deleteReturn = (id) => {
 }
 
 
-/* =========================
-   Modal Footer
-========================= */
+/* =====================================================
+   FOOTER
+===================================================== */
 
 .modal-footer {
 
@@ -1150,7 +1183,8 @@ const deleteReturn = (id) => {
 
   justify-content: flex-end;
 
-  padding: 15px 20px;
+  padding:
+    15px 20px;
 
   border-top:
     1px solid #e5e7eb;
@@ -1158,20 +1192,21 @@ const deleteReturn = (id) => {
 }
 
 
-/* =========================
-   Close Button
-========================= */
+/* =====================================================
+   CLOSE BUTTON
+===================================================== */
 
 .close-btn {
 
   height: 40px;
 
-  padding: 0 16px;
+  padding:
+    0 18px;
 
   border:
     1px solid #d1d5db;
 
-  border-radius: 7px;
+  border-radius: 8px;
 
   background: white;
 
@@ -1183,6 +1218,8 @@ const deleteReturn = (id) => {
 
   cursor: pointer;
 
+  transition: 0.2s;
+
 }
 
 
@@ -1193,29 +1230,15 @@ const deleteReturn = (id) => {
 }
 
 
-/* =========================
-   Responsive
-========================= */
+/* =====================================================
+   RESPONSIVE
+===================================================== */
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
   .modal {
 
     width: 100%;
-
-  }
-
-
-  .detail-row {
-
-    gap: 15px;
-
-  }
-
-
-  .detail-row strong {
-
-    max-width: 55%;
 
   }
 

@@ -330,29 +330,28 @@
 
 
 <script setup>
-
 import {
   reactive,
   ref,
   onUnmounted
 } from "vue";
 
-import { useRouter } from "vue-router";
-
 
 // =====================================================
-// ROUTER
+// EVENTS
 // =====================================================
 
-const router = useRouter();
+const emit = defineEmits([
+  "close",
+  "saved"
+]);
 
 
 // =====================================================
 // CURRENT YEAR
 // =====================================================
 
-const currentYear =
-  new Date().getFullYear();
+const currentYear = new Date().getFullYear();
 
 
 // =====================================================
@@ -399,14 +398,10 @@ const preview = ref("");
 
 function handleFile(event) {
 
-  const file =
-    event.target.files[0];
-
+  const file = event.target.files[0];
 
   if (!file) {
-
     return;
-
   }
 
 
@@ -415,8 +410,7 @@ function handleFile(event) {
 
 
   // Store file name
-  fileName.value =
-    file.name;
+  fileName.value = file.name;
 
 
   // Remove old preview
@@ -432,7 +426,6 @@ function handleFile(event) {
   // Create new preview
   preview.value =
     URL.createObjectURL(file);
-
 }
 
 
@@ -459,11 +452,8 @@ function saveBook() {
   );
 
 
-  // Go back to Book Management
-  router.push(
-    "/admin/books"
-  );
-
+  // Tell Books.vue that book was saved
+  emit("saved");
 }
 
 
@@ -473,9 +463,8 @@ function saveBook() {
 
 function cancel() {
 
-  router.push(
-    "/admin/books"
-  );
+  // Tell Books.vue to close AddBook
+  emit("close");
 
 }
 
@@ -495,9 +484,7 @@ onUnmounted(() => {
   }
 
 });
-
 </script>
-
 
 <style scoped>
 

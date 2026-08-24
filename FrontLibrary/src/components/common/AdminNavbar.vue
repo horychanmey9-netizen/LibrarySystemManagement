@@ -7,8 +7,20 @@
 
     <div class="navbar-left">
 
+      <!-- Mobile Menu -->
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        title="Open Menu"
+        @click="openSidebar"
+      >
+        <i class="bi bi-list"></i>
+      </button>
+
+
       <!-- Welcome -->
       <div class="welcome-text">
+
         <h3>
           Welcome, {{ adminName }}
         </h3>
@@ -16,6 +28,7 @@
         <p>
           Have a great day!
         </p>
+
       </div>
 
     </div>
@@ -117,6 +130,19 @@ function getInitial(name) {
 
 
 /* =========================
+   Open Sidebar
+========================= */
+
+function openSidebar() {
+
+  window.dispatchEvent(
+    new CustomEvent("toggle-admin-sidebar")
+  );
+
+}
+
+
+/* =========================
    Go To Notifications
 ========================= */
 
@@ -142,9 +168,9 @@ function goToProfile() {
 
 <style scoped>
 
-/* ================================
+/* ========================================
    NAVBAR
-================================ */
+======================================== */
 
 .admin-navbar {
 
@@ -175,9 +201,9 @@ function goToProfile() {
 }
 
 
-/* ================================
+/* ========================================
    LEFT SIDE
-================================ */
+======================================== */
 
 .navbar-left {
 
@@ -185,20 +211,64 @@ function goToProfile() {
 
   align-items: center;
 
-  gap: 20px;
+  gap: 15px;
+
+  min-width: 0;
 
 }
 
 
-/* ================================
+/* ========================================
+   MOBILE MENU
+======================================== */
+
+.mobile-menu-btn {
+
+  display: none;
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #f5f3ff;
+
+  color: #5b3df5;
+
+  font-size: 22px;
+
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  flex-shrink: 0;
+
+  transition: 0.2s;
+
+}
+
+
+.mobile-menu-btn:hover {
+
+  background: #eeeaff;
+
+}
+
+
+/* ========================================
    WELCOME
-================================ */
+======================================== */
 
 .welcome-text {
 
   display: flex;
 
   flex-direction: column;
+
+  min-width: 0;
 
 }
 
@@ -212,6 +282,12 @@ function goToProfile() {
   font-size: 18px;
 
   font-weight: 600;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
 
 }
 
@@ -227,9 +303,9 @@ function goToProfile() {
 }
 
 
-/* ================================
+/* ========================================
    RIGHT SIDE
-================================ */
+======================================== */
 
 .navbar-right {
 
@@ -239,12 +315,14 @@ function goToProfile() {
 
   gap: 18px;
 
+  flex-shrink: 0;
+
 }
 
 
-/* ================================
+/* ========================================
    NOTIFICATION
-================================ */
+======================================== */
 
 .notification-btn {
 
@@ -270,6 +348,8 @@ function goToProfile() {
 
   transition: 0.2s;
 
+  flex-shrink: 0;
+
 }
 
 
@@ -277,7 +357,7 @@ function goToProfile() {
 
   background: #f3f4f6;
 
-  color: #2563eb;
+  color: #5b3df5;
 
 }
 
@@ -289,9 +369,9 @@ function goToProfile() {
 }
 
 
-/* ================================
+/* ========================================
    ADMIN PROFILE
-================================ */
+======================================== */
 
 .admin-profile {
 
@@ -315,6 +395,8 @@ function goToProfile() {
 
   text-align: left;
 
+  flex-shrink: 0;
+
 }
 
 
@@ -325,9 +407,9 @@ function goToProfile() {
 }
 
 
-/* ================================
+/* ========================================
    AVATAR
-================================ */
+======================================== */
 
 .profile-avatar {
 
@@ -337,7 +419,7 @@ function goToProfile() {
 
   border-radius: 50%;
 
-  background: #2563eb;
+  background: #5b3df5;
 
   color: #ffffff;
 
@@ -354,9 +436,9 @@ function goToProfile() {
 }
 
 
-/* ================================
+/* ========================================
    PROFILE INFO
-================================ */
+======================================== */
 
 .profile-info {
 
@@ -379,6 +461,12 @@ function goToProfile() {
 
   font-weight: 600;
 
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
 }
 
 
@@ -393,9 +481,9 @@ function goToProfile() {
 }
 
 
-/* ================================
+/* ========================================
    PROFILE ARROW
-================================ */
+======================================== */
 
 .profile-arrow {
 
@@ -408,9 +496,26 @@ function goToProfile() {
 }
 
 
-/* ================================
-   RESPONSIVE
-================================ */
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1024px) {
+
+  .admin-navbar {
+
+    left: 230px;
+
+    padding: 0 20px;
+
+  }
+
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
 
 @media (max-width: 768px) {
 
@@ -418,28 +523,30 @@ function goToProfile() {
 
     left: 0;
 
+    height: 65px;
+
     padding: 0 15px;
 
   }
 
 
-  .profile-info {
+  /* Show Hamburger */
 
-    display: none;
+  .mobile-menu-btn {
 
-  }
-
-
-  .profile-arrow {
-
-    display: none;
+    display: flex;
 
   }
 
-}
 
+  /* Welcome */
 
-@media (max-width: 500px) {
+  .welcome-text h3 {
+
+    font-size: 16px;
+
+  }
+
 
   .welcome-text p {
 
@@ -448,32 +555,112 @@ function goToProfile() {
   }
 
 
-  .welcome-text h3 {
+  /* Right */
 
-    font-size: 15px;
+  .navbar-right {
+
+    gap: 6px;
+
+  }
+
+
+  /* Notification */
+
+  .notification-btn {
+
+    width: 40px;
+
+    height: 40px;
+
+  }
+
+
+  /* Hide profile text */
+
+  .profile-info {
+
+    display: none;
+
+  }
+
+
+  /* Hide arrow */
+
+  .profile-arrow {
+
+    display: none;
+
+  }
+
+
+  .admin-profile {
+
+    padding: 5px;
+
+  }
+
+}
+
+
+/* ========================================
+   SMALL MOBILE
+======================================== */
+
+@media (max-width: 480px) {
+
+  .admin-navbar {
+
+    padding: 0 10px;
 
   }
 
 
   .navbar-left {
 
-    gap: 10px;
+    gap: 8px;
+
+    min-width: 0;
 
   }
 
 
-  .navbar-right {
+  .welcome-text {
 
-    gap: 8px;
+    max-width: 140px;
+
+  }
+
+
+  .welcome-text h3 {
+
+    font-size: 14px;
+
+  }
+
+
+  .mobile-menu-btn {
+
+    width: 38px;
+
+    height: 38px;
+
+    font-size: 20px;
 
   }
 
 
   .notification-btn {
 
-    width: 38px;
+    width: 36px;
 
-    height: 38px;
+    height: 36px;
+
+  }
+
+
+  .notification-btn i {
+
+    font-size: 18px;
 
   }
 
@@ -483,6 +670,37 @@ function goToProfile() {
     width: 35px;
 
     height: 35px;
+
+    font-size: 13px;
+
+  }
+
+}
+
+
+/* ========================================
+   VERY SMALL MOBILE
+======================================== */
+
+@media (max-width: 360px) {
+
+  .welcome-text {
+
+    max-width: 100px;
+
+  }
+
+
+  .welcome-text h3 {
+
+    font-size: 13px;
+
+  }
+
+
+  .navbar-right {
+
+    gap: 2px;
 
   }
 

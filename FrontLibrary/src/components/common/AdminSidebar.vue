@@ -1,5 +1,8 @@
 <template>
-  <aside class="sidebar">
+  <aside
+    class="sidebar"
+    :class="{ 'sidebar-open': isOpen }"
+  >
 
     <!-- =========================
          Logo
@@ -15,6 +18,14 @@
         <span>Management System</span>
       </div>
 
+      <!-- Close button Mobile -->
+      <button
+        class="mobile-close"
+        @click="closeSidebar"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+
     </div>
 
 
@@ -23,17 +34,13 @@
     ========================== -->
     <nav class="navigation">
 
-      <!-- Main Menu -->
-      <p class="menu-title">
-        MAIN MENU
-      </p>
-
       <RouterLink
         v-for="item in mainMenu"
         :key="item.to"
         :to="item.to"
         class="nav-item"
         active-class="active"
+        @click="closeSidebarOnMobile"
       >
         <span class="icon">
           <i :class="item.icon"></i>
@@ -48,12 +55,14 @@
         MANAGEMENT
       </p>
 
+
       <RouterLink
         v-for="item in managementMenu"
         :key="item.to"
         :to="item.to"
         class="nav-item"
         active-class="active"
+        @click="closeSidebarOnMobile"
       >
         <span class="icon">
           <i :class="item.icon"></i>
@@ -99,13 +108,52 @@
     </div>
 
   </aside>
+
+
+  <!-- =========================
+       Mobile Overlay
+  ========================== -->
+  <div
+    v-if="isOpen"
+    class="sidebar-overlay"
+    @click="closeSidebar"
+  ></div>
+
 </template>
 
 
 <script setup>
 
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+
+
+import { onMounted, onUnmounted } from "vue";
+
+
+function handleToggleSidebar() {
+  toggleSidebar();
+}
+
+
+onMounted(() => {
+
+  window.addEventListener(
+    "toggle-admin-sidebar",
+    handleToggleSidebar
+  );
+
+});
+
+
+onUnmounted(() => {
+
+  window.removeEventListener(
+    "toggle-admin-sidebar",
+    handleToggleSidebar
+  );
+
+});
 
 
 /* =========================
@@ -116,10 +164,52 @@ const router = useRouter();
 
 
 /* =========================
+   Sidebar State
+========================= */
+
+const isOpen = ref(false);
+
+
+/*
+  Expose method to parent
+  Example:
+  ref="sidebar"
+  sidebar.value?.toggleSidebar()
+*/
+
+function toggleSidebar() {
+  isOpen.value = !isOpen.value;
+}
+
+function closeSidebar() {
+  isOpen.value = false;
+}
+
+function closeSidebarOnMobile() {
+
+  if (window.innerWidth <= 768) {
+    isOpen.value = false;
+  }
+
+}
+
+
+/* =========================
+   Expose
+========================= */
+
+defineExpose({
+  toggleSidebar,
+  closeSidebar
+});
+
+
+/* =========================
    Main Menu
 ========================= */
 
 const mainMenu = [
+
   {
     label: "Dashboard",
     to: "/admin/dashboard",
@@ -149,6 +239,7 @@ const mainMenu = [
     to: "/admin/returns",
     icon: "bi bi-arrow-return-left"
   }
+
 ];
 
 
@@ -157,16 +248,11 @@ const mainMenu = [
 ========================= */
 
 const managementMenu = [
+
   {
     label: "Users",
     to: "/admin/users",
     icon: "bi bi-people"
-  },
-
-  {
-    label: "Roles",
-    to: "/admin/roles",
-    icon: "bi bi-shield-lock"
   },
 
   {
@@ -186,6 +272,7 @@ const managementMenu = [
     to: "/admin/notifications",
     icon: "bi bi-bell"
   }
+
 ];
 
 
@@ -228,6 +315,8 @@ function goToProfile() {
 
   router.push("/admin/profile");
 
+  closeSidebar();
+
 }
 
 </script>
@@ -235,9 +324,9 @@ function goToProfile() {
 
 <style scoped>
 
-/* =========================
+/* ========================================
    Sidebar
-========================= */
+======================================== */
 
 .sidebar {
 
@@ -247,8 +336,6 @@ function goToProfile() {
   position: fixed;
   top: 0;
   left: 0;
-
-  flex-shrink: 0;
 
   background: #ffffff;
 
@@ -266,9 +353,9 @@ function goToProfile() {
 }
 
 
-/* =========================
+/* ========================================
    Logo
-========================= */
+======================================== */
 
 .logo-section {
 
@@ -276,7 +363,6 @@ function goToProfile() {
   min-height: 75px;
 
   display: flex;
-
   align-items: center;
 
   gap: 12px;
@@ -298,7 +384,6 @@ function goToProfile() {
   min-width: 42px;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -339,9 +424,9 @@ function goToProfile() {
 }
 
 
-/* =========================
+/* ========================================
    Navigation
-========================= */
+======================================== */
 
 .navigation {
 
@@ -357,23 +442,15 @@ function goToProfile() {
 }
 
 
-/* =========================
-   Scrollbar
-========================= */
+/* Scrollbar */
 
 .navigation::-webkit-scrollbar {
-
   width: 5px;
-
 }
-
 
 .navigation::-webkit-scrollbar-track {
-
   background: transparent;
-
 }
-
 
 .navigation::-webkit-scrollbar-thumb {
 
@@ -384,9 +461,9 @@ function goToProfile() {
 }
 
 
-/* =========================
+/* ========================================
    Menu Title
-========================= */
+======================================== */
 
 .menu-title {
 
@@ -403,9 +480,9 @@ function goToProfile() {
 }
 
 
-/* =========================
+/* ========================================
    Navigation Item
-========================= */
+======================================== */
 
 .nav-item {
 
@@ -447,9 +524,20 @@ function goToProfile() {
 }
 
 
-/* =========================
+.nav-item.active {
+
+  background: #eeeaff;
+
+  color: #5b3df5;
+
+  font-weight: 600;
+
+}
+
+
+/* ========================================
    Icon
-========================= */
+======================================== */
 
 .icon {
 
@@ -468,31 +556,9 @@ function goToProfile() {
 }
 
 
-/* =========================
-   Active
-========================= */
-
-.nav-item.active {
-
-  background: #eeeaff;
-
-  color: #5b3df5;
-
-  font-weight: 600;
-
-}
-
-
-.nav-item.active .icon {
-
-  color: #5b3df5;
-
-}
-
-
-/* =========================
+/* ========================================
    Bottom Profile
-========================= */
+======================================== */
 
 .sidebar-bottom {
 
@@ -508,10 +574,6 @@ function goToProfile() {
 
 }
 
-
-/* =========================
-   Admin Profile
-========================= */
 
 .admin-profile {
 
@@ -547,9 +609,9 @@ function goToProfile() {
 }
 
 
-/* =========================
+/* ========================================
    Avatar
-========================= */
+======================================== */
 
 .avatar {
 
@@ -574,9 +636,9 @@ function goToProfile() {
 }
 
 
-/* =========================
+/* ========================================
    Admin Info
-========================= */
+======================================== */
 
 .admin-info {
 
@@ -615,77 +677,259 @@ function goToProfile() {
 }
 
 
-/* =========================
-   Responsive
-========================= */
+/* ========================================
+   Mobile Close Button
+======================================== */
+
+.mobile-close {
+
+  display: none;
+
+  margin-left: auto;
+
+  width: 36px;
+  height: 36px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #667085;
+
+  font-size: 18px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+}
+
+
+.mobile-close:hover {
+
+  background: #f5f3ff;
+
+  color: #5b3df5;
+
+}
+
+
+/* ========================================
+   Overlay
+======================================== */
+
+.sidebar-overlay {
+
+  display: none;
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  z-index: 1050;
+
+}
+
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1024px) {
+
+  .sidebar {
+
+    width: 230px;
+
+  }
+
+  .logo-section {
+
+    padding: 0 18px;
+
+  }
+
+  .navigation {
+
+    padding: 18px 12px;
+
+  }
+
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
 
 @media (max-width: 768px) {
 
   .sidebar {
+    width: 270px;
+    max-width: 85vw;
 
-    width: 75px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: auto;
+
+    transform: translateX(-100%);
+
+    transition: transform 0.3s ease;
+
+    box-shadow: 8px 0 25px rgba(0, 0, 0, 0.08);
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+
+
+
+  /* Open Sidebar */
+
+  .sidebar.sidebar-open {
+
+    transform: translateX(0);
 
   }
 
 
+  /* Logo */
+
   .logo-section {
 
-    justify-content: center;
+    height: 70px;
 
-    padding: 0;
+    min-height: 70px;
+
+    padding: 0 18px;
 
   }
 
 
   .logo-text {
 
-    display: none;
+    display: block;
 
   }
 
 
+  .mobile-close {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+  }
+
+
+  /* Navigation */
+
   .navigation {
 
-    padding: 20px 10px;
+    padding: 18px 12px;
 
   }
 
 
   .nav-item {
 
-    justify-content: center;
+    justify-content: flex-start;
 
-    padding: 12px;
+    padding: 12px 13px;
+
+    font-size: 14px;
 
   }
 
 
   .nav-item span:last-child {
 
-    display: none;
+    display: block;
 
   }
 
 
   .menu-title {
 
-    display: none;
+    display: block;
 
   }
 
 
+  /* Profile */
+
   .admin-profile {
 
-    justify-content: center;
+    justify-content: flex-start;
 
-    padding: 8px 0;
+    padding: 8px;
 
   }
 
 
   .admin-info {
 
-    display: none;
+    display: block;
+
+  }
+
+
+  /* Overlay */
+
+  .sidebar-overlay {
+
+    display: block;
+
+  }
+
+}
+
+
+/* ========================================
+   SMALL MOBILE
+======================================== */
+
+@media (max-width: 480px) {
+
+  .sidebar {
+
+    width: 260px;
+
+    max-width: 88vw;
+
+  }
+
+
+  .logo-section {
+
+    padding: 0 15px;
+
+  }
+
+
+  .navigation {
+
+    padding: 15px 10px;
+
+  }
+
+
+  .nav-item {
+
+    padding: 11px 12px;
+
+  }
+
+
+  .sidebar-bottom {
+
+    padding: 12px;
 
   }
 

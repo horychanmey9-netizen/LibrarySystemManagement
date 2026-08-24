@@ -1,116 +1,279 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import ProfileCard from "@/components/user/ProfileCard.vue";
 
+import {
+  getProfile,
+  createProfile,
+  updateProfile,
+} from "../../service/profileservice";
+
 // =========================
-// GET LOGGED-IN USER
+// USER FROM SESSION
 // =========================
 const storedUser = sessionStorage.getItem("user");
 
 let user = null;
 
 try {
-  user = storedUser
-    ? JSON.parse(storedUser)
-    : null;
+  user = storedUser ? JSON.parse(storedUser) : null;
 } catch (error) {
-  console.error(
-    "Invalid user data:",
-    error
-  );
-
+  console.error("Invalid user data:", error);
   user = null;
 }
 
 // =========================
-// PROFILE DATA
+// PROFILE
 // =========================
 const profile = ref({
-  id: user?.id || "",
-
-  // Login user
+  id: "",
   fullName: user?.name || user?.fullName || "",
   email: user?.email || "",
 
-  // Backend Profile
-  gender: user?.gender || "Male",
-  phone: user?.phone || "",
-  address: user?.address || "",
-  dateOfBirth: user?.dateOfBirth || "",
-  postalCode: user?.postalCode || "",
+  gender: "",
+  phone: "",
+  address: "",
+  dateOfBirth: "",
 
-  // Avatar
-  avatar: user?.avatar || "",
+  avatar: "",
 });
+
+// =========================
+// LOADING
+// =========================
+const loading = ref(true);
+const saving = ref(false);
+const errorMessage = ref("");
+
+// =========================
+// GET PROFILE
+// =========================
+const loadProfile = async () => {
+  try {
+    loading.value = true;
+    errorMessage.value = "";
+
+    const response = await getProfile();
+
+    console.log("Profile response:", response);
+    console.log("PROFILE IMAGE:", response.data.image);
+
+    const data = response.data;
+
+    if (data) {
+      profile.value = {
+        id: data.id || "",
+
+        // User information
+        fullName:
+          data.fullName ||
+          data.name ||
+          user?.name ||
+          "",
+
+        email:
+          data.email ||
+          user?.email ||
+          "",
+
+        // Profile information
+        gender: data.gender || "",
+        phone: data.phone || "",
+        address: data.address || "",
+        dateOfBirth: data.dateOfBirth || "",
+
+        // Backend uses image
+        avatar:
+          data.image ||
+          data.avatar ||
+          "",
+      };
+    }
+  } catch (error) {
+    console.error("Get profile error:", error);
+
+    errorMessage.value =
+      error.message || "Failed to load profile";
+  } finally {
+    loading.value = false;
+  }
+};
+
 // =========================
 // SAVE PROFILE
 // =========================
-const saveProfile = (updatedProfile) => {
-  console.log(
-    "Updated profile:",
-    updatedProfile
-  );
+const saveProfile = async (updatedProfile) => {
+  try {
+    saving.value = true;
+    errorMessage.value = "";
 
-  // Get current user
-  const currentUser = JSON.parse(
-    sessionStorage.getItem("user")
-  );
+    console.log("Updated profile:", updatedProfile);
 
-  // Update user
-  const updatedUser = {
-    ...currentUser,
+    /*
+     * ProfileCard should send image file
+     * as updatedProfile.imageFile
+     */
+    const imageFile =
+      updatedProfile.imageFile || null;
 
-    name:
-      updatedProfile.fullName,
+    let response;
 
-    email:
-      updatedProfile.email,
+    // Existing profile
+    if (profile.value.id) {
+      response = await updateProfile(
+        updatedProfile,
+        imageFile
+      );
+    }
 
-    gender:
-      updatedProfile.gender,
+    // New profile
+    else {
+      response = await createProfile(
+        updatedProfile,
+        imageFile
+      );
+    }
 
-    address:
-      updatedProfile.address,
+    console.log(
+      "Save profile response:",
+      response
+    );
 
-    phone:
-      updatedProfile.phone,
+    // =========================
+    // UPDATE LOCAL PROFILE
+    // =========================
+    const data = response.data;
 
-    dateOfBirth:
-      updatedProfile.dateOfBirth,
+    if (data) {
+      profile.value = {
+        ...profile.value,
 
-    location:
-      updatedProfile.location,
+        id: data.id || profile.value.id,
 
-    postalCode:
-      updatedProfile.postalCode,
+        fullName:
+          data.fullName ||
+          data.name ||
+          updatedProfile.fullName,
 
-    avatar:
-      updatedProfile.avatar
-  };
+        email:
+          data.email ||
+          updatedProfile.email,
 
-  // Save back to sessionStorage
-  sessionStorage.setItem(
-    "user",
-    JSON.stringify(updatedUser)
-  );
+        gender:
+          data.gender ||
+          updatedProfile.gender,
 
-  console.log(
-    "Updated user:",
-    updatedUser
-  );
+        phone:
+          data.phone ||
+          updatedProfile.phone,
+
+        address:
+          data.address ||
+          updatedProfile.address,
+
+        dateOfBirth:
+          data.dateOfBirth ||
+          updatedProfile.dateOfBirth,
+
+        avatar:
+          data.image ||
+          data.avatar ||
+          profile.value.avatar,
+      };
+    }
+
+    // =========================
+    // UPDATE SESSION USER
+    // =========================
+    const currentUser =
+      JSON.parse(
+        sessionStorage.getItem("user") || "{}"
+      );
+
+    const updatedUser = {
+      ...currentUser,
+
+      name:
+        profile.value.fullName,
+
+      email:
+        profile.value.email,
+
+      avatar: profile.value.avatar
+    };
+
+    sessionStorage.setItem(
+      "user",
+      JSON.stringify(updatedUser)
+    );
+
+    console.log(
+      "Updated session user:",
+      updatedUser
+    );
+
+    alert("Profile updated successfully!");
+    window.location.reload();
+
+  } catch (error) {
+    console.error(
+      "Save profile error:",
+      error
+    );
+
+    errorMessage.value =
+      error.message ||
+      "Failed to save profile";
+
+    alert(errorMessage.value);
+
+  } finally {
+    saving.value = false;
+  }
 };
+
+// =========================
+// LOAD WHEN PAGE OPENS
+// =========================
+onMounted(() => {
+  loadProfile();
+});
 </script>
 
 <template>
 
   <!-- =========================
+       LOADING
+  ========================== -->
+  <div
+    v-if="loading"
+    class="min-h-[400px] flex items-center justify-center"
+  >
+    <div class="text-center">
+
+      <div
+        class="w-10 h-10 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto"
+      ></div>
+
+      <p class="text-gray-500 mt-4">
+        Loading profile...
+      </p>
+
+    </div>
+  </div>
+
+
+  <!-- =========================
        USER FOUND
   ========================== -->
   <ProfileCard
-    v-if="user"
+    v-else-if="user"
     :profile="profile"
+    :saving="saving"
+    role="USER"
     @save="saveProfile"
   />
+
 
   <!-- =========================
        USER NOT FOUND

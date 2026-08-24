@@ -23,11 +23,17 @@ import AdminNavbar from "@/components/common/AdminNavbar.vue";
 
 
 <style scoped>
+
 .admin-layout {
   width: 100%;
   min-height: 100vh;
   background: #f8f9fc;
 }
+
+
+/* =========================
+   Desktop
+========================= */
 
 .main-content {
   margin-left: 250px;
@@ -39,7 +45,10 @@ import AdminNavbar from "@/components/common/AdminNavbar.vue";
   box-sizing: border-box;
 }
 
-   /* Page Content */
+
+/* =========================
+   Page Content
+========================= */
 
 .content {
   padding-top: 75px;
@@ -50,14 +59,32 @@ import AdminNavbar from "@/components/common/AdminNavbar.vue";
 }
 
 
-/*Responsive*/
+/* =========================
+   Mobile
+========================= */
 
 @media (max-width: 768px) {
 
   .main-content {
-    margin-left: 75px;
 
-    width: calc(100% - 75px);
+    /* ❌ មិនទុក 75px ទៀត */
+
+    margin-left: 0;
+
+    width: 100%;
+
+    min-width: 0;
+
+  }
+
+  .content {
+
+    width: 100%;
+
+    padding-top: 65px;
+
+    box-sizing: border-box;
+
   }
 
 }
