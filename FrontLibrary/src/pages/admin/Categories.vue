@@ -6,9 +6,7 @@
          HEADER
     ================================================== -->
 
-    <div
-      class="flex items-center justify-between mb-6"
-    >
+    <div class="flex items-center justify-between mb-6">
 
       <div>
 
@@ -139,29 +137,127 @@
 
 
     <!-- =================================================
-         CATEGORY CARDS
+         CATEGORY TABLE
     ================================================== -->
 
     <div
       v-if="categories.length > 0"
-      class="grid grid-cols-1 sm:grid-cols-2
-             lg:grid-cols-3 xl:grid-cols-4
-             gap-5"
+      class="bg-white rounded-xl border border-gray-100
+             shadow-sm overflow-hidden"
     >
 
-      <AdminCategory
-        v-for="category in categories"
-        :key="category.id"
-        :category="category"
-        @edit="editCategory"
-        @delete="deleteCategory"
-      />
+      <div class="overflow-x-auto">
+
+        <table class="w-full">
+
+          <!-- TABLE HEADER -->
+
+          <thead class="bg-gray-50 border-b border-gray-100">
+
+            <tr>
+
+              <!-- ID -->
+
+              <th
+                class="px-6 py-4
+                       text-left
+                       text-xs
+                       font-semibold
+                       text-gray-500
+                       uppercase
+                       tracking-wider"
+              >
+                #
+              </th>
+
+
+              <!-- CATEGORY -->
+
+              <th
+                class="px-6 py-4
+                       text-left
+                       text-xs
+                       font-semibold
+                       text-gray-500
+                       uppercase
+                       tracking-wider"
+              >
+                Category
+              </th>
+
+
+              <!-- DESCRIPTION -->
+
+              <th
+                class="px-6 py-4
+                       text-left
+                       text-xs
+                       font-semibold
+                       text-gray-500
+                       uppercase
+                       tracking-wider"
+              >
+                Description
+              </th>
+
+
+              <!-- BOOKS -->
+
+              <th
+                class="px-6 py-4
+                       text-left
+                       text-xs
+                       font-semibold
+                       text-gray-500
+                       uppercase
+                       tracking-wider"
+              >
+                Books
+              </th>
+
+
+              <!-- ACTIONS -->
+
+              <th
+                class="px-6 py-4
+                       text-left
+                       text-xs
+                       font-semibold
+                       text-gray-500
+                       uppercase
+                       tracking-wider"
+              >
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <!-- TABLE BODY -->
+
+          <tbody class="divide-y divide-gray-100">
+
+            <AdminCategory
+              v-for="category in categories"
+              :key="category.id"
+              :category="category"
+              @edit="editCategory"
+              @delete="deleteCategory"
+            />
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </div>
 
 
     <!-- =================================================
-         EMPTY
+         EMPTY STATE
     ================================================== -->
 
     <div
@@ -176,6 +272,7 @@
                text-5xl text-gray-300"
       ></i>
 
+
       <h3
         class="text-lg font-semibold
                text-gray-700 mt-4"
@@ -183,14 +280,17 @@
         No categories found
       </h3>
 
+
       <p class="text-gray-500 mt-1">
         Add your first book category.
       </p>
 
+
       <button
         @click="openAddModal"
         class="mt-4 px-4 py-2
-               bg-blue-600 text-white
+               bg-blue-600
+               text-white
                rounded-lg
                hover:bg-blue-700"
       >
@@ -232,9 +332,10 @@
             class="text-xl font-bold
                    text-gray-800"
           >
-            {{ isEditing
-              ? "Edit Category"
-              : "Add Category"
+            {{
+              isEditing
+                ? "Edit Category"
+                : "Add Category"
             }}
           </h2>
 
@@ -273,6 +374,7 @@
             Category Name
           </label>
 
+
           <input
             v-model="form.name"
             type="text"
@@ -304,6 +406,7 @@
           >
             Description
           </label>
+
 
           <textarea
             v-model="form.description"
@@ -337,6 +440,7 @@
             Number of Books
           </label>
 
+
           <input
             v-model.number="form.books"
             type="number"
@@ -358,9 +462,9 @@
              BUTTONS
         ================================================== -->
 
-        <div
-          class="flex justify-end gap-3"
-        >
+        <div class="flex justify-end gap-3">
+
+          <!-- Cancel -->
 
           <button
             @click="closeModal"
@@ -374,6 +478,8 @@
           </button>
 
 
+          <!-- Save / Update -->
+
           <button
             @click="saveCategory"
             class="px-4 py-2
@@ -382,9 +488,7 @@
                    rounded-lg
                    hover:bg-blue-700"
           >
-
             {{ isEditing ? "Update" : "Save" }}
-
           </button>
 
         </div>
@@ -407,7 +511,9 @@ import { ref, computed } from "vue";
 // COMPONENT
 // =====================================================
 
-import AdminCategory from "../../components/admin/AdminCategory.vue";
+import AdminCategory
+  from "../../components/admin/AdminCategory.vue";
+
 
 // =====================================================
 // MODAL
@@ -487,7 +593,9 @@ const totalBooks = computed(() => {
 
   return categories.value.reduce(
     (total, category) => {
+
       return total + Number(category.books || 0);
+
     },
     0
   );
@@ -548,7 +656,9 @@ function saveCategory() {
   const name = form.value.name.trim();
 
 
-  // Validation
+  // ===================================================
+  // VALIDATION
+  // ===================================================
 
   if (!name) {
 
