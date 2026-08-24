@@ -8,6 +8,5 @@ import java.util.Optional;
 
 public interface OtpRepository extends JpaRepository<Otp, Long> {
     Optional<Otp> findByUser(User user);
-    Optional<Otp> findByOtp(String otp);
     void deleteByUser(User user);
 }

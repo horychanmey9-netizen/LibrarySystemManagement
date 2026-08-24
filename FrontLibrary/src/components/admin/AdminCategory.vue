@@ -1,93 +1,144 @@
 <template>
-  <div
-    class="category-card bg-white rounded-xl border border-gray-100
-           shadow-sm hover:shadow-md transition duration-200 p-5"
+
+  <tr
+    class="hover:bg-gray-50 transition duration-150"
   >
 
-    <!-- ================= TOP ================= -->
-    <div class="flex items-start justify-between">
+    <!-- =================================================
+         ID
+    ================================================== -->
 
-      <!-- Icon -->
-      <div
-        class="w-12 h-12 rounded-xl flex items-center justify-center"
-        :class="categoryColor.bg"
+    <td
+      class="px-6 py-4
+             text-sm
+             text-gray-500
+             whitespace-nowrap"
+    >
+      #{{ category.id }}
+    </td>
+
+
+    <!-- =================================================
+         CATEGORY
+    ================================================== -->
+
+    <td class="px-6 py-4">
+
+      <div>
+
+        <p
+          class="font-semibold
+                 text-gray-800"
+        >
+          {{ category.name }}
+        </p>
+
+        <p
+          class="text-xs
+                 text-gray-400
+                 mt-0.5"
+        >
+          Book Category
+        </p>
+
+      </div>
+
+    </td>
+
+
+    <!-- =================================================
+         DESCRIPTION
+    ================================================== -->
+
+    <td class="px-6 py-4">
+
+      <p
+        class="text-sm
+               text-gray-500
+               max-w-xs
+               truncate"
+        :title="category.description"
       >
-        <i
-          :class="[
-            'bi',
-            categoryIcon,
-            categoryColor.text
-          ]"
-          class="text-xl"
-        ></i>
-      </div>
-
-
-      <!-- Actions -->
-      <div class="flex gap-2">
-
-        <!-- Edit -->
-        <button
-          @click="$emit('edit', category)"
-          class="w-8 h-8 flex items-center justify-center
-                 rounded-lg bg-blue-50 text-blue-600
-                 hover:bg-blue-100 transition"
-          title="Edit"
-        >
-          <i class="bi bi-pencil"></i>
-        </button>
-
-
-        <!-- Delete -->
-        <button
-          @click="$emit('delete', category.id)"
-          class="w-8 h-8 flex items-center justify-center
-                 rounded-lg bg-red-50 text-red-600
-                 hover:bg-red-100 transition"
-          title="Delete"
-        >
-          <i class="bi bi-trash"></i>
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <!-- ================= CATEGORY INFO ================= -->
-    <div class="mt-5">
-
-      <h3 class="text-lg font-semibold text-gray-800">
-        {{ category.name }}
-      </h3>
-
-      <p class="text-sm text-gray-500 mt-1 line-clamp-2">
-        {{ category.description || 'No description available.' }}
+        {{ category.description || "No description available." }}
       </p>
 
-    </div>
+    </td>
 
 
-    <!-- ================= FOOTER ================= -->
-    <div
-      class="mt-5 pt-4 border-t border-gray-100
-             flex items-center justify-between"
-    >
+    <!-- =================================================
+         BOOKS
+    ================================================== -->
 
-      <span class="text-sm text-gray-500">
-        Books
-      </span>
+    <td class="px-6 py-4">
 
       <span
-        class="text-lg font-bold"
-        :class="categoryColor.text"
+        class="inline-flex
+               items-center
+               px-3 py-1
+               rounded-full
+               text-sm
+               font-semibold"
+        :class="categoryColor"
       >
         {{ category.books }}
       </span>
 
-    </div>
+    </td>
 
-  </div>
+
+    <!-- =================================================
+         ACTIONS
+    ================================================== -->
+
+    <td class="px-6 py-4">
+
+      <div
+        class="flex items-center gap-2"
+      >
+
+        <!-- Edit -->
+
+        <button
+          @click="$emit('edit', category)"
+          class="w-8 h-8
+                 flex items-center justify-center
+                 rounded-lg
+                 bg-blue-50
+                 text-blue-600
+                 hover:bg-blue-100
+                 transition"
+          title="Edit"
+        >
+
+          <i class="bi bi-pencil"></i>
+
+        </button>
+
+
+        <!-- Delete -->
+
+        <button
+          @click="$emit('delete', category.id)"
+          class="w-8 h-8
+                 flex items-center justify-center
+                 rounded-lg
+                 bg-red-50
+                 text-red-600
+                 hover:bg-red-100
+                 transition"
+          title="Delete"
+        >
+
+          <i class="bi bi-trash"></i>
+
+        </button>
+
+      </div>
+
+    </td>
+
+  </tr>
+
 </template>
 
 
@@ -96,146 +147,80 @@
 import { computed } from "vue";
 
 
-/*
-|--------------------------------------------------------------------------
-| PROPS
-|--------------------------------------------------------------------------
-*/
+// =====================================================
+// PROPS
+// =====================================================
 
 const props = defineProps({
 
   category: {
+
     type: Object,
+
     required: true
+
   }
 
 });
 
 
-/*
-|--------------------------------------------------------------------------
-| EMITS
-|--------------------------------------------------------------------------
-*/
+// =====================================================
+// EMITS
+// =====================================================
 
 defineEmits([
+
   "edit",
+
   "delete"
+
 ]);
 
 
-/*
-|--------------------------------------------------------------------------
-| CATEGORY ICON
-|--------------------------------------------------------------------------
-*/
-
-const categoryIcon = computed(() => {
-
-  const icons = {
-
-    Fiction: "bi-book",
-
-    Science: "bi-flask",
-
-    History: "bi-hourglass-split",
-
-    Programming: "bi-code-slash",
-
-    Business: "bi-briefcase",
-
-    Database: "bi-database",
-
-    Networking: "bi-diagram-3",
-
-    Security: "bi-shield-lock",
-
-    "Web Development": "bi-globe",
-
-    Other: "bi-three-dots"
-
-  };
-
-
-  return icons[props.category.name] || "bi-book";
-
-});
-
-
-/*
-|--------------------------------------------------------------------------
-| CATEGORY COLOR
-|--------------------------------------------------------------------------
-|
-| Important:
-| We always return bg + text.
-| This prevents:
-| Cannot read properties of undefined (reading 'bg')
-|
-*/
+// =====================================================
+// CATEGORY COLOR
+// =====================================================
 
 const categoryColor = computed(() => {
 
   const colors = {
 
-    Fiction: {
-      bg: "bg-purple-50",
-      text: "text-purple-600"
-    },
+    Fiction:
+      "bg-purple-50 text-purple-600",
 
-    Science: {
-      bg: "bg-green-50",
-      text: "text-green-600"
-    },
+    Science:
+      "bg-green-50 text-green-600",
 
-    History: {
-      bg: "bg-yellow-50",
-      text: "text-yellow-600"
-    },
+    History:
+      "bg-yellow-50 text-yellow-600",
 
-    Programming: {
-      bg: "bg-blue-50",
-      text: "text-blue-600"
-    },
+    Programming:
+      "bg-blue-50 text-blue-600",
 
-    Business: {
-      bg: "bg-orange-50",
-      text: "text-orange-600"
-    },
+    Business:
+      "bg-orange-50 text-orange-600",
 
-    Database: {
-      bg: "bg-cyan-50",
-      text: "text-cyan-600"
-    },
+    Database:
+      "bg-cyan-50 text-cyan-600",
 
-    Networking: {
-      bg: "bg-indigo-50",
-      text: "text-indigo-600"
-    },
+    Networking:
+      "bg-indigo-50 text-indigo-600",
 
-    Security: {
-      bg: "bg-red-50",
-      text: "text-red-600"
-    },
+    Security:
+      "bg-red-50 text-red-600",
 
-    "Web Development": {
-      bg: "bg-pink-50",
-      text: "text-pink-600"
-    },
+    "Web Development":
+      "bg-pink-50 text-pink-600",
 
-    Other: {
-      bg: "bg-gray-50",
-      text: "text-gray-600"
-    }
+    Other:
+      "bg-gray-50 text-gray-600"
 
   };
 
 
   return (
-    colors[props.category.name] || {
-      bg: "bg-gray-50",
-      text: "text-gray-600"
-    }
+    colors[props.category.name]
+    || "bg-gray-50 text-gray-600"
   );
 
 });

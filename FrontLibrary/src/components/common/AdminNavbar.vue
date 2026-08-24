@@ -4,7 +4,6 @@
     <!-- =========================
          Left Side
     ========================== -->
-
     <div class="navbar-left">
 
       <!-- Mobile Menu -->
@@ -37,7 +36,6 @@
     <!-- =========================
          Right Side
     ========================== -->
-
     <div class="navbar-right">
 
       <!-- Notification -->
@@ -59,10 +57,27 @@
         @click="goToProfile"
       >
 
+        <!-- =========================
+             PROFILE IMAGE
+        ========================== -->
         <div class="profile-avatar">
-          {{ getInitial(adminName) }}
+
+          <img
+            v-if="adminAvatar"
+            :src="adminAvatar"
+            :alt="adminName"
+            class="avatar-image"
+            @error="handleImageError"
+          />
+
+          <span v-else>
+            {{ getInitial(adminName) }}
+          </span>
+
         </div>
 
+
+        <!-- Profile Info -->
         <div class="profile-info">
 
           <h4>
@@ -75,7 +90,10 @@
 
         </div>
 
-        <i class="bi bi-chevron-down profile-arrow"></i>
+
+        <i
+          class="bi bi-chevron-down profile-arrow"
+        ></i>
 
       </button>
 
@@ -87,34 +105,209 @@
 
 <script setup>
 
-import { computed } from "vue";
-import { useRouter } from "vue-router";
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  ref,
+} from "vue";
+
+import {
+  useRouter
+} from "vue-router";
+
+import {
+  getProfile
+} from "../../service/profileservice";
 
 
-/* =========================
-   Router
-========================= */
+// ========================================
+// ROUTER
+// ========================================
 
 const router = useRouter();
 
 
-/* =========================
-   Admin Name
-========================= */
+// ========================================
+// ADMIN PROFILE
+// ========================================
+
+const admin = ref({
+  name: "",
+  email: "",
+  avatar: "",
+});
+
+
+// ========================================
+// GET PROFILE
+// ========================================
+
+const loadAdminProfile = async () => {
+
+  try {
+
+    // ====================================
+    // FIRST: GET FROM SESSION
+    // ====================================
+
+    const storedUser =
+      sessionStorage.getItem("user");
+
+    if (storedUser) {
+
+      try {
+
+        const user =
+          JSON.parse(storedUser);
+
+        admin.value.name =
+          user?.name ||
+          user?.fullName ||
+          "Admin";
+
+        admin.value.email =
+          user?.email ||
+          "";
+
+        admin.value.avatar =
+          user?.avatar ||
+          user?.image ||
+          "";
+
+      } catch (error) {
+
+        console.error(
+          "Invalid session user:",
+          error
+        );
+
+      }
+
+    }
+
+
+    // ====================================
+    // SECOND: FETCH FROM BACKEND
+    // ====================================
+
+    const response =
+      await getProfile();
+
+    console.log(
+      "ADMIN NAVBAR PROFILE:",
+      response
+    );
+
+
+    const data =
+      response?.data;
+
+
+    if (data) {
+
+      admin.value = {
+
+        name:
+          data.fullName ||
+          data.name ||
+          admin.value.name ||
+          "Admin",
+
+        email:
+          data.email ||
+          admin.value.email ||
+          "",
+
+        avatar:
+          data.image ||
+          data.avatar ||
+          admin.value.avatar ||
+          "",
+
+      };
+
+
+      // ==================================
+      // UPDATE SESSION
+      // ==================================
+
+      const currentUser =
+        JSON.parse(
+          sessionStorage.getItem(
+            "user"
+          ) || "{}"
+        );
+
+
+      const updatedUser = {
+
+        ...currentUser,
+
+        name:
+          admin.value.name,
+
+        email:
+          admin.value.email,
+
+        avatar:
+          admin.value.avatar,
+
+      };
+
+
+      sessionStorage.setItem(
+        "user",
+        JSON.stringify(
+          updatedUser
+        )
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Failed to load admin profile:",
+      error
+    );
+
+  }
+
+};
+
+
+// ========================================
+// COMPUTED NAME
+// ========================================
 
 const adminName = computed(() => {
 
   return (
-    localStorage.getItem("adminName")
-    || "Admin"
+    admin.value.name ||
+    "Admin"
   );
 
 });
 
 
-/* =========================
-   Get Initial
-========================= */
+// ========================================
+// COMPUTED AVATAR
+// ========================================
+
+const adminAvatar = computed(() => {
+
+  return (
+    admin.value.avatar ||
+    ""
+  );
+
+});
+
+
+// ========================================
+// GET INITIAL
+// ========================================
 
 function getInitial(name) {
 
@@ -129,39 +322,106 @@ function getInitial(name) {
 }
 
 
-/* =========================
-   Open Sidebar
-========================= */
+// ========================================
+// IMAGE ERROR
+// ========================================
+
+function handleImageError(event) {
+
+  console.error(
+    "Admin avatar failed to load:",
+    event.target.src
+  );
+
+  admin.value.avatar = "";
+
+}
+
+
+// ========================================
+// PROFILE UPDATED EVENT
+// ========================================
+
+const handleProfileUpdated = () => {
+
+  console.log(
+    "Profile updated → reload Admin Navbar"
+  );
+
+  loadAdminProfile();
+
+};
+
+
+// ========================================
+// OPEN SIDEBAR
+// ========================================
 
 function openSidebar() {
 
   window.dispatchEvent(
-    new CustomEvent("toggle-admin-sidebar")
+    new CustomEvent(
+      "toggle-admin-sidebar"
+    )
   );
 
 }
 
 
-/* =========================
-   Go To Notifications
-========================= */
+// ========================================
+// NOTIFICATIONS
+// ========================================
 
 function goToNotifications() {
 
-  router.push("/admin/notifications");
+  router.push(
+    "/admin/notifications"
+  );
 
 }
 
 
-/* =========================
-   Go To Profile
-========================= */
+// ========================================
+// PROFILE
+// ========================================
 
 function goToProfile() {
 
-  router.push("/admin/profile");
+  router.push(
+    "/admin/profile"
+  );
 
 }
+
+
+// ========================================
+// MOUNT
+// ========================================
+
+onMounted(() => {
+
+  loadAdminProfile();
+
+  window.addEventListener(
+    "profile-updated",
+    handleProfileUpdated
+  );
+
+});
+
+
+// ========================================
+// UNMOUNT
+// ========================================
+
+onBeforeUnmount(() => {
+
+  window.removeEventListener(
+    "profile-updated",
+    handleProfileUpdated
+  );
+
+});
 
 </script>
 
@@ -240,6 +500,7 @@ function goToProfile() {
   font-size: 22px;
 
   align-items: center;
+
   justify-content: center;
 
   cursor: pointer;
@@ -327,7 +588,6 @@ function goToProfile() {
 .notification-btn {
 
   width: 42px;
-
   height: 42px;
 
   border: none;
@@ -414,7 +674,6 @@ function goToProfile() {
 .profile-avatar {
 
   width: 38px;
-
   height: 38px;
 
   border-radius: 50%;
@@ -432,6 +691,20 @@ function goToProfile() {
   justify-content: center;
 
   flex-shrink: 0;
+
+  overflow: hidden;
+
+}
+
+
+.avatar-image {
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
 
 }
 
@@ -530,16 +803,12 @@ function goToProfile() {
   }
 
 
-  /* Show Hamburger */
-
   .mobile-menu-btn {
 
     display: flex;
 
   }
 
-
-  /* Welcome */
 
   .welcome-text h3 {
 
@@ -555,8 +824,6 @@ function goToProfile() {
   }
 
 
-  /* Right */
-
   .navbar-right {
 
     gap: 6px;
@@ -564,18 +831,13 @@ function goToProfile() {
   }
 
 
-  /* Notification */
-
   .notification-btn {
 
     width: 40px;
-
     height: 40px;
 
   }
 
-
-  /* Hide profile text */
 
   .profile-info {
 
@@ -583,8 +845,6 @@ function goToProfile() {
 
   }
 
-
-  /* Hide arrow */
 
   .profile-arrow {
 
@@ -641,7 +901,6 @@ function goToProfile() {
   .mobile-menu-btn {
 
     width: 38px;
-
     height: 38px;
 
     font-size: 20px;
@@ -652,7 +911,6 @@ function goToProfile() {
   .notification-btn {
 
     width: 36px;
-
     height: 36px;
 
   }
@@ -668,7 +926,6 @@ function goToProfile() {
   .profile-avatar {
 
     width: 35px;
-
     height: 35px;
 
     font-size: 13px;
