@@ -3,9 +3,11 @@ package com.example.LibraryBack.service;
 import com.example.LibraryBack.dto.request.BookRequest;
 import com.example.LibraryBack.dto.response.BookResponse;
 import com.example.LibraryBack.entity.Book;
+import com.example.LibraryBack.entity.Category;
 import com.example.LibraryBack.exception.NotException;
 import com.example.LibraryBack.mapper.BookMapper;
 import com.example.LibraryBack.repositoy.BookRepository;
+import com.example.LibraryBack.repositoy.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public BookResponse create(BookRequest bookRequest, MultipartFile file) throws IOException {
@@ -33,6 +36,13 @@ public class BookServiceImpl implements BookService {
         if (file == null || file.isEmpty()) {
             throw new NotException("Book image is required!");
         }
+        Category category = categoryRepository.findById(
+                bookRequest.getCategoryId()
+        ).orElseThrow(
+                () -> new NotException("Category not found")
+        );
+
+        book.setCategory(category);
 
         Path uploadPath = Paths.get("uploads");
 

@@ -24,6 +24,8 @@ public class BookResponse {
     private String language;
     private String image;
     private Status status;
+    private long categoryId;
+    private String category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

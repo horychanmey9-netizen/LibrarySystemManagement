@@ -4,6 +4,7 @@ import com.example.LibraryBack.dto.request.BookRequest;
 import com.example.LibraryBack.dto.response.BookResponse;
 import com.example.LibraryBack.entity.Book;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface BookMapper {
     Book toEntity(BookRequest bookRequest);
+    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "category", source = "category.name")
     BookResponse bookResponse(Book book);
     List<BookResponse> toResponseList(List<Book> books);
     void updateBook(BookRequest bookRequest, @MappingTarget Book book);
