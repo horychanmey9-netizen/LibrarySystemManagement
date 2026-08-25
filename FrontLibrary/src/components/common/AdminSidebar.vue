@@ -695,16 +695,6 @@ const managementMenu = [
     icon: "bi bi-people"
   },
 
-
-  {
-    label: "Reports",
-
-    to: "/admin/reports",
-
-    icon: "bi bi-bar-chart"
-  },
-
-
   {
     label: "Fines",
 

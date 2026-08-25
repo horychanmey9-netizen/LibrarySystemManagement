@@ -20,7 +20,6 @@ import Books from "../pages/admin/Books.vue";
 import Borrowings from "../pages/admin/Borrowings.vue";
 import Returns from "../pages/admin/Returns.vue";
 import Users from "../pages/admin/Users.vue";
-import Reports from "../pages/admin/Reports.vue";
 import Fines from "../pages/admin/Fines.vue";
 import AdminNotification from "../pages/admin/AdminNotification.vue";
 import AdminProfile from "../pages/admin/AdminProfile.vue";
@@ -152,13 +151,6 @@ const routes = [
         name: "AdminUsers",
         component: Users,
       },
-
-      {
-        path: "reports",
-        name: "AdminReports",
-        component: Reports,
-      },
-
       {
         path: "fines",
         name: "AdminFines",
@@ -193,64 +185,126 @@ const router = createRouter({
   routes
 });
 router.beforeEach((to, from, next) => {
-  const token = sessionStorage.getItem("token");
-  const role = sessionStorage.getItem("role");
+
+  const token =
+    sessionStorage.getItem("token");
+
+  const role =
+    sessionStorage.getItem("role");
+
 
   // =====================================
   // NOT LOGIN
   // =====================================
+
   if (!token) {
+
     if (
-      to.path === "/login" ||
-      to.path === "/register" ||
-      to.path === "/otp"
+      to.name === "Login" ||
+      to.name === "Register" ||
+      to.name === "OTPForm"
     ) {
+
       return next();
+
     }
 
-    return next("/login");
+    return next({
+      name: "Login"
+    });
+
   }
+
 
   // =====================================
   // LOGIN PAGE
   // =====================================
-  if (to.path === "/login") {
+
+  if (to.name === "Login") {
+
     if (role === "ADMIN") {
-      return next("/admin/dashboard");
+
+      return next({
+        name: "AdminDashboard"
+      });
+
     }
+
 
     if (role === "USER") {
-      return next("/user");
+
+      return next({
+        name: "Home"
+      });
+
     }
 
+
     sessionStorage.clear();
-    return next("/login");
+
+    return next({
+      name: "Login"
+    });
+
   }
+
 
   // =====================================
   // ADMIN
-  // Can access /admin AND /user
   // =====================================
+
   if (role === "ADMIN") {
+
+    /*
+     * ADMIN can access:
+     *
+     * /admin/*
+     * /user/*
+     *
+     * Therefore do NOT redirect ADMIN
+     * to dashboard when visiting user pages.
+     */
+
     return next();
+
   }
+
 
   // =====================================
   // USER
-  // Can access /user only
   // =====================================
+
   if (role === "USER") {
-    if (to.path.startsWith("/admin")) {
-      return next("/user");
+
+    /*
+     * USER cannot access ADMIN pages
+     */
+
+    if (
+      to.path.startsWith("/admin")
+    ) {
+
+      return next({
+        name: "Home"
+      });
+
     }
 
+
     return next();
+
   }
+
 
   // =====================================
   // INVALID ROLE
   // =====================================
+
   sessionStorage.clear();
-  return next("/login");
+
+  return next({
+    name: "Login"
+  });
+
 });
 export default router;

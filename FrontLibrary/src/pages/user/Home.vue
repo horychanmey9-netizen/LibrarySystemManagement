@@ -1,35 +1,77 @@
 <template>
+
   <div class="home-page">
 
     <!-- ================= CATEGORIES ================= -->
+
     <section class="section">
 
       <div class="section-header">
 
         <div>
-          <h2>Categories</h2>
+
+          <h2>
+            Categories
+          </h2>
 
           <p class="section-subtitle">
             Explore books by category
           </p>
+
         </div>
 
-        <router-link to="/browse-books">
+        <router-link
+          :to="{ name: 'BrowseBooks' }"
+        >
           View all
         </router-link>
 
       </div>
 
 
-      <!-- Category Cards -->
-      <div class="category-row">
+      <!-- ================= CATEGORY LOADING ================= -->
+
+      <div
+        v-if="loadingCategories"
+        class="loading-category"
+      >
+
+        <i class="bi bi-arrow-repeat"></i>
+
+        Loading categories...
+
+      </div>
+
+
+      <!-- ================= CATEGORY CARDS ================= -->
+
+      <div
+        v-else-if="categories.length > 0"
+        class="category-row"
+      >
 
         <CategoryCard
           v-for="category in categories"
           :key="category.id"
           :category="category"
-          @click="goToCategory(category.name)"
+          @click="goToCategory"
         />
+
+      </div>
+
+
+      <!-- ================= NO CATEGORIES ================= -->
+
+      <div
+        v-else
+        class="empty-category"
+      >
+
+        <i class="bi bi-folder2-open"></i>
+
+        <p>
+          No categories found.
+        </p>
 
       </div>
 
@@ -37,27 +79,52 @@
 
 
     <!-- ================= RECOMMENDED BOOKS ================= -->
+
     <section class="section">
 
       <div class="section-header">
 
         <div>
-          <h2>Recommended Books</h2>
+
+          <h2>
+            Recommended Books
+          </h2>
 
           <p class="section-subtitle">
             Books you may like
           </p>
+
         </div>
 
-        <router-link to="/browse-books">
+        <router-link
+          :to="{ name: 'BrowseBooks' }"
+        >
           View all
         </router-link>
 
       </div>
 
 
-      <!-- Book Cards -->
-      <div class="book-row">
+      <!-- ================= BOOK LOADING ================= -->
+
+      <div
+        v-if="loadingBooks"
+        class="loading-books"
+      >
+
+        <i class="bi bi-arrow-repeat"></i>
+
+        Loading books...
+
+      </div>
+
+
+      <!-- ================= BOOK CARDS ================= -->
+
+      <div
+        v-else-if="books.length > 0"
+        class="book-row"
+      >
 
         <BookCard
           v-for="book in books"
@@ -69,10 +136,31 @@
 
       </div>
 
+
+      <!-- ================= NO BOOKS ================= -->
+
+      <div
+        v-else
+        class="empty-books"
+      >
+
+        <i class="bi bi-book"></i>
+
+        <h3>
+          No books found
+        </h3>
+
+        <p>
+          There are no books available in the library yet.
+        </p>
+
+      </div>
+
     </section>
 
 
     <!-- ================= BOOK DETAILS ================= -->
+
     <BookDetails
       v-if="selectedBook"
       :book="selectedBook"
@@ -80,6 +168,7 @@
     />
 
   </div>
+
 </template>
 
 
@@ -93,6 +182,16 @@ import BookCard
 
 import BookDetails
   from "../../components/books/BookDetails.vue";
+
+
+import {
+  getCategories
+} from "../../service/categoryService.js";
+
+
+import {
+  getBooks
+} from "../../service/bookService.js";
 
 
 export default {
@@ -123,192 +222,251 @@ export default {
 
 
       // ==================================================
-      // CATEGORY JSON DATA
+      // CATEGORIES
       // ==================================================
 
-      categories: [
+      categories: [],
 
-        {
-          id: 1,
-          name: "Fiction",
-          count: 320,
-          icon: "bi bi-book",
-          bg: "#F3E8FF",
-          color: "#9333EA"
-        },
-
-        {
-          id: 2,
-          name: "Science",
-          count: 180,
-          icon: "bi bi-eyedropper",
-          bg: "#DCFCE7",
-          color: "#16A34A"
-        },
-
-        {
-          id: 3,
-          name: "Technology",
-          count: 150,
-          icon: "bi bi-laptop",
-          bg: "#DBEAFE",
-          color: "#2563EB"
-        },
-
-        {
-          id: 4,
-          name: "History",
-          count: 120,
-          icon: "bi bi-bank",
-          bg: "#FFEDD5",
-          color: "#EA580C"
-        },
-
-        {
-          id: 5,
-          name: "Others",
-          count: 478,
-          icon: "bi bi-journal",
-          bg: "#F1F5F9",
-          color: "#475569"
-        }
-
-      ],
+      loadingCategories: false,
 
 
       // ==================================================
-      // BOOK JSON DATA
+      // BOOKS
       // ==================================================
 
-      books: [
+      books: [],
 
-        {
-          id: 1,
-
-          title: "The Great Gatsby",
-
-          author: "F. Scott Fitzgerald",
-
-          category: "Fiction",
-
-          status: true,
-
-          bookmarked: false,
-
-          qty: 5,
-
-          pages: 180,
-
-          isbn: "9780743273565",
-
-          language: "English",
-
-          description:
-            "The Great Gatsby is a classic American novel that explores themes of wealth, love, ambition, and the American Dream during the Jazz Age.",
-
-          image:
-            "https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg"
-        },
-
-
-        {
-          id: 2,
-
-          title: "A Brief History of Time",
-
-          author: "Stephen Hawking",
-
-          category: "Science",
-
-          status: true,
-
-          bookmarked: false,
-
-          qty: 4,
-
-          pages: 256,
-
-          isbn: "9780553380163",
-
-          language: "English",
-
-          description:
-            "A Brief History of Time explores the origins and structure of the universe, including space, time, black holes, and the nature of reality.",
-
-          image:
-            "https://covers.openlibrary.org/b/isbn/9780553380163-L.jpg"
-        },
-
-
-        {
-          id: 3,
-
-          title: "Clean Code",
-
-          author: "Robert C. Martin",
-
-          category: "Technology",
-
-          status: false,
-
-          bookmarked: false,
-
-          qty: 3,
-
-          pages: 464,
-
-          isbn: "9780132350884",
-
-          language: "English",
-
-          description:
-            "Clean Code provides practical principles and techniques for writing readable, maintainable, and professional software.",
-
-          image:
-            "https://covers.openlibrary.org/b/isbn/9780132350884-L.jpg"
-        },
-
-
-        {
-          id: 4,
-
-          title: "Sapiens",
-
-          author: "Yuval Noah Harari",
-
-          category: "History",
-
-          status: true,
-
-          bookmarked: false,
-
-          qty: 6,
-
-          pages: 443,
-
-          isbn: "9780062316097",
-
-          language: "English",
-
-          description:
-            "Sapiens examines the history of humankind, from early human societies to modern civilization and the forces that shaped our world.",
-
-          image:
-            "https://covers.openlibrary.org/b/isbn/9780062316097-L.jpg"
-        }
-
-      ]
+      loadingBooks: false
 
     };
 
   },
 
 
-  // ==================================================
+  // =====================================================
+  // CREATED
+  // =====================================================
+
+  async created() {
+
+    await Promise.all([
+
+      this.fetchCategories(),
+
+      this.fetchBooks()
+
+    ]);
+
+  },
+
+
+  // =====================================================
   // METHODS
-  // ==================================================
+  // =====================================================
 
   methods: {
+
+
+    // ==================================================
+    // FETCH CATEGORIES
+    // ==================================================
+
+    async fetchCategories() {
+
+      this.loadingCategories = true;
+
+
+      try {
+
+        const response =
+          await getCategories();
+
+
+        console.log(
+          "HOME CATEGORY RESPONSE:",
+          response
+        );
+
+
+        /*
+         * Expected:
+         *
+         * {
+         *   status: 200,
+         *   msg: "...",
+         *   data: [...]
+         * }
+         */
+
+
+        if (
+          response &&
+          Array.isArray(response.data)
+        ) {
+
+          this.categories =
+            response.data;
+
+        }
+
+
+        /*
+         * If API returns array directly
+         */
+
+        else if (
+          Array.isArray(response)
+        ) {
+
+          this.categories =
+            response;
+
+        }
+
+
+        else {
+
+          this.categories = [];
+
+        }
+
+
+        console.log(
+          "HOME CATEGORIES:",
+          this.categories
+        );
+
+      }
+
+
+      catch (error) {
+
+        console.error(
+          "Failed to load categories:",
+          error
+        );
+
+        this.categories = [];
+
+      }
+
+
+      finally {
+
+        this.loadingCategories = false;
+
+      }
+
+    },
+
+
+    // ==================================================
+    // FETCH BOOKS
+    // ==================================================
+
+    async fetchBooks() {
+
+      this.loadingBooks = true;
+
+
+      try {
+
+        const response =
+          await getBooks();
+
+
+        console.log(
+          "HOME BOOK RESPONSE:",
+          response
+        );
+
+
+        /*
+         * Expected:
+         *
+         * {
+         *   status: 200,
+         *   msg: "...",
+         *   data: [...]
+         * }
+         */
+
+
+        if (
+          response &&
+          Array.isArray(response.data)
+        ) {
+
+          this.books =
+            response.data;
+
+        }
+
+
+        /*
+         * If API returns array directly
+         */
+
+        else if (
+          Array.isArray(response)
+        ) {
+
+          this.books =
+            response;
+
+        }
+
+
+        else {
+
+          this.books = [];
+
+        }
+
+
+        /*
+         * Make sure every book has
+         * bookmarked property
+         */
+
+        this.books =
+          this.books.map(book => ({
+
+            ...book,
+
+            bookmarked:
+              book.bookmarked ?? false
+
+          }));
+
+
+        console.log(
+          "HOME BOOKS:",
+          this.books
+        );
+
+      }
+
+
+      catch (error) {
+
+        console.error(
+          "Failed to load books:",
+          error
+        );
+
+        this.books = [];
+
+      }
+
+
+      finally {
+
+        this.loadingBooks = false;
+
+      }
+
+    },
 
 
     // ==================================================
@@ -334,9 +492,13 @@ export default {
         book
       );
 
-      this.selectedBook = book;
 
-      document.body.style.overflow = "hidden";
+      this.selectedBook =
+        book;
+
+
+      document.body.style.overflow =
+        "hidden";
 
     },
 
@@ -347,9 +509,12 @@ export default {
 
     closeBookDetails() {
 
-      this.selectedBook = null;
+      this.selectedBook =
+        null;
 
-      document.body.style.overflow = "";
+
+      document.body.style.overflow =
+        "";
 
     },
 
@@ -360,12 +525,28 @@ export default {
 
     goToCategory(category) {
 
+      console.log(
+        "Selected category:",
+        category
+      );
+
+
+      const categoryName =
+        category.isOther
+          ? "Other"
+          : category.name;
+
+
       this.$router.push({
 
-        path: "/browse-books",
+        name:
+          "BrowseBooks",
 
         query: {
-          category: category
+
+          category:
+            categoryName
+
         }
 
       });
@@ -375,31 +556,40 @@ export default {
   },
 
 
-  // ==================================================
+  // =====================================================
   // CLEAN UP
-  // ==================================================
+  // =====================================================
 
   beforeUnmount() {
 
-    document.body.style.overflow = "";
+    document.body.style.overflow =
+      "";
 
   }
 
 };
+
 </script>
 
 
 <style scoped>
 
+/* ==================================================
+   HOME PAGE
+================================================== */
+
 .home-page {
 
   min-height: 100vh;
 
-  padding: 1.5rem 2rem;
+  padding:
+    1.5rem
+    2rem;
 
   width: 100%;
 
-  background: #f8faff;
+  background:
+    #f8faff;
 
 }
 
@@ -410,7 +600,8 @@ export default {
 
 .section {
 
-  margin-bottom: 2.5rem;
+  margin-bottom:
+    2.5rem;
 
 }
 
@@ -421,55 +612,73 @@ export default {
 
 .section-header {
 
-  display: flex;
+  display:
+    flex;
 
-  justify-content: space-between;
+  justify-content:
+    space-between;
 
-  align-items: flex-end;
+  align-items:
+    flex-end;
 
-  margin-bottom: 1rem;
+  margin-bottom:
+    1rem;
 
 }
 
 
 .section-header h2 {
 
-  font-size: 1.25rem;
+  font-size:
+    1.25rem;
 
-  font-weight: 700;
+  font-weight:
+    700;
 
-  margin: 0;
+  margin:
+    0;
+
+  color:
+    #0f172a;
 
 }
 
 
 .section-subtitle {
 
-  color: #94a3b8;
+  color:
+    #94a3b8;
 
-  font-size: 0.85rem;
+  font-size:
+    0.85rem;
 
-  margin: 0.3rem 0 0;
+  margin:
+    0.3rem 0 0;
 
 }
 
 
 .section-header a {
 
-  font-size: 0.85rem;
+  font-size:
+    0.85rem;
 
-  color: #2563eb;
+  color:
+    #2563eb;
 
-  text-decoration: none;
+  text-decoration:
+    none;
 
-  font-weight: 500;
+  font-weight:
+    500;
 
 }
 
 
 .section-header a:hover {
 
-  text-decoration: underline;
+  text-decoration:
+    underline;
 
 }
 
@@ -480,29 +689,181 @@ export default {
 
 .category-row {
 
-  display: flex;
+  display:
+    flex;
 
-  gap: 1rem;
+  gap:
+    1rem;
 
-  overflow-x: auto;
+  overflow-x:
+    auto;
 
-  padding-bottom: 0.5rem;
+  padding-bottom:
+    0.5rem;
 
 }
 
 
 .category-row::-webkit-scrollbar {
 
-  height: 6px;
+  height:
+    6px;
 
 }
 
 
 .category-row::-webkit-scrollbar-thumb {
 
-  background: #cbd5e1;
+  background:
+    #cbd5e1;
 
-  border-radius: 999px;
+  border-radius:
+    999px;
+
+}
+
+
+/* ==================================================
+   CATEGORY LOADING
+================================================== */
+
+.loading-category {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    8px;
+
+  padding:
+    30px;
+
+  color:
+    #94a3b8;
+
+  font-size:
+    14px;
+
+}
+
+
+.loading-category i {
+
+  animation:
+    spin 1s linear infinite;
+
+}
+
+
+/* ==================================================
+   BOOK LOADING
+================================================== */
+
+.loading-books {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    8px;
+
+  padding:
+    50px;
+
+  color:
+    #94a3b8;
+
+  font-size:
+    14px;
+
+}
+
+
+.loading-books i {
+
+  animation:
+    spin 1s linear infinite;
+
+}
+
+
+/* ==================================================
+   SPIN
+================================================== */
+
+@keyframes spin {
+
+  from {
+
+    transform:
+      rotate(0deg);
+
+  }
+
+  to {
+
+    transform:
+      rotate(360deg);
+
+  }
+
+}
+
+
+/* ==================================================
+   EMPTY CATEGORY
+================================================== */
+
+.empty-category {
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  padding:
+    30px;
+
+  color:
+    #94a3b8;
+
+}
+
+
+.empty-category i {
+
+  font-size:
+    30px;
+
+  margin-bottom:
+    8px;
+
+}
+
+
+.empty-category p {
+
+  margin:
+    0;
 
 }
 
@@ -513,12 +874,92 @@ export default {
 
 .book-row {
 
-  display: grid;
+  display:
+    grid;
 
   grid-template-columns:
     repeat(4, minmax(0, 1fr));
 
-  gap: 1rem;
+  gap:
+    1rem;
+
+}
+
+
+/* ==================================================
+   EMPTY BOOKS
+================================================== */
+
+.empty-books {
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  padding:
+    50px 20px;
+
+  background:
+    white;
+
+  border:
+    1px solid #e2e8f0;
+
+  border-radius:
+    14px;
+
+  text-align:
+    center;
+
+}
+
+
+.empty-books i {
+
+  font-size:
+    40px;
+
+  color:
+    #94a3b8;
+
+  margin-bottom:
+    10px;
+
+}
+
+
+.empty-books h3 {
+
+  margin:
+    0;
+
+  color:
+    #334155;
+
+  font-size:
+    1rem;
+
+}
+
+
+.empty-books p {
+
+  margin:
+    6px 0 0;
+
+  color:
+    #94a3b8;
+
+  font-size:
+    0.85rem;
 
 }
 
@@ -555,21 +996,24 @@ export default {
 
   .home-page {
 
-    padding: 1rem;
+    padding:
+      1rem;
 
   }
 
 
   .section-header {
 
-    align-items: center;
+    align-items:
+      center;
 
   }
 
 
   .book-row {
 
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
 
   }
 
