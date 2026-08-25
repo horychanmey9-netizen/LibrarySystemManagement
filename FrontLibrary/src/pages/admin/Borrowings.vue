@@ -62,9 +62,39 @@
 
 
     <!-- =========================
+         Loading
+    ========================== -->
+    <div
+      v-if="loading"
+      class="loading-message"
+    >
+      Loading borrowings...
+    </div>
+
+
+    <!-- =========================
+         Error
+    ========================== -->
+    <div
+      v-else-if="error"
+      class="error-message"
+    >
+      {{ error }}
+
+      <button
+        class="retry-btn"
+        @click="fetchBorrowings"
+      >
+        Try Again
+      </button>
+    </div>
+
+
+    <!-- =========================
          Borrowing Table
     ========================== -->
     <BorrowingTable
+      v-else
       :borrowings="filteredBorrowings"
       @view="viewBorrowing"
       @return="returnBook"
@@ -88,13 +118,23 @@
 
 import {
   ref,
-  computed
+  computed,
+  onMounted
 } from "vue";
 
-import BorrowingTable from "@/components/admin/borrowings/BorrowingTable.vue";
+
+import BorrowingTable
+  from "@/components/admin/borrowings/BorrowingTable.vue";
 
 
-import BorrowingDetails from "@/components/admin/borrowings/BorrowingDetails.vue";
+import BorrowingDetails
+  from "@/components/admin/borrowings/BorrowingDetails.vue";
+
+
+import {
+  getBorrowings,
+  updateBorrowing
+} from "@/service/borrowingService.js";
 
 
 /* =========================
@@ -104,11 +144,13 @@ import BorrowingDetails from "@/components/admin/borrowings/BorrowingDetails.vue
 const search = ref("");
 
 
+
 /* =========================
    Status Filter
 ========================= */
 
 const statusFilter = ref("All");
+
 
 
 /* =========================
@@ -118,73 +160,107 @@ const statusFilter = ref("All");
 const selectedBorrowing = ref(null);
 
 
+
 /* =========================
    Borrowing Data
 ========================= */
 
-const borrowings = ref([
+const borrowings = ref([]);
 
-  {
-    id: 1,
-    user: "Dara Sok",
-    email: "dara@gmail.com",
-    book: "Clean Code",
-    borrowDate: "2026-08-01",
-    dueDate: "2026-08-15",
-    returnDate: null,
-    fine: 0,
-    status: "Borrowed"
-  },
 
-  {
-    id: 2,
-    user: "Sreyneang Kim",
-    email: "sreyneang@gmail.com",
-    book: "Java Programming",
-    borrowDate: "2026-07-15",
-    dueDate: "2026-07-29",
-    returnDate: null,
-    fine: 1.50,
-    status: "Late"
-  },
 
-  {
-    id: 3,
-    user: "Rithy Chan",
-    email: "rithy@gmail.com",
-    book: "Database System",
-    borrowDate: "2026-08-05",
-    dueDate: "2026-08-19",
-    returnDate: null,
-    fine: 0,
-    status: "Borrowed"
-  },
+/* =========================
+   Loading
+========================= */
 
-  {
-    id: 4,
-    user: "Sokha Lim",
-    email: "sokha@gmail.com",
-    book: "Web Development",
-    borrowDate: "2026-07-05",
-    dueDate: "2026-07-19",
-    returnDate: null,
-    fine: 2.00,
-    status: "Late"
-  },
+const loading = ref(false);
 
-  {
-    id: 5,
-    user: "Vanna Chea",
-    email: "vanna@gmail.com",
-    book: "Python Programming",
-    borrowDate: "2026-07-25",
-    dueDate: "2026-08-08",
-    returnDate: "2026-08-07",
-    fine: 0,
-    status: "Returned"
+
+
+/* =========================
+   Error
+========================= */
+
+const error = ref("");
+
+
+
+/* =========================
+   Fetch Borrowings
+========================= */
+
+async function fetchBorrowings() {
+
+  loading.value = true;
+
+  error.value = "";
+
+
+  try {
+
+    const data =
+      await getBorrowings();
+
+
+    /*
+     * Backend should return:
+     *
+     * [
+     *   {
+     *     id,
+     *     userId,
+     *     userName,
+     *     bookId,
+     *     bookTitle,
+     *     borrowDate,
+     *     dueDate,
+     *     returnDate,
+     *     fine,
+     *     status,
+     *     createdAt,
+     *     updatedAt
+     *   }
+     * ]
+     */
+
+
+    borrowings.value =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+  } catch (err) {
+
+    console.error(
+      "Failed to fetch borrowings:",
+      err
+    );
+
+
+    error.value =
+      "Failed to load borrowing data.";
+
+  } finally {
+
+    loading.value = false;
+
   }
 
-]);
+}
+
+
+
+/* =========================
+   Load Data
+========================= */
+
+onMounted(() => {
+
+  fetchBorrowings();
+
+});
+
 
 
 /* =========================
@@ -199,36 +275,67 @@ const filteredBorrowings = computed(() => {
       .trim();
 
 
-  return borrowings.value.filter(item => {
+  return borrowings.value.filter(
+    item => {
 
-    const matchesSearch =
-      item.user
-        .toLowerCase()
-        .includes(keyword)
-
-      ||
-
-      item.book
-        .toLowerCase()
-        .includes(keyword);
+      const userName =
+        item.userName || "";
 
 
-    const matchesStatus =
-      statusFilter.value === "All"
-
-      ||
-
-      item.status === statusFilter.value;
+      const bookTitle =
+        item.bookTitle || "";
 
 
-    return (
-      matchesSearch &&
-      matchesStatus
-    );
+      /*
+       * Search User
+       */
 
-  });
+      const matchesUser =
+        userName
+          .toLowerCase()
+          .includes(keyword);
+
+
+      /*
+       * Search Book
+       */
+
+      const matchesBook =
+        bookTitle
+          .toLowerCase()
+          .includes(keyword);
+
+
+      /*
+       * Search Result
+       */
+
+      const matchesSearch =
+        matchesUser ||
+        matchesBook;
+
+
+      /*
+       * Status Filter
+       */
+
+      const matchesStatus =
+        statusFilter.value === "All"
+        ||
+        item.status ===
+          statusFilter.value;
+
+
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
+
+    }
+  );
 
 });
+
 
 
 /* =========================
@@ -237,9 +344,11 @@ const filteredBorrowings = computed(() => {
 
 function viewBorrowing(item) {
 
-  selectedBorrowing.value = item;
+  selectedBorrowing.value =
+    item;
 
 }
+
 
 
 /* =========================
@@ -248,29 +357,40 @@ function viewBorrowing(item) {
 
 function closeDetails() {
 
-  selectedBorrowing.value = null;
+  selectedBorrowing.value =
+    null;
 
 }
+
 
 
 /* =========================
    Return Book
 ========================= */
 
-function returnBook(item) {
+async function returnBook(item) {
 
-  if (item.status === "Returned") {
+  /*
+   * Already returned
+   */
+
+  if (
+    item.status === "Returned"
+  ) {
 
     return;
 
   }
 
 
-  const confirmed = window.confirm(
+  /*
+   * Confirmation
+   */
 
-    `Are you sure you want to return "${item.book}"?`
-
-  );
+  const confirmed =
+    window.confirm(
+      `Are you sure you want to return "${item.bookTitle}"?`
+    );
 
 
   if (!confirmed) {
@@ -280,236 +400,478 @@ function returnBook(item) {
   }
 
 
-  /* Today's Date */
+  try {
 
-  const today = new Date();
+    /*
+     * Call Backend API
+     */
 
-  const year =
-    today.getFullYear();
-
-  const month =
-    String(
-      today.getMonth() + 1
-    ).padStart(2, "0");
-
-  const day =
-    String(
-      today.getDate()
-    ).padStart(2, "0");
-
-
-  const returnDate =
-    `${year}-${month}-${day}`;
-
-
-  /* Update Return Date */
-
-  item.returnDate =
-    returnDate;
-
-
-  /* Calculate Fine */
-
-  if (
-    returnDate >
-    item.dueDate
-  ) {
-
-    item.fine =
-      calculateFine(
-        item.dueDate,
-        returnDate
+    const updatedBorrowing =
+      await returnBorrowing(
+        item.id
       );
 
-  }
+
+    /*
+     * Update selected item
+     */
+
+    if (updatedBorrowing) {
+
+      Object.assign(
+        item,
+        updatedBorrowing
+      );
+
+    }
 
 
-  /* Change Status */
+    /*
+     * Close details if opened
+     */
 
-  item.status =
-    "Returned";
-
-
-  alert(
-    `"${item.book}" has been returned successfully.`
-  );
-
-}
+    selectedBorrowing.value =
+      null;
 
 
-/* =========================
-   Calculate Fine
-========================= */
+    /*
+     * Refresh data
+     */
 
-function calculateFine(
-  dueDate,
-  returnDate
-) {
-
-  const due =
-    new Date(dueDate);
-
-  const returned =
-    new Date(returnDate);
+    await fetchBorrowings();
 
 
-  const difference =
-    returned - due;
+    /*
+     * Success message
+     */
 
-
-  const lateDays =
-    Math.ceil(
-      difference /
-      (1000 * 60 * 60 * 24)
+    alert(
+      `"${item.bookTitle}" has been returned successfully.`
     );
 
 
-  const finePerDay =
-    0.50;
+  } catch (err) {
+
+    console.error(
+      "Failed to return book:",
+      err
+    );
 
 
-  return Math.max(
-    0,
-    lateDays * finePerDay
-  );
+    alert(
+      "Failed to return book. Please try again."
+    );
+
+  }
 
 }
+
 
 
 /* =========================
    Renew Book
 ========================= */
 
-function renewBook(item) {
+async function renewBook(item) {
+
+  /*
+   * Cannot renew returned book
+   */
+
   if (
     item.status === "Returned"
   ) {
+
     return;
+
   }
+
+
+  /*
+   * Confirmation
+   */
+
   const confirmed =
     window.confirm(
-      `Do you want to renew "${item.book}" for 7 more days?`
+      `Do you want to renew "${item.bookTitle}" for 7 more days?`
     );
+
+
   if (!confirmed) {
+
     return;
+
   }
-  /* Calculate New Due Date */
-  const due =
-    new Date(item.dueDate);
-  due.setDate(
-    due.getDate() + 7
-  );
-  const year =
-    due.getFullYear();
-  const month =
-    String(
-      due.getMonth() + 1
-    ).padStart(2, "0");
-  const day =
-    String(
-      due.getDate()
-    ).padStart(2, "0");
-  const newDueDate =
-    `${year}-${month}-${day}`;
-  /* Update */
-  item.dueDate =newDueDate;
-  item.fine =0;
-  item.status ="Borrowed";
-  alert(
-    `"${item.book}" has been renewed successfully.\n\n` +
-    `New Due Date: ${newDueDate}`
-  );
+
+
+  try {
+
+    /*
+     * Call Backend API
+     */
+
+    const updatedBorrowing =
+      await renewBorrowing(
+        item.id
+      );
+
+
+    /*
+     * Update item
+     */
+
+    if (updatedBorrowing) {
+
+      Object.assign(
+        item,
+        updatedBorrowing
+      );
+
+    }
+
+
+    /*
+     * Close details
+     */
+
+    selectedBorrowing.value =
+      null;
+
+
+    /*
+     * Refresh data
+     */
+
+    await fetchBorrowings();
+
+
+    /*
+     * Success message
+     */
+
+    alert(
+      `"${item.bookTitle}" has been renewed successfully.\n\n` +
+      `New Due Date: ${item.dueDate}`
+    );
+
+
+  } catch (err) {
+
+    console.error(
+      "Failed to renew borrowing:",
+      err
+    );
+
+
+    alert(
+      "Failed to renew borrowing. Please try again."
+    );
+
+  }
+
 }
+
 </script>
 
+
 <style scoped>
+
 .borrowings-page {
-  min-height: calc(100vh - 70px);
+
+  min-height:
+    calc(100vh - 70px);
+
   padding: 30px;
+
   background: #f8fafc;
+
   box-sizing: border-box;
+
 }
+
+
 /* =========================
    Header
 ========================= */
+
 .page-header {
+
   margin-bottom: 25px;
+
 }
+
+
 .page-header h1 {
+
   margin: 0;
+
   color: #1f2937;
+
   font-size: 28px;
+
   font-weight: 700;
+
 }
+
+
 .page-header p {
+
   margin: 6px 0 0;
+
   color: #6b7280;
+
   font-size: 14px;
+
 }
+
+
 /* =========================
    Toolbar
 ========================= */
+
 .toolbar {
+
   display: flex;
+
   align-items: center;
-  justify-content: space-between;
+
+  justify-content:
+    space-between;
+
   gap: 15px;
+
   margin-bottom: 20px;
+
 }
+
+
+/* =========================
+   Search Box
+========================= */
+
 .search-box {
+
   position: relative;
+
   width: 350px;
+
 }
+
+
 .search-icon {
+
   position: absolute;
+
   left: 13px;
+
   top: 50%;
-  transform: translateY(-50%);
+
+  transform:
+    translateY(-50%);
+
   color: #9ca3af;
+
   font-size: 16px;
+
 }
+
+
 .search-box input {
+
   width: 100%;
+
   height: 44px;
+
   box-sizing: border-box;
-  padding:0 15px 0 40px;
-  border: 1px solid #d1d5db;
+
+  padding:
+    0 15px 0 40px;
+
+  border:
+    1px solid #d1d5db;
+
   border-radius: 8px;
+
   outline: none;
+
   background: white;
+
   color: #374151;
+
   font-size: 14px;
+
 }
+
+
 .search-box input:focus {
+
   border-color: #2563eb;
+
 }
+
+
+/* =========================
+   Status Filter
+========================= */
+
 .status-filter {
+
   width: 160px;
+
   height: 44px;
-  padding: 0 12px;
-  border: 1px solid #d1d5db;
+
+  padding:
+    0 12px;
+
+  border:
+    1px solid #d1d5db;
+
   border-radius: 8px;
+
   outline: none;
+
   background: white;
+
   color: #374151;
+
   cursor: pointer;
+
 }
+
+
+.status-filter:focus {
+
+  border-color: #2563eb;
+
+}
+
+
+/* =========================
+   Loading
+========================= */
+
+.loading-message {
+
+  padding: 40px;
+
+  text-align: center;
+
+  background: white;
+
+  border:
+    1px solid #e5e7eb;
+
+  border-radius: 10px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+
+}
+
+
+/* =========================
+   Error
+========================= */
+
+.error-message {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 15px;
+
+  padding: 30px;
+
+  background: white;
+
+  border:
+    1px solid #fecaca;
+
+  border-radius: 10px;
+
+  color: #dc2626;
+
+  font-size: 14px;
+
+}
+
+
+.retry-btn {
+
+  padding:
+    8px 16px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  background: #2563eb;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+}
+
+
+.retry-btn:hover {
+
+  background: #1d4ed8;
+
+}
+
+
 /* =========================
    Responsive
 ========================= */
+
 @media (max-width: 650px) {
+
   .borrowings-page {
+
     padding: 20px;
+
   }
+
+
   .toolbar {
-    flex-direction: column;
-    align-items: stretch;
+
+    flex-direction:
+      column;
+
+    align-items:
+      stretch;
+
   }
+
+
   .search-box {
+
     width: 100%;
+
   }
+
+
   .status-filter {
+
     width: 100%;
+
   }
+
+
+  .error-message {
+
+    flex-direction:
+      column;
+
+  }
+
 }
+
 </style>
