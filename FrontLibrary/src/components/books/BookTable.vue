@@ -2,23 +2,30 @@
 
   <div class="books-page">
 
-    <!-- ================= HEADER ================= -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
     <div class="page-header">
 
       <div>
-        <h1>Book Management</h1>
+
+        <h1>
+          Book Management
+        </h1>
 
         <p>
           Manage all library books
         </p>
+
       </div>
 
 
-      <!-- Add Book -->
+      <!-- ADD BOOK -->
 
       <button
         class="add-btn"
+        type="button"
         @click="openAddBook"
       >
 
@@ -33,15 +40,19 @@
     </div>
 
 
-    <!-- ================= SEARCH & FILTER ================= -->
+    <!-- =====================================================
+         SEARCH & FILTER
+    ====================================================== -->
 
     <div class="filter-box">
 
-      <!-- Search -->
+      <!-- SEARCH -->
 
       <div class="search-box">
 
-        <i class="bi bi-search search-icon"></i>
+        <i
+          class="bi bi-search search-icon"
+        ></i>
 
         <input
           v-model="search"
@@ -52,7 +63,7 @@
       </div>
 
 
-      <!-- Category -->
+      <!-- CATEGORY -->
 
       <select
         v-model="selectedCategory"
@@ -64,16 +75,18 @@
 
         <option
           v-for="category in categories"
-          :key="category"
-          :value="category"
+          :key="category.id"
+          :value="category.name"
         >
-          {{ category }}
+
+          {{ category.name }}
+
         </option>
 
       </select>
 
 
-      <!-- Status -->
+      <!-- STATUS -->
 
       <select
         v-model="selectedStatus"
@@ -98,10 +111,11 @@
       </select>
 
 
-      <!-- Reset -->
+      <!-- RESET -->
 
       <button
         class="reset-btn"
+        type="button"
         @click="resetFilters"
       >
 
@@ -114,40 +128,62 @@
     </div>
 
 
-    <!-- ================= TABLE ================= -->
+    <!-- =====================================================
+         TABLE
+    ====================================================== -->
 
     <div class="table-container">
 
       <table>
 
-        <!-- Table Header -->
+        <!-- =================================================
+             HEADER
+        ================================================== -->
 
         <thead>
 
           <tr>
 
-            <th>#</th>
+            <th>
+              #
+            </th>
 
-            <th>BOOK</th>
+            <th>
+              BOOK
+            </th>
 
-            <th>AUTHOR</th>
+            <th>
+              AUTHOR
+            </th>
 
-            <th>CATEGORY</th>
+            <th>
+              CATEGORY
+            </th>
 
-            <th>ISBN</th>
+            <th>
+              ISBN
+            </th>
 
-            <th>QUANTITY</th>
+            <th>
+              QUANTITY
+            </th>
 
-            <th>STATUS</th>
+            <th>
+              STATUS
+            </th>
 
-            <th>ACTION</th>
+            <th>
+              ACTION
+            </th>
 
           </tr>
 
         </thead>
 
 
-        <!-- Table Body -->
+        <!-- =================================================
+             BODY
+        ================================================== -->
 
         <tbody>
 
@@ -156,34 +192,66 @@
             :key="book.id"
           >
 
-            <!-- Number -->
+            <!-- NUMBER -->
 
             <td>
+
               {{ index + 1 }}
+
             </td>
 
 
-            <!-- Book -->
+            <!-- =================================================
+                 BOOK
+            ================================================== -->
 
             <td>
 
               <div class="book-info">
 
+                <!-- BOOK IMAGE -->
+
                 <div class="book-cover">
 
-                  <i class="bi bi-book"></i>
+                  <img
+                    v-if="book.image"
+                    :src="getBookImage(book.image)"
+                    :alt="book.title"
+                    @error="handleImageError"
+                  />
+
+                  <i
+                    v-else
+                    class="bi bi-book"
+                  ></i>
 
                 </div>
 
 
+                <!-- BOOK TEXT -->
+
                 <div class="book-text">
 
                   <strong>
-                    {{ book.title }}
+                    {{ book.title || "-" }}
                   </strong>
 
-                  <small>
+                  <small
+                    v-if="book.description"
+                    :title="book.description"
+                  >
+
                     {{ book.description }}
+
+                  </small>
+
+                  <small
+                    v-else
+                    class="no-description"
+                  >
+
+                    No description
+
                   </small>
 
                 </div>
@@ -193,39 +261,64 @@
             </td>
 
 
-            <!-- Author -->
+            <!-- =================================================
+                 AUTHOR
+            ================================================== -->
 
             <td>
-              {{ book.author }}
+
+              {{ book.author || "-" }}
+
             </td>
 
 
-            <!-- Category -->
+            <!-- =================================================
+                 CATEGORY
+            ================================================== -->
 
             <td>
 
               <span class="category">
-                {{ book.category }}
+
+                {{ getCategoryName(book) }}
+
               </span>
 
             </td>
 
 
-            <!-- ISBN -->
+            <!-- =================================================
+                 ISBN
+            ================================================== -->
 
             <td>
+
               {{ book.isbn || "-" }}
+
             </td>
 
 
-            <!-- Quantity -->
+            <!-- =================================================
+                 QUANTITY
+            ================================================== -->
 
             <td>
-              {{ book.quantity }}
+
+              <span
+                class="quantity"
+                :class="getQuantityClass(book)"
+              >
+
+                {{ getQuantity(book) }}
+
+              </span>
+
             </td>
 
 
-            <!-- Status -->
+            <!-- =================================================
+                 STATUS
+            ================================================== -->
 
             <td>
 
@@ -234,24 +327,26 @@
                 :class="getStatusClass(book.status)"
               >
 
-                {{ book.status }}
+                {{ formatStatus(book.status) }}
 
               </span>
 
             </td>
 
 
-            <!-- Action -->
+            <!-- =================================================
+                 ACTION
+            ================================================== -->
 
             <td>
 
-              <!-- ================= EDIT ================= -->
+              <!-- EDIT -->
 
               <button
                 class="edit-btn"
                 type="button"
-                @click="editBook(book.id)"
                 title="Edit Book"
+                @click="editBook(book.id)"
               >
 
                 <i class="bi bi-pencil"></i>
@@ -259,13 +354,13 @@
               </button>
 
 
-              <!-- ================= DELETE ================= -->
+              <!-- DELETE -->
 
               <button
                 class="delete-btn"
                 type="button"
-                @click="deleteBook(book.id)"
                 title="Delete Book"
+                @click="deleteBook(book.id)"
               >
 
                 <i class="bi bi-trash"></i>
@@ -277,7 +372,9 @@
           </tr>
 
 
-          <!-- No Result -->
+          <!-- =================================================
+               NO RESULT
+          ================================================== -->
 
           <tr
             v-if="filteredBooks.length === 0"
@@ -296,6 +393,12 @@
                 No books found.
               </p>
 
+              <small
+                v-if="hasFilters"
+              >
+                Try changing your search or filters.
+              </small>
+
             </td>
 
           </tr>
@@ -307,66 +410,25 @@
     </div>
 
 
-    <!-- ================= PAGINATION ================= -->
+    <!-- =====================================================
+         PAGINATION / RESULT
+    ====================================================== -->
 
     <div class="pagination">
 
       <span>
 
         Showing
-        {{ filteredBooks.length }}
+        <strong>
+          {{ filteredBooks.length }}
+        </strong>
         of
-        {{ books.length }}
+        <strong>
+          {{ books.length }}
+        </strong>
         books
 
       </span>
-
-
-      <div class="pagination-buttons">
-
-        <button
-          title="Previous"
-          type="button"
-        >
-
-          <i class="bi bi-chevron-left"></i>
-
-        </button>
-
-
-        <button
-          class="active"
-          type="button"
-        >
-          1
-        </button>
-
-
-        <button
-          type="button"
-        >
-          2
-        </button>
-
-
-        <button
-          type="button"
-        >
-          3
-        </button>
-
-
-        <button
-          title="Next"
-          type="button"
-        >
-
-          <i class="bi bi-chevron-right"></i>
-
-        </button>
-
-      </div>
-
     </div>
 
   </div>
@@ -378,8 +440,13 @@
 
 import {
   ref,
-  computed
+  computed,
+  onMounted
 } from "vue";
+
+import {
+  getCategories
+} from "../../service/categoryService";
 
 
 // =====================================================
@@ -389,8 +456,11 @@ import {
 const props = defineProps({
 
   books: {
+
     type: Array,
+
     default: () => []
+
   }
 
 });
@@ -401,9 +471,13 @@ const props = defineProps({
 // =====================================================
 
 const emit = defineEmits([
+
   "add-book",
+
   "edit-book",
+
   "delete-book"
+
 ]);
 
 
@@ -418,98 +492,533 @@ const search = ref("");
 // FILTER
 // =====================================================
 
-const selectedCategory = ref("");
+const selectedCategory =
+  ref("");
 
-const selectedStatus = ref("");
+const selectedStatus =
+  ref("");
 
 
 // =====================================================
 // CATEGORIES
 // =====================================================
 
-const categories = [
-  "Programming",
-  "Database",
-  "Networking",
-  "Security",
-  "Web Development",
-  "Business",
-  "Other"
-];
+const categories =
+  ref([]);
 
 
 // =====================================================
-// FILTER BOOKS
+// FETCH CATEGORIES
 // =====================================================
 
-const filteredBooks = computed(() => {
+async function fetchCategories() {
 
-  return props.books.filter((book) => {
+  try {
 
-    const searchText =
-      search.value
-        .toLowerCase()
-        .trim();
+    const response =
+      await getCategories();
 
-
-    // Search
-
-    const matchesSearch =
-
-      book.title
-        .toLowerCase()
-        .includes(searchText)
-
-      ||
-
-      book.author
-        .toLowerCase()
-        .includes(searchText)
-
-      ||
-
-      (book.isbn || "")
-        .toLowerCase()
-        .includes(searchText);
-
-
-    // Category
-
-    const matchesCategory =
-
-      selectedCategory.value === ""
-
-      ||
-
-      book.category ===
-        selectedCategory.value;
-
-
-    // Status
-
-    const matchesStatus =
-
-      selectedStatus.value === ""
-
-      ||
-
-      book.status ===
-        selectedStatus.value;
-
-
-    return (
-      matchesSearch &&
-      matchesCategory &&
-      matchesStatus
+    console.log(
+      "CATEGORY API RESPONSE:",
+      response
     );
 
-  });
+
+    // =================================================
+    // RESPONSE:
+    //
+    // {
+    //   status: 200,
+    //   data: [...]
+    // }
+    // =================================================
+
+    if (
+      response &&
+      Array.isArray(response.data)
+    ) {
+
+      categories.value =
+        response.data;
+
+    }
+
+    // =================================================
+    // DIRECT ARRAY
+    // =================================================
+
+    else if (
+      Array.isArray(response)
+    ) {
+
+      categories.value =
+        response;
+
+    }
+
+    else {
+
+      categories.value = [];
+
+    }
+
+
+    console.log(
+      "CATEGORIES:",
+      categories.value
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Failed to fetch categories:",
+      error
+    );
+
+    categories.value = [];
+
+  }
+
+}
+
+
+// =====================================================
+// ON MOUNTED
+// =====================================================
+
+onMounted(() => {
+
+  fetchCategories();
 
 });
 
 
 // =====================================================
-// RESET FILTER
+// GET CATEGORY NAME
+// =====================================================
+
+function getCategoryName(book) {
+
+  // ===================================================
+  // CASE 1
+  //
+  // category:
+  // {
+  //   id: 1,
+  //   name: "Programming"
+  // }
+  // ===================================================
+
+  if (
+    book.category &&
+    typeof book.category === "object"
+  ) {
+
+    return (
+      book.category.name ||
+      "-"
+    );
+
+  }
+
+
+  // ===================================================
+  // CASE 2
+  //
+  // category: "Programming"
+  // ===================================================
+
+  if (
+    typeof book.category === "string"
+  ) {
+
+    return book.category;
+
+  }
+
+
+  // ===================================================
+  // CASE 3
+  //
+  // categoryName: "Programming"
+  // ===================================================
+
+  if (
+    book.categoryName
+  ) {
+
+    return book.categoryName;
+
+  }
+
+
+  return "-";
+
+}
+
+
+// =====================================================
+// GET QUANTITY
+//
+// Backend:
+// qty
+//
+// Frontend:
+// quantity
+// =====================================================
+
+function getQuantity(book) {
+
+  if (
+    book.quantity !== undefined &&
+    book.quantity !== null
+  ) {
+
+    return book.quantity;
+
+  }
+
+
+  if (
+    book.qty !== undefined &&
+    book.qty !== null
+  ) {
+
+    return book.qty;
+
+  }
+
+
+  return 0;
+
+}
+
+
+// =====================================================
+// QUANTITY CLASS
+// =====================================================
+
+function getQuantityClass(book) {
+
+  const quantity =
+    Number(
+      getQuantity(book)
+    );
+
+
+  if (quantity <= 0) {
+
+    return "quantity-empty";
+
+  }
+
+
+  if (quantity <= 2) {
+
+    return "quantity-low";
+
+  }
+
+
+  return "quantity-normal";
+
+}
+
+
+// =====================================================
+// FORMAT STATUS
+//
+// AVAILABLE
+// → Available
+//
+// BORROWED
+// → Borrowed
+//
+// OVERDUE
+// → Overdue
+// =====================================================
+
+function formatStatus(status) {
+
+  if (!status) {
+
+    return "-";
+
+  }
+
+
+  const value =
+    String(status)
+      .toLowerCase()
+      .trim();
+
+
+  return (
+    value.charAt(0).toUpperCase() +
+    value.slice(1)
+  );
+
+}
+
+
+// =====================================================
+// STATUS CLASS
+// =====================================================
+
+function getStatusClass(status) {
+
+  const value =
+    String(status || "")
+      .toLowerCase()
+      .trim();
+
+
+  if (
+    value === "available"
+  ) {
+
+    return "available";
+
+  }
+
+
+  if (
+    value === "borrowed"
+  ) {
+
+    return "borrowed";
+
+  }
+
+
+  if (
+    value === "overdue"
+  ) {
+
+    return "overdue";
+
+  }
+
+
+  return "unknown";
+
+}
+
+
+// =====================================================
+// BOOK IMAGE
+// =====================================================
+
+function getBookImage(image) {
+
+  if (!image) {
+
+    return "";
+
+  }
+
+
+  // Already complete URL
+
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://")
+  ) {
+
+    return image;
+
+  }
+
+
+  // Backend upload path
+
+  return `http://localhost:8080/uploads/${image}`;
+
+}
+
+
+// =====================================================
+// IMAGE ERROR
+// =====================================================
+
+function handleImageError(event) {
+
+  event.target.style.display =
+    "none";
+
+}
+
+
+// =====================================================
+// FILTERED BOOKS
+// =====================================================
+
+const filteredBooks =
+  computed(() => {
+
+    return props.books.filter(
+      (book) => {
+
+        // =================================================
+        // SEARCH TEXT
+        // =================================================
+
+        const searchText =
+          search.value
+            .toLowerCase()
+            .trim();
+
+
+        // =================================================
+        // TITLE
+        // =================================================
+
+        const title =
+          String(
+            book.title || ""
+          )
+            .toLowerCase();
+
+
+        // =================================================
+        // AUTHOR
+        // =================================================
+
+        const author =
+          String(
+            book.author || ""
+          )
+            .toLowerCase();
+
+
+        // =================================================
+        // ISBN
+        // =================================================
+
+        const isbn =
+          String(
+            book.isbn || ""
+          )
+            .toLowerCase();
+
+
+        // =================================================
+        // SEARCH MATCH
+        // =================================================
+
+        const matchesSearch =
+
+          title.includes(
+            searchText
+          )
+
+          ||
+
+          author.includes(
+            searchText
+          )
+
+          ||
+
+          isbn.includes(
+            searchText
+          );
+
+
+        // =================================================
+        // CATEGORY
+        // =================================================
+
+        const bookCategory =
+          getCategoryName(book);
+
+
+        const matchesCategory =
+
+          selectedCategory.value === ""
+
+          ||
+
+          bookCategory ===
+            selectedCategory.value;
+
+
+        // =================================================
+        // STATUS
+        // =================================================
+
+        const bookStatus =
+          String(
+            book.status || ""
+          )
+            .toLowerCase()
+            .trim();
+
+
+        const selectedStatusValue =
+          String(
+            selectedStatus.value || ""
+          )
+            .toLowerCase()
+            .trim();
+
+
+        const matchesStatus =
+
+          selectedStatus.value === ""
+
+          ||
+
+          bookStatus ===
+            selectedStatusValue;
+
+
+        // =================================================
+        // RETURN
+        // =================================================
+
+        return (
+
+          matchesSearch &&
+
+          matchesCategory &&
+
+          matchesStatus
+
+        );
+
+      }
+    );
+
+  });
+
+
+// =====================================================
+// HAS FILTERS
+// =====================================================
+
+const hasFilters =
+  computed(() => {
+
+    return (
+
+      search.value.trim() !== ""
+
+      ||
+
+      selectedCategory.value !== ""
+
+      ||
+
+      selectedStatus.value !== ""
+
+    );
+
+  });
+
+
+// =====================================================
+// RESET FILTERS
 // =====================================================
 
 function resetFilters() {
@@ -524,35 +1033,18 @@ function resetFilters() {
 
 
 // =====================================================
-// STATUS CLASS
-// =====================================================
-
-function getStatusClass(status) {
-
-  if (status === "Available") {
-    return "available";
-  }
-
-  if (status === "Borrowed") {
-    return "borrowed";
-  }
-
-  if (status === "Overdue") {
-    return "overdue";
-  }
-
-  return "";
-
-}
-
-
-// =====================================================
 // ADD BOOK
 // =====================================================
 
 function openAddBook() {
 
-  emit("add-book");
+  console.log(
+    "Opening Add Book..."
+  );
+
+  emit(
+    "add-book"
+  );
 
 }
 
@@ -582,6 +1074,11 @@ function editBook(bookId) {
 
 function deleteBook(bookId) {
 
+  console.log(
+    "Delete book ID:",
+    bookId
+  );
+
   emit(
     "delete-book",
     bookId
@@ -599,22 +1096,15 @@ function deleteBook(bookId) {
 ===================================================== */
 
 .books-page {
-
   width: 100%;
-
-  min-height:
-    calc(100vh - 70px);
+  min-height: calc(100vh - 70px);
 
   padding: 30px;
-
   box-sizing: border-box;
 
   background: #f8f9fc;
 
-  font-family:
-    Arial,
-    sans-serif;
-
+  font-family: Arial, sans-serif;
 }
 
 
@@ -623,41 +1113,27 @@ function deleteBook(bookId) {
 ===================================================== */
 
 .page-header {
-
   display: flex;
-
-  justify-content:
-    space-between;
-
-  align-items:
-    center;
+  justify-content: space-between;
+  align-items: center;
 
   margin-bottom: 25px;
-
 }
 
-
 .page-header h1 {
-
   margin: 0;
 
   font-size: 28px;
-
   font-weight: 700;
 
   color: #172033;
-
 }
 
-
 .page-header p {
-
   margin: 6px 0 0;
 
   color: #7b8497;
-
   font-size: 14px;
-
 }
 
 
@@ -666,15 +1142,13 @@ function deleteBook(bookId) {
 ===================================================== */
 
 .add-btn {
-
   display: flex;
-
   align-items: center;
+  justify-content: center;
 
   gap: 8px;
 
   background: #5b3df5;
-
   color: white;
 
   border: none;
@@ -686,25 +1160,17 @@ function deleteBook(bookId) {
   cursor: pointer;
 
   font-size: 14px;
-
   font-weight: 600;
 
   transition: 0.2s;
-
 }
-
 
 .add-btn:hover {
-
   background: #4930d5;
-
 }
 
-
 .add-btn i {
-
   font-size: 16px;
-
 }
 
 
@@ -713,9 +1179,7 @@ function deleteBook(bookId) {
 ===================================================== */
 
 .filter-box {
-
   display: flex;
-
   gap: 12px;
 
   margin-bottom: 20px;
@@ -729,7 +1193,6 @@ function deleteBook(bookId) {
   border: 1px solid #e5e8ef;
 
   box-sizing: border-box;
-
 }
 
 
@@ -738,31 +1201,21 @@ function deleteBook(bookId) {
 ===================================================== */
 
 .search-box {
-
   flex: 1;
 
   position: relative;
 
   min-width: 200px;
-
 }
 
-
 .search-box input {
-
   width: 100%;
 
   box-sizing: border-box;
 
-  padding:
-    12px
-    15px
-    12px
-    40px;
+  padding: 12px 15px 12px 40px;
 
-  border:
-    1px solid
-    #dfe3eb;
+  border: 1px solid #dfe3eb;
 
   border-radius: 8px;
 
@@ -770,31 +1223,36 @@ function deleteBook(bookId) {
 
   font-size: 14px;
 
+  color: #333b4f;
+
+  background: white;
 }
 
+.search-box input::placeholder {
+  color: #a0a6b2;
+}
 
 .search-box input:focus {
-
   border-color: #5b3df5;
 
+  box-shadow:
+    0 0 0 3px
+    rgba(91, 61, 245, 0.08);
 }
 
-
 .search-icon {
-
   position: absolute;
 
   left: 14px;
-
   top: 50%;
 
-  transform:
-    translateY(-50%);
+  transform: translateY(-50%);
 
   font-size: 16px;
 
   color: #8a92a3;
 
+  pointer-events: none;
 }
 
 
@@ -803,14 +1261,11 @@ function deleteBook(bookId) {
 ===================================================== */
 
 select {
-
   width: 180px;
 
   padding: 12px;
 
-  border:
-    1px solid
-    #dfe3eb;
+  border: 1px solid #dfe3eb;
 
   border-radius: 8px;
 
@@ -820,13 +1275,17 @@ select {
 
   outline: none;
 
+  color: #333b4f;
+
+  font-size: 14px;
 }
 
-
 select:focus {
-
   border-color: #5b3df5;
 
+  box-shadow:
+    0 0 0 3px
+    rgba(91, 61, 245, 0.08);
 }
 
 
@@ -835,18 +1294,16 @@ select:focus {
 ===================================================== */
 
 .reset-btn {
-
   display: flex;
 
   align-items: center;
+  justify-content: center;
 
   gap: 7px;
 
   padding: 12px 18px;
 
-  border:
-    1px solid
-    #dfe3eb;
+  border: 1px solid #dfe3eb;
 
   background: white;
 
@@ -856,20 +1313,86 @@ select:focus {
 
   color: #667085;
 
-}
+  white-space: nowrap;
 
+  font-size: 14px;
+
+  transition: 0.2s;
+}
 
 .reset-btn:hover {
-
   background: #f1f2f6;
 
+  border-color: #d4d8e1;
+}
+
+.reset-btn i {
+  font-size: 15px;
 }
 
 
-.reset-btn i {
+/* =====================================================
+   TABLE CONTAINER
+   VERTICAL + HORIZONTAL SCROLL
+===================================================== */
 
-  font-size: 15px;
+.table-container {
+  width: 100%;
 
+  background: white;
+
+  border-radius: 10px;
+
+  border: 1px solid #e5e8ef;
+
+  box-sizing: border-box;
+
+  /*
+   * Main scroll
+   */
+  max-height: 600px;
+
+  overflow-y: auto;
+  overflow-x: auto;
+
+  /*
+   * Smooth scrolling
+   */
+  scroll-behavior: smooth;
+}
+
+
+/* =====================================================
+   SCROLLBAR
+===================================================== */
+
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f5f6f8;
+
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c7cad4;
+
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #aeb2be;
+}
+
+
+/* Firefox */
+
+.table-container {
+  scrollbar-width: thin;
+  scrollbar-color: #c7cad4 #f5f6f8;
 }
 
 
@@ -877,34 +1400,27 @@ select:focus {
    TABLE
 ===================================================== */
 
-.table-container {
-
-  background: white;
-
-  border-radius: 10px;
-
-  overflow-x: auto;
-
-  border:
-    1px solid
-    #e5e8ef;
-
-}
-
-
 table {
-
   width: 100%;
 
-  min-width: 1000px;
+  min-width: 1100px;
 
-  border-collapse:
-    collapse;
+  border-collapse: separate;
 
+  border-spacing: 0;
 }
 
 
-th {
+/* =====================================================
+   TABLE HEADER
+===================================================== */
+
+thead th {
+  position: sticky;
+
+  top: 0;
+
+  z-index: 10;
 
   text-align: left;
 
@@ -912,22 +1428,44 @@ th {
 
   font-size: 12px;
 
+  font-weight: 700;
+
   color: #7c8497;
 
   background: #fafbfc;
 
   white-space: nowrap;
 
+  border-bottom: 1px solid #e5e8ef;
 }
 
 
-td {
+/*
+ * Make the first header corner rounded
+ */
 
+thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+
+/*
+ * Make the last header corner rounded
+ */
+
+thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+
+/* =====================================================
+   TABLE BODY
+===================================================== */
+
+td {
   padding: 15px;
 
-  border-top:
-    1px solid
-    #edf0f5;
+  border-top: 1px solid #edf0f5;
 
   color: #333b4f;
 
@@ -935,6 +1473,20 @@ td {
 
   white-space: nowrap;
 
+  background: white;
+}
+
+
+/* =====================================================
+   ROW
+===================================================== */
+
+tbody tr {
+  transition: background 0.15s;
+}
+
+tbody tr:hover td {
+  background: #fafbff;
 }
 
 
@@ -943,26 +1495,27 @@ td {
 ===================================================== */
 
 .book-info {
-
   display: flex;
 
   align-items: center;
 
   gap: 12px;
 
+  min-width: 280px;
 }
 
 
+/* =====================================================
+   BOOK COVER
+===================================================== */
+
 .book-cover {
-
   width: 38px;
-
   height: 50px;
 
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   background: #f0efff;
@@ -971,29 +1524,48 @@ td {
 
   flex-shrink: 0;
 
+  overflow: hidden;
 }
 
+.book-cover img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
 
 .book-cover i {
-
   color: #5b3df5;
 
   font-size: 20px;
-
 }
 
+
+/* =====================================================
+   BOOK TEXT
+===================================================== */
+
+.book-text {
+  min-width: 0;
+}
 
 .book-text strong {
-
   display: block;
 
+  max-width: 280px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: #172033;
+
+  font-size: 14px;
 }
 
-
 .book-text small {
-
-  color: #8a92a3;
-
   display: block;
 
   margin-top: 4px;
@@ -1004,6 +1576,17 @@ td {
 
   text-overflow: ellipsis;
 
+  white-space: nowrap;
+
+  color: #8a92a3;
+
+  font-size: 12px;
+}
+
+.book-text .no-description {
+  color: #b0b5c0;
+
+  font-style: italic;
 }
 
 
@@ -1012,6 +1595,7 @@ td {
 ===================================================== */
 
 .category {
+  display: inline-block;
 
   padding: 5px 9px;
 
@@ -1023,6 +1607,49 @@ td {
 
   font-size: 12px;
 
+  font-weight: 500;
+}
+
+
+/* =====================================================
+   QUANTITY
+===================================================== */
+
+.quantity {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 32px;
+
+  padding: 4px 8px;
+
+  border-radius: 5px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  box-sizing: border-box;
+}
+
+.quantity-normal {
+  background: #e5f8ed;
+
+  color: #16864a;
+}
+
+.quantity-low {
+  background: #fff3d8;
+
+  color: #b77900;
+}
+
+.quantity-empty {
+  background: #ffe5e5;
+
+  color: #d93636;
 }
 
 
@@ -1031,6 +1658,7 @@ td {
 ===================================================== */
 
 .status {
+  display: inline-block;
 
   padding: 5px 10px;
 
@@ -1039,46 +1667,40 @@ td {
   font-size: 12px;
 
   font-weight: 600;
-
 }
 
-
 .available {
-
   background: #e5f8ed;
 
   color: #16864a;
-
 }
 
-
 .borrowed {
-
   background: #fff3d8;
 
   color: #b77900;
-
 }
 
-
 .overdue {
-
   background: #ffe5e5;
 
   color: #d93636;
+}
 
+.unknown {
+  background: #eef0f3;
+
+  color: #667085;
 }
 
 
 /* =====================================================
-   ACTIONS
+   ACTION BUTTONS
 ===================================================== */
 
 .edit-btn,
 .delete-btn {
-
   width: 34px;
-
   height: 34px;
 
   border: none;
@@ -1092,43 +1714,34 @@ td {
   display: inline-flex;
 
   align-items: center;
-
   justify-content: center;
 
   transition: 0.2s;
-
 }
 
-
 .edit-btn {
-
   background: #eeeaff;
 
   color: #5941e8;
-
 }
 
-
 .delete-btn {
-
   background: #ffe7e7;
 
   color: #d93636;
-
 }
-
 
 .edit-btn:hover {
-
   background: #ddd7ff;
-
 }
 
-
 .delete-btn:hover {
-
   background: #ffd4d4;
+}
 
+.edit-btn i,
+.delete-btn i {
+  font-size: 15px;
 }
 
 
@@ -1137,80 +1750,80 @@ td {
 ===================================================== */
 
 .no-result {
-
   text-align: center;
 
-  padding: 40px;
+  padding: 50px 40px;
 
   color: #888;
-
 }
-
 
 .no-result-icon {
-
   display: block;
 
-  margin-bottom: 8px;
+  margin: 0 auto 10px;
 
-  font-size: 30px;
+  font-size: 35px;
 
   color: #9ca3af;
-
 }
 
-
 .no-result p {
-
   margin: 0;
 
+  font-size: 15px;
+
+  color: #667085;
+}
+
+.no-result small {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #a0a6b2;
 }
 
 
 /* =====================================================
-   PAGINATION
+   PAGINATION / RESULT
 ===================================================== */
 
 .pagination {
-
   display: flex;
 
-  justify-content:
-    space-between;
+  justify-content: space-between;
 
-  align-items:
-    center;
+  align-items: center;
 
   padding: 18px 5px;
 
   color: #777;
 
   font-size: 14px;
-
 }
 
+.pagination strong {
+  color: #333b4f;
+}
+
+
+/* =====================================================
+   PAGINATION BUTTONS
+===================================================== */
 
 .pagination-buttons {
-
   display: flex;
 
-  align-items:
-    center;
-
+  align-items: center;
 }
 
-
 .pagination button {
-
   width: 35px;
-
   height: 35px;
 
   margin-left: 5px;
 
-  border:
-    1px solid
-    #ddd;
+  border: 1px solid #ddd;
 
   background: white;
 
@@ -1218,91 +1831,248 @@ td {
 
   cursor: pointer;
 
+  transition: 0.2s;
 }
 
-
-.pagination button:hover {
-
+.pagination button:hover:not(:disabled) {
   background: #f3f4f6;
-
 }
-
 
 .pagination button.active {
-
   background: #5b3df5;
 
   color: white;
 
-  border-color:
-    #5b3df5;
+  border-color: #5b3df5;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+}
+
+
+/* =====================================================
+   RESPONSIVE - TABLET
+===================================================== */
+
+@media (max-width: 1100px) {
+
+  .filter-box {
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    flex: 1 1 100%;
+  }
+
+  select {
+    flex: 1;
+  }
 
 }
 
 
 /* =====================================================
-   RESPONSIVE
+   RESPONSIVE - MOBILE
 ===================================================== */
 
 @media (max-width: 900px) {
 
-  .filter-box {
-
-    flex-direction: column;
-
+  .books-page {
+    padding: 20px;
   }
 
 
-  select {
-
-    width: 100%;
-
-  }
-
+  /* HEADER */
 
   .page-header {
-
     flex-direction: column;
 
     align-items: flex-start;
 
     gap: 15px;
+  }
 
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .add-btn {
+    width: 100%;
   }
 
 
-  .add-btn {
+  /* FILTER */
 
+  .filter-box {
+    flex-direction: column;
+
+    padding: 15px;
+  }
+
+  .search-box {
     width: 100%;
 
-    justify-content:
-      center;
+    min-width: 0;
+  }
 
+  select {
+    width: 100%;
+  }
+
+  .reset-btn {
+    width: 100%;
+  }
+
+
+  /* TABLE */
+
+  .table-container {
+    max-height: 500px;
+
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 1100px;
   }
 
 }
 
 
-@media (max-width: 768px) {
+/* =====================================================
+   RESPONSIVE - SMALL MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
 
   .books-page {
+    padding: 15px;
+  }
 
-    padding: 20px;
 
+  .page-header h1 {
+    font-size: 22px;
+  }
+
+  .page-header p {
+    font-size: 13px;
+  }
+
+
+  .filter-box {
+    padding: 12px;
+  }
+
+
+  .table-container {
+    max-height: 450px;
+
+    border-radius: 8px;
+  }
+
+
+  th {
+    padding: 12px;
+
+    font-size: 11px;
+  }
+
+
+  td {
+    padding: 12px;
+
+    font-size: 13px;
+  }
+
+
+  .book-info {
+    min-width: 250px;
+  }
+
+
+  .book-text strong {
+    max-width: 230px;
+  }
+
+
+  .book-text small {
+    max-width: 230px;
   }
 
 
   .pagination {
-
     flex-direction: column;
 
-    align-items:
-      flex-start;
+    align-items: flex-start;
 
     gap: 15px;
-
   }
 
+}
+
+
+/* =====================================================
+   ACCESSIBILITY
+===================================================== */
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #5b3df5;
+
+  outline-offset: 2px;
+}
+
+
+/* =====================================================
+   SMOOTH SCROLL
+===================================================== */
+
+.table-container {
+  scroll-behavior: smooth;
+}
+
+
+/* =====================================================
+   VERTICAL SCROLLBAR - EDGE/CHROME
+===================================================== */
+
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f5f6f8;
+
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c7cad4;
+
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #aeb2be;
+}
+
+
+/* =====================================================
+   FIREFOX SCROLLBAR
+===================================================== */
+
+.table-container {
+  scrollbar-width: thin;
+
+  scrollbar-color:
+    #c7cad4
+    #f5f6f8;
 }
 
 </style>

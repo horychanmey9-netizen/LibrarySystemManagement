@@ -2,343 +2,359 @@
   <div class="add-book-page">
 
     <!-- ================= HEADER ================= -->
-
     <div class="page-header">
-
       <div>
-
-        <h1>
-          Add New Book
-        </h1>
-
-        <p>
-          Add a new book to the library collection
-        </p>
-
+        <h1>Add New Book</h1>
+        <p>Add a new book to the library</p>
       </div>
 
+      <button
+        type="button"
+        class="back-btn"
+        @click="closePage"
+      >
+        <i class="bi bi-arrow-left"></i>
+        Back
+      </button>
     </div>
 
 
-    <!-- ================= FORM CARD ================= -->
-
-    <div class="form-card">
-
-      <form @submit.prevent="saveBook">
-
-
-        <!-- ================= ROW 1 ================= -->
-
-        <div class="form-row">
-
-          <!-- Title -->
-          <div class="form-group">
-
-            <label>
-              Title <span>*</span>
-            </label>
-
-            <input
-              v-model="form.title"
-              type="text"
-              placeholder="Enter book title"
-              required
-            />
-
-          </div>
-
-
-          <!-- Category -->
-          <div class="form-group">
-
-            <label>
-              Category <span>*</span>
-            </label>
-
-            <select
-              v-model="form.category"
-              required
-            >
-
-              <option
-                value=""
-                disabled
-              >
-                Select category
-              </option>
-
-              <option value="Programming">
-                Programming
-              </option>
-
-              <option value="Database">
-                Database
-              </option>
-
-              <option value="Networking">
-                Networking
-              </option>
-
-              <option value="Security">
-                Security
-              </option>
-
-              <option value="Web Development">
-                Web Development
-              </option>
-
-              <option value="Business">
-                Business
-              </option>
-
-              <option value="Other">
-                Other
-              </option>
-
-            </select>
-
-          </div>
-
-        </div>
-
-
-        <!-- ================= ROW 2 ================= -->
-
-        <div class="form-row">
-
-          <!-- Publisher -->
-          <div class="form-group">
-
-            <label>
-              Publisher
-            </label>
-
-            <input
-              v-model="form.publisher"
-              type="text"
-              placeholder="Enter publisher"
-            />
-
-          </div>
-
-
-          <!-- Quantity -->
-          <div class="form-group">
-
-            <label>
-              Quantity <span>*</span>
-            </label>
-
-            <input
-              v-model.number="form.quantity"
-              type="number"
-              min="1"
-              placeholder="Enter quantity"
-              required
-            />
-
-          </div>
-
-        </div>
-
-
-        <!-- ================= ROW 3 ================= -->
-
-        <div class="form-row">
-
-          <!-- Author -->
-          <div class="form-group">
-
-            <label>
-              Author <span>*</span>
-            </label>
-
-            <input
-              v-model="form.author"
-              type="text"
-              placeholder="Enter author name"
-              required
-            />
-
-          </div>
-
-
-          <!-- ISBN -->
-          <div class="form-group">
-
-            <label>
-              ISBN
-            </label>
-
-            <input
-              v-model="form.isbn"
-              type="text"
-              placeholder="Enter ISBN"
-            />
-
-          </div>
-
-        </div>
-
-
-        <!-- ================= ROW 4 ================= -->
-
-        <div class="form-row">
-
-          <!-- Published Year -->
-          <div class="form-group">
-
-            <label>
-              Published Year
-            </label>
-
-            <input
-              v-model.number="form.publishedYear"
-              type="number"
-              min="1000"
-              :max="currentYear"
-              placeholder="e.g. 2024"
-            />
-
-          </div>
-
-
-          <!-- Status -->
-          <div class="form-group">
-
-            <label>
-              Status <span>*</span>
-            </label>
-
-            <select
-              v-model="form.status"
-              required
-            >
-
-              <option value="Available">
-                Available
-              </option>
-
-              <option value="Unavailable">
-                Unavailable
-              </option>
-
-            </select>
-
-          </div>
-
-        </div>
-
-
-        <!-- ================= DESCRIPTION ================= -->
-
-        <div class="form-group full-width">
-
-          <label>
-            Description
-          </label>
-
-          <textarea
-            v-model="form.description"
-            rows="5"
-            placeholder="Enter book description..."
-          ></textarea>
-
-        </div>
-
-
-        <!-- ================= BOOK COVER ================= -->
-
-        <div class="form-group full-width">
-
-          <label>
-            Book Cover
-          </label>
-
-
-          <div class="file-upload">
-
-            <input
-              id="book-cover"
-              type="file"
-              accept="image/*"
-              @change="handleFile"
-            />
-
-
-            <label
-              for="book-cover"
-              class="choose-file-btn"
-            >
-              Choose File
-            </label>
-
-
-            <span class="file-name">
-
-              {{ fileName || "No file chosen" }}
-
-            </span>
-
-          </div>
-
-
-          <!-- Preview -->
-          <div
-            v-if="preview"
-            class="image-preview"
+    <!-- ================= ERROR ================= -->
+    <div
+      v-if="errorMessage"
+      class="error-message"
+    >
+      <i class="bi bi-exclamation-circle"></i>
+      {{ errorMessage }}
+    </div>
+
+
+    <!-- ================= SUCCESS ================= -->
+    <div
+      v-if="successMessage"
+      class="success-message"
+    >
+      <i class="bi bi-check-circle"></i>
+      {{ successMessage }}
+    </div>
+
+
+    <!-- ================= FORM ================= -->
+    <form
+      class="book-form"
+      @submit.prevent="submitBook"
+    >
+
+      <!-- TITLE -->
+      <div class="form-group">
+        <label>
+          Book Title
+          <span>*</span>
+        </label>
+
+        <input
+          v-model="form.title"
+          type="text"
+          placeholder="Enter book title"
+          required
+        />
+      </div>
+
+
+      <!-- AUTHOR -->
+      <div class="form-group">
+        <label>
+          Author
+          <span>*</span>
+        </label>
+
+        <input
+          v-model="form.author"
+          type="text"
+          placeholder="Enter author name"
+          required
+        />
+      </div>
+
+
+      <!-- ISBN -->
+      <div class="form-group">
+        <label>
+          ISBN
+          <span>*</span>
+        </label>
+
+        <input
+          v-model="form.isbn"
+          type="text"
+          placeholder="Enter ISBN"
+          required
+        />
+      </div>
+
+
+      <!-- CATEGORY -->
+      <div class="form-group">
+        <label>
+          Category
+          <span>*</span>
+        </label>
+
+        <select
+          v-model="form.categoryId"
+          :disabled="loadingCategories"
+          required
+        >
+          <option value="">
+            {{
+              loadingCategories
+                ? "Loading categories..."
+                : "Select category"
+            }}
+          </option>
+
+          <option
+            v-for="category in categories"
+            :key="category.id"
+            :value="category.id"
           >
+            {{ category.name }}
+          </option>
+        </select>
 
-            <img
-              :src="preview"
-              alt="Book Cover Preview"
-            />
+        <small
+          v-if="loadingCategories"
+          class="help-text"
+        >
+          Loading categories...
+        </small>
 
-          </div>
+        <small
+          v-if="
+            !loadingCategories &&
+            categories.length === 0
+          "
+          class="warning-text"
+        >
+          No categories found.
+        </small>
+      </div>
 
-        </div>
+
+      <!-- QUANTITY -->
+      <div class="form-group">
+        <label>
+          Quantity
+          <span>*</span>
+        </label>
+
+        <input
+          v-model.number="form.qty"
+          type="number"
+          min="1"
+          placeholder="Enter quantity"
+          required
+        />
+      </div>
 
 
-        <!-- ================= BUTTONS ================= -->
+      <!-- PAGES -->
+      <div class="form-group">
+        <label>
+          Pages
+        </label>
 
-        <div class="form-actions">
+        <input
+          v-model.number="form.pages"
+          type="number"
+          min="1"
+          placeholder="Enter number of pages"
+        />
+      </div>
+
+
+      <!-- LANGUAGE -->
+      <div class="form-group">
+        <label>
+          Language
+        </label>
+
+        <input
+          v-model="form.language"
+          type="text"
+          placeholder="e.g. English"
+        />
+      </div>
+
+
+      <!-- STATUS -->
+      <div class="form-group">
+        <label>
+          Status
+          <span>*</span>
+        </label>
+
+        <select
+          v-model="form.status"
+          required
+        >
+          <option value="Available">
+            Available
+          </option>
+
+          <option value="Borrowed">
+            Borrowed
+          </option>
+
+          <option value="Overdue">
+            Overdue
+          </option>
+        </select>
+      </div>
+
+
+      <!-- DESCRIPTION -->
+      <div class="form-group full-width">
+        <label>
+          Description
+        </label>
+
+        <textarea
+          v-model="form.description"
+          rows="5"
+          placeholder="Enter book description"
+        ></textarea>
+      </div>
+
+
+      <!-- IMAGE -->
+      <div class="form-group full-width">
+
+        <label>
+          Book Image
+          <span>*</span>
+        </label>
+
+        <input
+          type="file"
+          accept="image/*"
+          @change="handleImageChange"
+          required
+        />
+
+        <small class="help-text">
+          Please select a book cover image.
+        </small>
+
+
+        <!-- IMAGE PREVIEW -->
+        <div
+          v-if="imagePreview"
+          class="image-preview"
+        >
+          <img
+            :src="imagePreview"
+            alt="Book Preview"
+          />
 
           <button
             type="button"
-            class="cancel-btn"
-            @click="cancel"
+            class="remove-image"
+            @click="removeImage"
           >
-            Cancel
+            <i class="bi bi-x"></i>
           </button>
-
-
-          <button
-            type="submit"
-            class="save-btn"
-          >
-            Save Book
-          </button>
-
         </div>
 
-      </form>
+      </div>
 
-    </div>
+
+      <!-- CATEGORY PREVIEW -->
+      <div
+        v-if="selectedCategory"
+        class="category-preview"
+      >
+
+        <div class="category-icon">
+          {{
+            getInitial(
+              selectedCategory.name
+            )
+          }}
+        </div>
+
+        <div>
+          <p class="preview-label">
+            Selected Category
+          </p>
+
+          <p class="preview-name">
+            {{ selectedCategory.name }}
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- BUTTONS -->
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="cancel-btn"
+          @click="closePage"
+          :disabled="saving"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="save-btn"
+          :disabled="saving"
+        >
+
+          <i
+            v-if="saving"
+            class="bi bi-arrow-repeat spinning"
+          ></i>
+
+          {{
+            saving
+              ? "Saving..."
+              : "Save Book"
+          }}
+
+        </button>
+
+      </div>
+
+    </form>
 
   </div>
 </template>
 
 
 <script setup>
+
 import {
-  reactive,
   ref,
-  onUnmounted
+  computed,
+  onMounted,
+  onBeforeUnmount
 } from "vue";
+
+import {
+  getCategories
+} from "../../service/categoryService";
+
+import {
+  createBook
+} from "../../service/bookService";
 
 
 // =====================================================
-// EVENTS
+// EMITS
 // =====================================================
 
 const emit = defineEmits([
@@ -348,149 +364,564 @@ const emit = defineEmits([
 
 
 // =====================================================
-// CURRENT YEAR
+// CATEGORIES
 // =====================================================
 
-const currentYear = new Date().getFullYear();
+const categories = ref([]);
+
+const loadingCategories = ref(false);
 
 
 // =====================================================
 // FORM
 // =====================================================
 
-const form = reactive({
+const form = ref({
 
   title: "",
-
-  category: "",
-
-  publisher: "",
-
-  quantity: 1,
 
   author: "",
 
   isbn: "",
 
-  publishedYear: "",
+  categoryId: "",
 
-  status: "Available",
+  qty: 1,
+
+  pages: null,
+
+  language: "",
 
   description: "",
 
-  bookCover: null
+  status: "Available"
 
 });
 
 
 // =====================================================
-// FILE
+// IMAGE
 // =====================================================
 
-const fileName = ref("");
+const imageFile = ref(null);
 
-const preview = ref("");
+const imagePreview = ref("");
 
 
 // =====================================================
-// HANDLE FILE
+// STATE
 // =====================================================
 
-function handleFile(event) {
+const saving = ref(false);
 
-  const file = event.target.files[0];
+const errorMessage = ref("");
+
+const successMessage = ref("");
+
+
+// =====================================================
+// FETCH CATEGORIES
+// =====================================================
+
+async function fetchCategories() {
+
+  loadingCategories.value = true;
+
+  errorMessage.value = "";
+
+  try {
+
+    const response =
+      await getCategories();
+
+    console.log(
+      "CATEGORY RESPONSE:",
+      response
+    );
+
+
+    if (
+      response &&
+      Array.isArray(response.data)
+    ) {
+
+      categories.value =
+        response.data;
+
+    } else if (
+      Array.isArray(response)
+    ) {
+
+      categories.value =
+        response;
+
+    } else {
+
+      categories.value = [];
+
+    }
+
+
+    console.log(
+      "CATEGORIES:",
+      categories.value
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Fetch categories error:",
+      error
+    );
+
+    errorMessage.value =
+      "Failed to load categories.";
+
+  } finally {
+
+    loadingCategories.value = false;
+
+  }
+
+}
+
+
+// =====================================================
+// SELECTED CATEGORY
+// =====================================================
+
+const selectedCategory =
+  computed(() => {
+
+    if (!form.value.categoryId) {
+      return null;
+    }
+
+    return categories.value.find(
+      category =>
+        String(category.id) ===
+        String(form.value.categoryId)
+    );
+
+  });
+
+
+// =====================================================
+// CATEGORY INITIAL
+// =====================================================
+
+function getInitial(name) {
+
+  if (!name) {
+    return "?";
+  }
+
+  return name
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+
+}
+
+
+// =====================================================
+// IMAGE CHANGE
+// =====================================================
+
+function handleImageChange(event) {
+
+  const file =
+    event.target.files?.[0];
 
   if (!file) {
+
+    imageFile.value = null;
+
+    imagePreview.value = "";
+
     return;
+
   }
 
 
-  // Store file
-  form.bookCover = file;
+  // Check image
+  if (!file.type.startsWith("image/")) {
+
+    errorMessage.value =
+      "Please select a valid image file.";
+
+    event.target.value = "";
+
+    return;
+
+  }
 
 
-  // Store file name
-  fileName.value = file.name;
+  // Optional size check
+  if (file.size > 5 * 1024 * 1024) {
+
+    errorMessage.value =
+      "Image size must be less than 5MB.";
+
+    event.target.value = "";
+
+    return;
+
+  }
 
 
-  // Remove old preview
-  if (preview.value) {
+  errorMessage.value = "";
+
+  imageFile.value = file;
+
+
+  // Create preview
+  imagePreview.value =
+    URL.createObjectURL(file);
+
+
+  console.log(
+    "BOOK IMAGE:",
+    imageFile.value
+  );
+
+}
+
+
+// =====================================================
+// REMOVE IMAGE
+// =====================================================
+
+function removeImage() {
+
+  if (imagePreview.value) {
 
     URL.revokeObjectURL(
-      preview.value
+      imagePreview.value
     );
 
   }
 
+  imageFile.value = null;
 
-  // Create new preview
-  preview.value =
-    URL.createObjectURL(file);
+  imagePreview.value = "";
+
 }
 
 
 // =====================================================
-// SAVE BOOK
+// SUBMIT BOOK
 // =====================================================
 
-function saveBook() {
+async function submitBook() {
 
-  console.log(
-    "Book data:",
-    form
-  );
+  errorMessage.value = "";
 
-
-  // -----------------------------------------------
-  // Later:
-  // Send form data to Backend API
-  // -----------------------------------------------
+  successMessage.value = "";
 
 
-  alert(
-    "Book saved successfully!"
-  );
+  // ===================================================
+  // VALIDATION
+  // ===================================================
+
+  if (!form.value.title.trim()) {
+
+    errorMessage.value =
+      "Book title is required.";
+
+    return;
+
+  }
 
 
-  // Tell Books.vue that book was saved
-  emit("saved");
+  if (!form.value.author.trim()) {
+
+    errorMessage.value =
+      "Author is required.";
+
+    return;
+
+  }
+
+
+  if (!form.value.isbn.trim()) {
+
+    errorMessage.value =
+      "ISBN is required.";
+
+    return;
+
+  }
+
+
+  if (!form.value.categoryId) {
+
+    errorMessage.value =
+      "Please select a category.";
+
+    return;
+
+  }
+
+
+  if (
+    !form.value.qty ||
+    Number(form.value.qty) < 1
+  ) {
+
+    errorMessage.value =
+      "Quantity must be at least 1.";
+
+    return;
+
+  }
+
+
+  if (
+    form.value.pages !== null &&
+    form.value.pages !== "" &&
+    Number(form.value.pages) < 1
+  ) {
+
+    errorMessage.value =
+      "Pages must be at least 1.";
+
+    return;
+
+  }
+
+
+  // Backend currently requires image
+  if (!imageFile.value) {
+
+    errorMessage.value =
+      "Book image is required.";
+
+    return;
+
+  }
+
+
+  // ===================================================
+  // START SAVING
+  // ===================================================
+
+  saving.value = true;
+
+
+  try {
+
+    // =================================================
+    // CREATE REQUEST DATA
+    // =================================================
+
+    const bookRequest = {
+
+      categoryId:
+        Number(
+          form.value.categoryId
+        ),
+
+      title:
+        form.value.title.trim(),
+
+      qty:
+        Number(form.value.qty),
+
+      description:
+        form.value.description.trim(),
+
+      author:
+        form.value.author.trim(),
+
+      pages:
+        form.value.pages
+          ? Number(form.value.pages)
+          : null,
+
+      isbn:
+        form.value.isbn.trim(),
+
+      language:
+        form.value.language.trim(),
+
+      status:
+        form.value.status
+
+    };
+
+
+    console.log(
+      "BOOK REQUEST TO BACKEND:",
+      bookRequest
+    );
+
+    console.log(
+      "BOOK IMAGE:",
+      imageFile.value
+    );
+
+
+    // =================================================
+    // CALL BACKEND
+    // =================================================
+
+    const response =
+      await createBook(
+        bookRequest,
+        imageFile.value
+      );
+
+
+    console.log(
+      "CREATE BOOK RESPONSE:",
+      response
+    );
+
+
+    // =================================================
+    // SUCCESS
+    // =================================================
+
+    successMessage.value =
+      "Book created successfully!";
+
+
+    // =================================================
+    // GET CREATED BOOK
+    // =================================================
+
+    const createdBook =
+      response?.data || response;
+
+
+    // Add category information
+    const newBook = {
+
+      ...createdBook,
+
+      categoryId:
+        Number(
+          form.value.categoryId
+        ),
+
+      category:
+        selectedCategory.value?.name || "",
+
+      quantity:
+        Number(form.value.qty)
+
+    };
+
+
+    console.log(
+      "NEW BOOK:",
+      newBook
+    );
+
+
+    // =================================================
+    // SEND TO PARENT
+    // =================================================
+
+    emit(
+      "saved",
+      newBook
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Save book error:",
+      error
+    );
+
+
+    // =================================================
+    // ERROR HANDLING
+    // =================================================
+
+    if (
+      error?.response?.data
+    ) {
+
+      const backendError =
+        error.response.data;
+
+
+      if (
+        typeof backendError ===
+        "string"
+      ) {
+
+        errorMessage.value =
+          backendError;
+
+      } else {
+
+        errorMessage.value =
+          backendError.msg ||
+          backendError.message ||
+          "Failed to create book.";
+
+      }
+
+    } else {
+
+      errorMessage.value =
+        error?.message ||
+        "Failed to create book.";
+
+    }
+
+  } finally {
+
+    saving.value = false;
+
+  }
+
 }
 
 
 // =====================================================
-// CANCEL
+// CLOSE
 // =====================================================
 
-function cancel() {
+function closePage() {
 
-  // Tell Books.vue to close AddBook
   emit("close");
 
 }
 
 
 // =====================================================
-// CLEANUP PREVIEW
+// LOAD
 // =====================================================
 
-onUnmounted(() => {
+onMounted(() => {
 
-  if (preview.value) {
+  fetchCategories();
+
+});
+
+
+onBeforeUnmount(() => {
+
+  if (imagePreview.value) {
 
     URL.revokeObjectURL(
-      preview.value
+      imagePreview.value
     );
 
   }
 
 });
+
 </script>
 
-<style scoped>
 
-/* =====================================================
-   PAGE
-===================================================== */
+<style scoped>
 
 .add-book-page {
 
@@ -498,9 +929,9 @@ onUnmounted(() => {
 
   padding: 30px;
 
-  box-sizing: border-box;
-
   background: #f8fafc;
+
+  box-sizing: border-box;
 
 }
 
@@ -511,10 +942,15 @@ onUnmounted(() => {
 
 .page-header {
 
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
   margin-bottom: 25px;
 
 }
-
 
 .page-header h1 {
 
@@ -524,29 +960,125 @@ onUnmounted(() => {
 
   font-weight: 700;
 
-  color: #111827;
+  color: #172033;
 
 }
-
 
 .page-header p {
 
   margin: 6px 0 0;
 
-  font-size: 14px;
+  color: #7b8497;
 
-  color: #6b7280;
+  font-size: 14px;
 
 }
 
 
 /* =====================================================
-   FORM CARD
+   BACK
 ===================================================== */
 
-.form-card {
+.back-btn {
 
-  max-width: 1000px;
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 10px 18px;
+
+  border: 1px solid #dfe3eb;
+
+  background: white;
+
+  color: #374151;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+}
+
+.back-btn:hover {
+
+  background: #f3f4f6;
+
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.error-message {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 20px;
+
+  padding: 13px 16px;
+
+  background: #fef2f2;
+
+  color: #dc2626;
+
+  border: 1px solid #fecaca;
+
+  border-radius: 8px;
+
+}
+
+
+/* =====================================================
+   SUCCESS
+===================================================== */
+
+.success-message {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 20px;
+
+  padding: 13px 16px;
+
+  background: #ecfdf5;
+
+  color: #15803d;
+
+  border: 1px solid #bbf7d0;
+
+  border-radius: 8px;
+
+}
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.book-form {
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    1fr;
+
+  gap: 22px;
+
+  padding: 30px;
 
   background: white;
 
@@ -554,38 +1086,11 @@ onUnmounted(() => {
 
   border-radius: 12px;
 
-  padding: 30px;
-
-  box-sizing: border-box;
-
   box-shadow:
     0 2px 8px
     rgba(0, 0, 0, 0.04);
 
 }
-
-
-/* =====================================================
-   FORM ROW
-===================================================== */
-
-.form-row {
-
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
-  gap: 22px;
-
-  margin-bottom: 20px;
-
-}
-
-
-/* =====================================================
-   FORM GROUP
-===================================================== */
 
 .form-group {
 
@@ -593,23 +1098,17 @@ onUnmounted(() => {
 
   flex-direction: column;
 
-  gap: 8px;
-
 }
 
+.form-group.full-width {
 
-.full-width {
-
-  margin-bottom: 20px;
+  grid-column: 1 / -1;
 
 }
-
-
-/* =====================================================
-   LABEL
-===================================================== */
 
 .form-group label {
+
+  margin-bottom: 8px;
 
   font-size: 14px;
 
@@ -619,16 +1118,15 @@ onUnmounted(() => {
 
 }
 
-
 .form-group label span {
 
-  color: #ef4444;
+  color: #dc2626;
 
 }
 
 
 /* =====================================================
-   INPUT / SELECT / TEXTAREA
+   INPUT
 ===================================================== */
 
 .form-group input,
@@ -641,51 +1139,23 @@ onUnmounted(() => {
 
   padding: 11px 13px;
 
-  border: 1px solid #d1d5db;
+  border:
+    1px solid
+    #d1d5db;
 
-  border-radius: 7px;
-
-  outline: none;
+  border-radius: 8px;
 
   background: white;
 
   color: #374151;
+
+  outline: none;
 
   font-size: 14px;
 
   transition: 0.2s;
 
 }
-
-
-.form-group input {
-
-  height: 44px;
-
-}
-
-
-.form-group select {
-
-  height: 44px;
-
-  cursor: pointer;
-
-}
-
-
-.form-group textarea {
-
-  resize: vertical;
-
-  min-height: 120px;
-
-}
-
-
-/* =====================================================
-   FOCUS
-===================================================== */
 
 .form-group input:focus,
 .form-group select:focus,
@@ -695,92 +1165,38 @@ onUnmounted(() => {
 
   box-shadow:
     0 0 0 3px
-    rgba(37, 99, 235, 0.08);
+    rgba(37, 99, 235, 0.1);
+
+}
+
+.form-group textarea {
+
+  resize: vertical;
 
 }
 
 
 /* =====================================================
-   PLACEHOLDER
+   HELP
 ===================================================== */
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
+.help-text {
 
-  color: #9ca3af;
-
-}
-
-
-/* =====================================================
-   FILE UPLOAD
-===================================================== */
-
-.file-upload {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
-}
-
-
-/* Hide file input */
-
-.file-upload input[type="file"] {
-
-  display: none;
-
-}
-
-
-/* Choose File */
-
-.choose-file-btn {
-
-  display: inline-flex !important;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 10px 16px;
-
-  background: #f3f4f6;
-
-  border: 1px solid #d1d5db;
-
-  border-radius: 7px;
-
-  color: #374151 !important;
-
-  font-size: 14px !important;
-
-  font-weight: 500 !important;
-
-  cursor: pointer;
-
-  transition: 0.2s;
-
-}
-
-
-.choose-file-btn:hover {
-
-  background: #e5e7eb;
-
-}
-
-
-/* File Name */
-
-.file-name {
-
-  font-size: 13px;
+  margin-top: 6px;
 
   color: #6b7280;
+
+  font-size: 12px;
+
+}
+
+.warning-text {
+
+  margin-top: 6px;
+
+  color: #dc2626;
+
+  font-size: 12px;
 
 }
 
@@ -791,31 +1207,153 @@ onUnmounted(() => {
 
 .image-preview {
 
+  position: relative;
+
+  width: 180px;
+
+  height: 240px;
+
   margin-top: 15px;
+
+  border:
+    1px solid
+    #e5e7eb;
+
+  border-radius: 10px;
+
+  overflow: hidden;
+
+  background: #f8fafc;
 
 }
 
-
 .image-preview img {
 
-  width: 100px;
+  width: 100%;
 
-  height: 130px;
+  height: 100%;
 
   object-fit: cover;
 
-  border-radius: 6px;
+}
 
-  border: 1px solid #e5e7eb;
+.remove-image {
+
+  position: absolute;
+
+  top: 8px;
+
+  right: 8px;
+
+  width: 32px;
+
+  height: 32px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #dc2626;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 16px;
+
+}
+
+.remove-image:hover {
+
+  background: #b91c1c;
 
 }
 
 
 /* =====================================================
-   FORM ACTIONS
+   CATEGORY PREVIEW
+===================================================== */
+
+.category-preview {
+
+  grid-column: 1 / -1;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  background: #eff6ff;
+
+  border:
+    1px solid
+    #bfdbfe;
+
+  border-radius: 10px;
+
+}
+
+.category-icon {
+
+  width: 42px;
+
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-weight: 700;
+
+}
+
+.preview-label {
+
+  margin: 0;
+
+  font-size: 12px;
+
+  color: #6b7280;
+
+}
+
+.preview-name {
+
+  margin: 3px 0 0;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  color: #1f2937;
+
+}
+
+
+/* =====================================================
+   ACTIONS
 ===================================================== */
 
 .form-actions {
+
+  grid-column: 1 / -1;
 
   display: flex;
 
@@ -823,41 +1361,38 @@ onUnmounted(() => {
 
   gap: 12px;
 
-  margin-top: 30px;
-
   padding-top: 20px;
 
-  border-top: 1px solid #e5e7eb;
+  border-top:
+    1px solid
+    #e5e7eb;
 
 }
 
+.cancel-btn,
+.save-btn {
 
-/* =====================================================
-   CANCEL
-===================================================== */
+  padding: 11px 22px;
 
-.cancel-btn {
-
-  padding: 11px 20px;
-
-  border: 1px solid #d1d5db;
-
-  border-radius: 7px;
-
-  background: white;
-
-  color: #374151;
-
-  font-size: 14px;
+  border-radius: 8px;
 
   font-weight: 600;
 
   cursor: pointer;
 
-  transition: 0.2s;
-
 }
 
+.cancel-btn {
+
+  border:
+    1px solid
+    #d1d5db;
+
+  background: white;
+
+  color: #374151;
+
+}
 
 .cancel-btn:hover {
 
@@ -865,37 +1400,61 @@ onUnmounted(() => {
 
 }
 
-
-/* =====================================================
-   SAVE
-===================================================== */
-
 .save-btn {
 
-  padding: 11px 22px;
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  min-width: 130px;
 
   border: none;
-
-  border-radius: 7px;
 
   background: #2563eb;
 
   color: white;
 
-  font-size: 14px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition: 0.2s;
-
 }
-
 
 .save-btn:hover {
 
   background: #1d4ed8;
+
+}
+
+.save-btn:disabled {
+
+  background: #93c5fd;
+
+  cursor: not-allowed;
+
+}
+
+
+/* =====================================================
+   SPINNING
+===================================================== */
+
+.spinning {
+
+  animation:
+    spin 1s linear infinite;
+
+}
+
+@keyframes spin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 
 }
 
@@ -912,36 +1471,53 @@ onUnmounted(() => {
 
   }
 
+  .page-header {
 
-  .form-card {
+    align-items: flex-start;
+
+    gap: 15px;
+
+  }
+
+  .book-form {
+
+    grid-template-columns: 1fr;
 
     padding: 20px;
 
   }
 
+  .form-group.full-width,
+  .category-preview,
+  .form-actions {
 
-  .form-row {
-
-    grid-template-columns: 1fr;
-
-    gap: 18px;
-
-  }
-
-
-  .file-upload {
-
-    flex-wrap: wrap;
+    grid-column: 1;
 
   }
 
+}
+
+@media (max-width: 500px) {
+
+  .page-header {
+
+    flex-direction: column;
+
+  }
+
+  .back-btn {
+
+    width: 100%;
+
+    justify-content: center;
+
+  }
 
   .form-actions {
 
-    flex-direction: column-reverse;
+    flex-direction: column;
 
   }
-
 
   .cancel-btn,
   .save-btn {

@@ -1,251 +1,320 @@
 <template>
+  <div class="min-h-screen bg-gray-50 p-4 sm:p-6">
 
-  <div class="min-h-screen bg-gray-50 p-6">
-
-    <!-- =================================================
+    <!-- =====================================================
          HEADER
-    ================================================== -->
-
-    <div class="flex items-center justify-between mb-6">
-
+    ====================================================== -->
+    <div
+      class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6"
+    >
       <div>
-
         <h1 class="text-2xl font-bold text-gray-800">
           Category Management
         </h1>
 
         <p class="text-gray-500 mt-1">
-          Manage book categories
+          Manage book categories in the library system
         </p>
-
       </div>
 
+      <!-- Add Button -->
+      <button
+        type="button"
+        @click="openAddModal"
+        class="inline-flex items-center justify-center gap-2 px-5 py-2.5
+               bg-blue-600 hover:bg-blue-700 text-white font-medium
+               rounded-lg shadow-sm transition"
+      >
+        <span class="text-lg">+</span>
+        Add Category
+      </button>
+    </div>
 
-      <!-- Add Category -->
+
+    <!-- =====================================================
+         SUCCESS MESSAGE
+    ====================================================== -->
+    <div
+      v-if="successMessage"
+      class="mb-5 flex items-center justify-between gap-4
+             rounded-lg border border-green-200 bg-green-50
+             px-4 py-3 text-green-700"
+    >
+      <div class="flex items-center gap-2">
+        <span class="font-semibold">✓</span>
+        <span>{{ successMessage }}</span>
+      </div>
 
       <button
-        @click="openAddModal"
-        class="flex items-center gap-2
-               px-4 py-2.5
-               bg-blue-600
-               text-white
-               rounded-lg
-               hover:bg-blue-700
-               transition"
+        type="button"
+        @click="successMessage = ''"
+        class="text-green-700 hover:text-green-900 text-lg"
       >
-
-        <i class="bi bi-plus-lg"></i>
-
-        <span>
-          Add Category
-        </span>
-
+        ×
       </button>
-
     </div>
 
 
-    <!-- =================================================
-         STATISTICS
-    ================================================== -->
-
+    <!-- =====================================================
+         ERROR MESSAGE
+    ====================================================== -->
     <div
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
-             gap-4 mb-6"
+      v-if="errorMessage"
+      class="mb-5 flex items-center justify-between gap-4
+             rounded-lg border border-red-200 bg-red-50
+             px-4 py-3 text-red-700"
     >
-
-      <!-- Total Categories -->
-
-      <div
-        class="bg-white rounded-xl border border-gray-100
-               shadow-sm p-5"
-      >
-
-        <div class="flex items-center justify-between">
-
-          <div>
-
-            <p class="text-sm text-gray-500">
-              Total Categories
-            </p>
-
-            <h2
-              class="text-2xl font-bold text-gray-800 mt-1"
-            >
-              {{ categories.length }}
-            </h2>
-
-          </div>
-
-
-          <div
-            class="w-11 h-11 rounded-lg
-                   bg-blue-50
-                   text-blue-600
-                   flex items-center justify-center"
-          >
-
-            <i class="bi bi-grid text-xl"></i>
-
-          </div>
-
-        </div>
-
+      <div class="flex items-center gap-2">
+        <span class="font-semibold">!</span>
+        <span>{{ errorMessage }}</span>
       </div>
 
-
-      <!-- Total Books -->
-
-      <div
-        class="bg-white rounded-xl border border-gray-100
-               shadow-sm p-5"
+      <button
+        type="button"
+        @click="errorMessage = ''"
+        class="text-red-700 hover:text-red-900 text-lg"
       >
-
-        <div class="flex items-center justify-between">
-
-          <div>
-
-            <p class="text-sm text-gray-500">
-              Total Books
-            </p>
-
-            <h2
-              class="text-2xl font-bold text-gray-800 mt-1"
-            >
-              {{ totalBooks }}
-            </h2>
-
-          </div>
-
-
-          <div
-            class="w-11 h-11 rounded-lg
-                   bg-green-50
-                   text-green-600
-                   flex items-center justify-center"
-          >
-
-            <i class="bi bi-book text-xl"></i>
-
-          </div>
-
-        </div>
-
-      </div>
-
+        ×
+      </button>
     </div>
 
 
-    <!-- =================================================
-         CATEGORY TABLE
-    ================================================== -->
-
+    <!-- =====================================================
+         SEARCH + TOTAL
+    ====================================================== -->
     <div
-      v-if="categories.length > 0"
-      class="bg-white rounded-xl border border-gray-100
+      class="bg-white rounded-xl shadow-sm border border-gray-200
+             p-4 mb-6"
+    >
+      <div
+        class="flex flex-col gap-4 md:flex-row md:items-center
+               md:justify-between"
+      >
+
+        <!-- Search -->
+        <div class="relative w-full md:max-w-md">
+
+          <span
+            class="absolute left-3 top-1/2 -translate-y-1/2
+                   text-gray-400"
+          >
+            🔍
+          </span>
+
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search category..."
+            class="w-full rounded-lg border border-gray-300
+                   py-2.5 pl-10 pr-4
+                   text-gray-700
+                   focus:border-blue-500
+                   focus:ring-2 focus:ring-blue-100
+                   outline-none transition"
+          />
+        </div>
+
+        <!-- Total -->
+        <div class="text-sm text-gray-500">
+          Total Categories:
+          <span class="font-semibold text-gray-800">
+            {{ filteredCategories.length }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- =====================================================
+         LOADING
+    ====================================================== -->
+    <div
+      v-if="loading"
+      class="bg-white rounded-xl border border-gray-200
+             shadow-sm p-10 text-center"
+    >
+      <div
+        class="mx-auto mb-4 h-10 w-10 rounded-full
+               border-4 border-gray-200
+               border-t-blue-600 animate-spin"
+      ></div>
+
+      <p class="text-gray-500">
+        Loading categories...
+      </p>
+    </div>
+
+
+    <!-- =====================================================
+         EMPTY STATE
+    ====================================================== -->
+    <div
+      v-else-if="filteredCategories.length === 0"
+      class="bg-white rounded-xl border border-gray-200
+             shadow-sm p-10 text-center"
+    >
+      <div class="text-5xl mb-4">
+        📂
+      </div>
+
+      <h2 class="text-lg font-semibold text-gray-800">
+        No categories found
+      </h2>
+
+      <p class="text-gray-500 mt-1">
+        {{
+          searchQuery
+            ? "Try another search keyword."
+            : "Create your first category."
+        }}
+      </p>
+
+      <button
+        v-if="!searchQuery"
+        type="button"
+        @click="openAddModal"
+        class="mt-5 px-5 py-2.5 rounded-lg
+               bg-blue-600 hover:bg-blue-700
+               text-white font-medium transition"
+      >
+        + Add Category
+      </button>
+    </div>
+
+
+    <!-- =====================================================
+         CATEGORY TABLE
+    ====================================================== -->
+    <div
+      v-else
+      class="bg-white rounded-xl border border-gray-200
              shadow-sm overflow-hidden"
     >
 
-      <div class="overflow-x-auto">
+      <!-- Desktop Table -->
+      <div class="hidden md:block overflow-x-auto">
 
-        <table class="w-full">
+        <table class="w-full text-left">
 
-          <!-- TABLE HEADER -->
-
-          <thead class="bg-gray-50 border-b border-gray-100">
+          <thead class="bg-gray-50 border-b border-gray-200">
 
             <tr>
-
-              <!-- ID -->
-
               <th
-                class="px-6 py-4
-                       text-left
-                       text-xs
-                       font-semibold
-                       text-gray-500
-                       uppercase
-                       tracking-wider"
+                class="px-6 py-4 text-xs font-semibold
+                       text-gray-500 uppercase tracking-wider"
               >
                 #
               </th>
 
-
-              <!-- CATEGORY -->
-
               <th
-                class="px-6 py-4
-                       text-left
-                       text-xs
-                       font-semibold
-                       text-gray-500
-                       uppercase
-                       tracking-wider"
+                class="px-6 py-4 text-xs font-semibold
+                       text-gray-500 uppercase tracking-wider"
               >
-                Category
+                Category Name
               </th>
 
-
-              <!-- DESCRIPTION -->
-
               <th
-                class="px-6 py-4
-                       text-left
-                       text-xs
-                       font-semibold
-                       text-gray-500
-                       uppercase
-                       tracking-wider"
+                class="px-6 py-4 text-xs font-semibold
+                       text-gray-500 uppercase tracking-wider"
               >
-                Description
+                ID
               </th>
 
-
-              <!-- BOOKS -->
-
               <th
-                class="px-6 py-4
-                       text-left
-                       text-xs
-                       font-semibold
-                       text-gray-500
-                       uppercase
-                       tracking-wider"
-              >
-                Books
-              </th>
-
-
-              <!-- ACTIONS -->
-
-              <th
-                class="px-6 py-4
-                       text-left
-                       text-xs
-                       font-semibold
-                       text-gray-500
-                       uppercase
-                       tracking-wider"
+                class="px-6 py-4 text-xs font-semibold
+                       text-gray-500 uppercase tracking-wider
+                       text-right"
               >
                 Actions
               </th>
-
             </tr>
 
           </thead>
 
 
-          <!-- TABLE BODY -->
-
           <tbody class="divide-y divide-gray-100">
 
-            <AdminCategory
-              v-for="category in categories"
+            <tr
+              v-for="(category, index) in filteredCategories"
               :key="category.id"
-              :category="category"
-              @edit="editCategory"
-              @delete="deleteCategory"
-            />
+              class="hover:bg-gray-50 transition"
+            >
+
+              <!-- Number -->
+              <td class="px-6 py-4 text-sm text-gray-500">
+                {{ index + 1 }}
+              </td>
+
+
+              <!-- Category -->
+              <td class="px-6 py-4">
+
+                <div class="flex items-center gap-3">
+
+                  <div
+                    class="h-10 w-10 rounded-lg
+                           bg-blue-100 text-blue-600
+                           flex items-center justify-center
+                           font-semibold"
+                  >
+                    {{ getCategoryInitial(category.name) }}
+                  </div>
+
+                  <div>
+                    <p class="font-medium text-gray-800">
+                      {{ category.name }}
+                    </p>
+
+                    <p class="text-xs text-gray-400">
+                      Book Category
+                    </p>
+                  </div>
+
+                </div>
+
+              </td>
+
+
+              <!-- ID -->
+              <td class="px-6 py-4 text-sm text-gray-500">
+                #{{ category.id }}
+              </td>
+
+
+              <!-- Actions -->
+              <td class="px-6 py-4">
+
+                <div class="flex justify-end gap-2">
+
+                  <!-- Edit -->
+                  <button
+                    type="button"
+                    @click="openEditModal(category)"
+                    class="px-3 py-2 rounded-lg
+                           bg-blue-50 text-blue-600
+                           hover:bg-blue-100
+                           font-medium text-sm transition"
+                  >
+                    Edit
+                  </button>
+
+                  <!-- Delete -->
+                  <button
+                    type="button"
+                    @click="openDeleteModal(category)"
+                    class="px-3 py-2 rounded-lg
+                           bg-red-50 text-red-600
+                           hover:bg-red-100
+                           font-medium text-sm transition"
+                  >
+                    Delete
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
 
           </tbody>
 
@@ -253,242 +322,307 @@
 
       </div>
 
+
+      <!-- ===================================================
+           MOBILE CARDS
+      ==================================================== -->
+      <div class="md:hidden divide-y divide-gray-100">
+
+        <div
+          v-for="(category, index) in filteredCategories"
+          :key="category.id"
+          class="p-4"
+        >
+
+          <div class="flex items-center justify-between gap-3">
+
+            <div class="flex items-center gap-3 min-w-0">
+
+              <div
+                class="h-11 w-11 shrink-0 rounded-lg
+                       bg-blue-100 text-blue-600
+                       flex items-center justify-center
+                       font-semibold"
+              >
+                {{ getCategoryInitial(category.name) }}
+              </div>
+
+              <div class="min-w-0">
+
+                <p class="font-medium text-gray-800 truncate">
+                  {{ category.name }}
+                </p>
+
+                <p class="text-xs text-gray-400 mt-1">
+                  #{{ category.id }}
+                </p>
+
+              </div>
+
+            </div>
+
+            <span class="text-xs text-gray-400 shrink-0">
+              {{ index + 1 }}
+            </span>
+
+          </div>
+
+
+          <div class="flex gap-2 mt-4">
+
+            <button
+              type="button"
+              @click="openEditModal(category)"
+              class="flex-1 px-3 py-2 rounded-lg
+                     bg-blue-50 text-blue-600
+                     hover:bg-blue-100
+                     font-medium text-sm transition"
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              @click="openDeleteModal(category)"
+              class="flex-1 px-3 py-2 rounded-lg
+                     bg-red-50 text-red-600
+                     hover:bg-red-100
+                     font-medium text-sm transition"
+            >
+              Delete
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
 
 
-    <!-- =================================================
-         EMPTY STATE
-    ================================================== -->
-
+    <!-- =====================================================
+         ADD / EDIT MODAL
+    ====================================================== -->
     <div
-      v-else
-      class="bg-white rounded-xl
-             border border-gray-100
-             p-12 text-center"
+      v-if="showFormModal"
+      class="fixed inset-0 z-50 flex items-center
+             justify-center p-4"
     >
 
-      <i
-        class="bi bi-folder-x
-               text-5xl text-gray-300"
-      ></i>
-
-
-      <h3
-        class="text-lg font-semibold
-               text-gray-700 mt-4"
-      >
-        No categories found
-      </h3>
-
-
-      <p class="text-gray-500 mt-1">
-        Add your first book category.
-      </p>
-
-
-      <button
-        @click="openAddModal"
-        class="mt-4 px-4 py-2
-               bg-blue-600
-               text-white
-               rounded-lg
-               hover:bg-blue-700"
-      >
-        Add Category
-      </button>
-
-    </div>
-
-
-    <!-- =================================================
-         MODAL
-    ================================================== -->
-
-    <div
-      v-if="showModal"
-      class="fixed inset-0
-             bg-black/40
-             flex items-center justify-center
-             z-50 p-4"
-      @click.self="closeModal"
-    >
-
+      <!-- Overlay -->
       <div
-        class="bg-white
-               w-full max-w-md
-               rounded-xl
-               shadow-xl
-               p-6"
+        class="absolute inset-0 bg-black/50"
+        @click="closeFormModal"
+      ></div>
+
+
+      <!-- Modal -->
+      <div
+        class="relative w-full max-w-md
+               bg-white rounded-xl shadow-xl"
       >
 
         <!-- Modal Header -->
-
         <div
-          class="flex items-center
-                 justify-between mb-5"
+          class="flex items-center justify-between
+                 px-6 py-4 border-b border-gray-200"
         >
 
-          <h2
-            class="text-xl font-bold
-                   text-gray-800"
-          >
-            {{
-              isEditing
-                ? "Edit Category"
-                : "Add Category"
-            }}
-          </h2>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-800">
+              {{ isEditMode ? "Edit Category" : "Add Category" }}
+            </h2>
 
+            <p class="text-sm text-gray-500 mt-1">
+              {{
+                isEditMode
+                  ? "Update category information"
+                  : "Create a new book category"
+              }}
+            </p>
+          </div>
 
           <button
-            @click="closeModal"
-            class="w-8 h-8
-                   flex items-center
-                   justify-center
-                   rounded-lg
-                   text-gray-400
-                   hover:bg-gray-100
-                   hover:text-gray-600"
+            type="button"
+            @click="closeFormModal"
+            class="text-gray-400 hover:text-gray-700
+                   text-2xl leading-none"
           >
-
-            <i class="bi bi-x-lg"></i>
-
+            ×
           </button>
 
         </div>
 
 
-        <!-- =================================================
-             NAME
-        ================================================== -->
-
-        <div class="mb-4">
+        <!-- Form -->
+        <form
+          @submit.prevent="submitCategory"
+          class="p-6"
+        >
 
           <label
-            class="block
-                   text-sm
-                   font-medium
-                   text-gray-700
-                   mb-2"
+            for="categoryName"
+            class="block text-sm font-medium
+                   text-gray-700 mb-2"
           >
             Category Name
           </label>
 
-
           <input
+            id="categoryName"
             v-model="form.name"
             type="text"
             placeholder="Enter category name"
-            class="w-full
+            maxlength="100"
+            autocomplete="off"
+            class="w-full rounded-lg border border-gray-300
                    px-4 py-2.5
-                   border border-gray-200
-                   rounded-lg
-                   focus:outline-none
-                   focus:ring-2
-                   focus:ring-blue-500"
+                   text-gray-700
+                   focus:border-blue-500
+                   focus:ring-2 focus:ring-blue-100
+                   outline-none transition"
+            :class="{
+              'border-red-400 focus:border-red-500':
+                formError
+            }"
           />
 
-        </div>
-
-
-        <!-- =================================================
-             DESCRIPTION
-        ================================================== -->
-
-        <div class="mb-4">
-
-          <label
-            class="block
-                   text-sm
-                   font-medium
-                   text-gray-700
-                   mb-2"
+          <p
+            v-if="formError"
+            class="mt-2 text-sm text-red-600"
           >
-            Description
-          </label>
+            {{ formError }}
+          </p>
 
 
-          <textarea
-            v-model="form.description"
-            rows="3"
-            placeholder="Enter description"
-            class="w-full
-                   px-4 py-2.5
-                   border border-gray-200
-                   rounded-lg
-                   focus:outline-none
-                   focus:ring-2
-                   focus:ring-blue-500"
-          ></textarea>
+          <!-- Buttons -->
+          <div class="flex justify-end gap-3 mt-6">
+
+            <button
+              type="button"
+              @click="closeFormModal"
+              class="px-4 py-2.5 rounded-lg
+                     border border-gray-300
+                     text-gray-700
+                     hover:bg-gray-50
+                     font-medium transition"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              :disabled="saving"
+              class="px-5 py-2.5 rounded-lg
+                     bg-blue-600 hover:bg-blue-700
+                     disabled:bg-blue-300
+                     text-white font-medium
+                     transition"
+            >
+              <span v-if="saving">
+                Saving...
+              </span>
+
+              <span v-else>
+                {{ isEditMode ? "Update Category" : "Create Category" }}
+              </span>
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DELETE MODAL
+    ====================================================== -->
+    <div
+      v-if="showDeleteModal"
+      class="fixed inset-0 z-50 flex items-center
+             justify-center p-4"
+    >
+
+      <!-- Overlay -->
+      <div
+        class="absolute inset-0 bg-black/50"
+        @click="closeDeleteModal"
+      ></div>
+
+
+      <!-- Modal -->
+      <div
+        class="relative w-full max-w-md
+               bg-white rounded-xl shadow-xl p-6"
+      >
+
+        <!-- Icon -->
+        <div
+          class="mx-auto h-14 w-14 rounded-full
+                 bg-red-100 text-red-600
+                 flex items-center justify-center
+                 text-2xl"
+        >
+          !
+        </div>
+
+
+        <div class="text-center mt-4">
+
+          <h2 class="text-lg font-semibold text-gray-800">
+            Delete Category?
+          </h2>
+
+          <p class="text-gray-500 mt-2">
+            Are you sure you want to delete
+            <span class="font-semibold text-gray-700">
+              "{{ selectedCategory?.name }}"
+            </span>
+            ?
+          </p>
+
+          <p class="text-sm text-red-500 mt-2">
+            This action cannot be undone.
+          </p>
 
         </div>
 
 
-        <!-- =================================================
-             NUMBER OF BOOKS
-        ================================================== -->
-
-        <div class="mb-6">
-
-          <label
-            class="block
-                   text-sm
-                   font-medium
-                   text-gray-700
-                   mb-2"
-          >
-            Number of Books
-          </label>
-
-
-          <input
-            v-model.number="form.books"
-            type="number"
-            min="0"
-            placeholder="Enter number of books"
-            class="w-full
-                   px-4 py-2.5
-                   border border-gray-200
-                   rounded-lg
-                   focus:outline-none
-                   focus:ring-2
-                   focus:ring-blue-500"
-          />
-
-        </div>
-
-
-        <!-- =================================================
-             BUTTONS
-        ================================================== -->
-
-        <div class="flex justify-end gap-3">
-
-          <!-- Cancel -->
+        <!-- Buttons -->
+        <div class="flex justify-center gap-3 mt-6">
 
           <button
-            @click="closeModal"
-            class="px-4 py-2
-                   border border-gray-200
-                   rounded-lg
-                   text-gray-600
-                   hover:bg-gray-50"
+            type="button"
+            @click="closeDeleteModal"
+            class="px-5 py-2.5 rounded-lg
+                   border border-gray-300
+                   text-gray-700
+                   hover:bg-gray-50
+                   font-medium transition"
           >
             Cancel
           </button>
 
-
-          <!-- Save / Update -->
-
           <button
-            @click="saveCategory"
-            class="px-4 py-2
-                   bg-blue-600
-                   text-white
-                   rounded-lg
-                   hover:bg-blue-700"
+            type="button"
+            @click="confirmDelete"
+            :disabled="deleting"
+            class="px-5 py-2.5 rounded-lg
+                   bg-red-600 hover:bg-red-700
+                   disabled:bg-red-300
+                   text-white font-medium transition"
           >
-            {{ isEditing ? "Update" : "Save" }}
+            <span v-if="deleting">
+              Deleting...
+            </span>
+
+            <span v-else>
+              Delete
+            </span>
           </button>
 
         </div>
@@ -498,30 +632,46 @@
     </div>
 
   </div>
-
 </template>
 
 
 <script setup>
+import { ref, computed, onMounted } from "vue";
 
-import { ref, computed } from "vue";
-
-
-// =====================================================
-// COMPONENT
-// =====================================================
-
-import AdminCategory
-  from "../../components/admin/AdminCategory.vue";
+import {
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "../../service/categoryService";
 
 
 // =====================================================
-// MODAL
+// STATE
 // =====================================================
 
-const showModal = ref(false);
+const categories = ref([]);
 
-const isEditing = ref(false);
+const loading = ref(false);
+const saving = ref(false);
+const deleting = ref(false);
+
+const searchQuery = ref("");
+
+const successMessage = ref("");
+const errorMessage = ref("");
+
+
+// =====================================================
+// MODAL STATE
+// =====================================================
+
+const showFormModal = ref(false);
+const showDeleteModal = ref(false);
+
+const isEditMode = ref(false);
+
+const selectedCategory = ref(null);
 
 
 // =====================================================
@@ -529,257 +679,414 @@ const isEditing = ref(false);
 // =====================================================
 
 const form = ref({
-
-  id: null,
-
   name: "",
-
-  description: "",
-
-  books: 0
-
 });
 
+const formError = ref("");
+
 
 // =====================================================
-// CATEGORY DATA
+// FETCH CATEGORIES
 // =====================================================
 
-const categories = ref([
+const fetchCategories = async () => {
+  loading.value = true;
+  errorMessage.value = "";
 
-  {
-    id: 1,
-    name: "Fiction",
-    description: "Fictional stories and novels",
-    books: 120
-  },
+  try {
+    const result = await getCategories();
 
-  {
-    id: 2,
-    name: "Science",
-    description: "Science and technology books",
-    books: 85
-  },
+    console.log("CATEGORY API RESPONSE:", result);
 
-  {
-    id: 3,
-    name: "History",
-    description: "Historical books and documents",
-    books: 64
-  },
+    /*
+      Backend response could be:
 
-  {
-    id: 4,
-    name: "Programming",
-    description: "Programming and software development",
-    books: 95
-  },
+      [
+        {
+          id: 1,
+          name: "Programming"
+        }
+      ]
 
-  {
-    id: 5,
-    name: "Business",
-    description: "Business and management books",
-    books: 42
+      OR
+
+      {
+        data: [
+          {
+            id: 1,
+            name: "Programming"
+          }
+        ]
+      }
+
+      OR
+
+      {
+        categories: [...]
+      }
+    */
+
+    if (Array.isArray(result)) {
+      categories.value = result;
+    } else if (Array.isArray(result?.data)) {
+      categories.value = result.data;
+    } else if (Array.isArray(result?.categories)) {
+      categories.value = result.categories;
+    } else {
+      categories.value = [];
+    }
+
+  } catch (error) {
+
+    console.error("Fetch categories error:", error);
+
+    errorMessage.value =
+      error?.message || "Failed to load categories.";
+
+  } finally {
+    loading.value = false;
+  }
+};
+
+
+// =====================================================
+// FILTER CATEGORY
+// =====================================================
+
+const filteredCategories = computed(() => {
+
+  const keyword = searchQuery.value
+    .trim()
+    .toLowerCase();
+
+  if (!keyword) {
+    return categories.value;
   }
 
-]);
+  return categories.value.filter((category) => {
 
+    const name = String(
+      category?.name || ""
+    ).toLowerCase();
 
-// =====================================================
-// TOTAL BOOKS
-// =====================================================
+    return name.includes(keyword);
 
-const totalBooks = computed(() => {
-
-  return categories.value.reduce(
-    (total, category) => {
-
-      return total + Number(category.books || 0);
-
-    },
-    0
-  );
-
+  });
 });
 
 
 // =====================================================
-// OPEN ADD
+// CATEGORY INITIAL
 // =====================================================
 
-function openAddModal() {
+const getCategoryInitial = (name) => {
 
-  isEditing.value = false;
+  if (!name) {
+    return "?";
+  }
+
+  return String(name)
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+};
+
+
+// =====================================================
+// OPEN ADD MODAL
+// =====================================================
+
+const openAddModal = () => {
+
+  isEditMode.value = false;
+
+  selectedCategory.value = null;
 
   form.value = {
-
-    id: null,
-
     name: "",
-
-    description: "",
-
-    books: 0
-
   };
 
-  showModal.value = true;
+  formError.value = "";
 
-}
+  showFormModal.value = true;
+};
 
 
 // =====================================================
-// EDIT
+// OPEN EDIT MODAL
 // =====================================================
 
-function editCategory(category) {
+const openEditModal = (category) => {
 
-  isEditing.value = true;
+  isEditMode.value = true;
+
+  selectedCategory.value = category;
 
   form.value = {
-
-    ...category
-
+    name: category?.name || "",
   };
 
-  showModal.value = true;
+  formError.value = "";
 
-}
+  showFormModal.value = true;
+};
 
 
 // =====================================================
-// SAVE / UPDATE
+// CLOSE FORM MODAL
 // =====================================================
 
-function saveCategory() {
+const closeFormModal = () => {
+
+  if (saving.value) {
+    return;
+  }
+
+  showFormModal.value = false;
+
+  formError.value = "";
+
+  selectedCategory.value = null;
+
+  form.value = {
+    name: "",
+  };
+};
+
+
+// =====================================================
+// VALIDATE FORM
+// =====================================================
+
+const validateForm = () => {
+
+  formError.value = "";
 
   const name = form.value.name.trim();
 
-
-  // ===================================================
-  // VALIDATION
-  // ===================================================
-
   if (!name) {
-
-    alert("Please enter category name.");
-
-    return;
-
+    formError.value = "Category name is required.";
+    return false;
   }
 
-
-  if (Number(form.value.books) < 0) {
-
-    alert("Number of books cannot be negative.");
-
-    return;
-
+  if (name.length < 2) {
+    formError.value =
+      "Category name must be at least 2 characters.";
+    return false;
   }
 
+  if (name.length > 100) {
+    formError.value =
+      "Category name must not exceed 100 characters.";
+    return false;
+  }
 
-  // ===================================================
-  // EDIT
-  // ===================================================
+  return true;
+};
 
-  if (isEditing.value) {
 
-    const index =
-      categories.value.findIndex(
-        category =>
-          category.id === form.value.id
+// =====================================================
+// CREATE / UPDATE
+// =====================================================
+
+const submitCategory = async () => {
+
+  if (!validateForm()) {
+    return;
+  }
+
+  saving.value = true;
+
+  errorMessage.value = "";
+  successMessage.value = "";
+
+  const categoryData = {
+    name: form.value.name.trim(),
+  };
+
+  try {
+
+    // =================================================
+    // UPDATE
+    // =================================================
+
+    if (isEditMode.value) {
+
+      const id = selectedCategory.value?.id;
+
+      if (!id) {
+        throw new Error(
+          "Category ID is missing."
+        );
+      }
+
+      const result = await updateCategory(
+        id,
+        categoryData
       );
 
+      console.log(
+        "UPDATE CATEGORY RESPONSE:",
+        result
+      );
 
-    if (index !== -1) {
-
-      categories.value[index] = {
-
-        ...form.value,
-
-        name,
-
-        books: Number(form.value.books)
-
-      };
+      successMessage.value =
+        "Category updated successfully.";
 
     }
 
-  }
+    // =================================================
+    // CREATE
+    // =================================================
+
+    else {
+
+      const result = await createCategory(
+        categoryData
+      );
+
+      console.log(
+        "CREATE CATEGORY RESPONSE:",
+        result
+      );
+
+      successMessage.value =
+        "Category created successfully.";
+    }
 
 
-  // ===================================================
-  // ADD
-  // ===================================================
+    // Close modal
+    showFormModal.value = false;
 
-  else {
+    // Reset
+    form.value = {
+      name: "",
+    };
 
-    const newId =
-      categories.value.length > 0
-        ? Math.max(
-            ...categories.value.map(
-              category => category.id
-            )
-          ) + 1
-        : 1;
+    selectedCategory.value = null;
+
+    // Refresh list
+    await fetchCategories();
 
 
-    categories.value.push({
+    // Auto hide success message
+    setTimeout(() => {
+      successMessage.value = "";
+    }, 3000);
 
-      id: newId,
+  } catch (error) {
 
-      name,
-
-      description:
-        form.value.description.trim(),
-
-      books: Number(form.value.books)
-
-    });
-
-  }
-
-
-  closeModal();
-
-}
-
-
-// =====================================================
-// DELETE
-// =====================================================
-
-function deleteCategory(id) {
-
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this category?"
-  );
-
-
-  if (!confirmed) {
-
-    return;
-
-  }
-
-
-  categories.value =
-    categories.value.filter(
-      category =>
-        category.id !== id
+    console.error(
+      "Save category error:",
+      error
     );
 
-}
+    errorMessage.value =
+      error?.message ||
+      "Failed to save category.";
+
+  } finally {
+
+    saving.value = false;
+  }
+};
 
 
 // =====================================================
-// CLOSE
+// OPEN DELETE MODAL
 // =====================================================
 
-function closeModal() {
+const openDeleteModal = (category) => {
 
-  showModal.value = false;
+  selectedCategory.value = category;
 
-}
+  showDeleteModal.value = true;
+};
 
+
+// =====================================================
+// CLOSE DELETE MODAL
+// =====================================================
+
+const closeDeleteModal = () => {
+
+  if (deleting.value) {
+    return;
+  }
+
+  showDeleteModal.value = false;
+
+  selectedCategory.value = null;
+};
+
+
+// =====================================================
+// CONFIRM DELETE
+// =====================================================
+
+const confirmDelete = async () => {
+
+  const id = selectedCategory.value?.id;
+
+  if (!id) {
+
+    errorMessage.value =
+      "Category ID is missing.";
+
+    return;
+  }
+
+  deleting.value = true;
+
+  errorMessage.value = "";
+  successMessage.value = "";
+
+  try {
+
+    const result = await deleteCategory(id);
+
+    console.log(
+      "DELETE CATEGORY RESPONSE:",
+      result
+    );
+
+    successMessage.value =
+      "Category deleted successfully.";
+
+    showDeleteModal.value = false;
+
+    selectedCategory.value = null;
+
+    // Refresh categories
+    await fetchCategories();
+
+    setTimeout(() => {
+      successMessage.value = "";
+    }, 3000);
+
+  } catch (error) {
+
+    console.error(
+      "Delete category error:",
+      error
+    );
+
+    errorMessage.value =
+      error?.message ||
+      "Failed to delete category.";
+
+  } finally {
+
+    deleting.value = false;
+  }
+};
+
+
+// =====================================================
+// INITIAL LOAD
+// =====================================================
+
+onMounted(() => {
+  fetchCategories();
+});
 </script>

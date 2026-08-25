@@ -22,6 +22,7 @@
                px-6 py-4
                border-b border-slate-200"
       >
+
         <div>
           <h2
             class="text-xl font-bold
@@ -34,6 +35,7 @@
             View complete information about this book
           </p>
         </div>
+
 
         <!-- Close -->
         <button
@@ -49,6 +51,7 @@
         >
           ✕
         </button>
+
       </div>
 
 
@@ -75,6 +78,8 @@
                      flex items-center
                      justify-center"
             >
+
+              <!-- Book Image -->
               <img
                 v-if="book.image"
                 :src="book.image"
@@ -83,12 +88,14 @@
                        object-contain"
               />
 
+              <!-- No Image -->
               <div
                 v-else
                 class="text-6xl text-slate-300"
               >
                 📚
               </div>
+
             </div>
 
 
@@ -178,6 +185,7 @@
                        rounded-xl
                        p-4"
               >
+
                 <p
                   class="text-xs
                          text-slate-400
@@ -195,6 +203,7 @@
                 >
                   {{ book.qty }}
                 </p>
+
               </div>
 
 
@@ -204,6 +213,7 @@
                        rounded-xl
                        p-4"
               >
+
                 <p
                   class="text-xs
                          text-slate-400
@@ -221,6 +231,7 @@
                 >
                   {{ book.pages }}
                 </p>
+
               </div>
 
 
@@ -230,6 +241,7 @@
                        rounded-xl
                        p-4"
               >
+
                 <p
                   class="text-xs
                          text-slate-400
@@ -247,6 +259,7 @@
                 >
                   {{ book.language }}
                 </p>
+
               </div>
 
 
@@ -258,6 +271,7 @@
                        rounded-xl
                        p-4"
               >
+
                 <p
                   class="text-xs
                          text-slate-400
@@ -275,6 +289,7 @@
                 >
                   {{ book.isbn }}
                 </p>
+
               </div>
 
             </div>
@@ -299,23 +314,20 @@
                        text-slate-600
                        leading-7"
               >
-                {{ book.description }}
+                {{ book.description || "No description available." }}
               </p>
 
             </div>
 
 
             <!-- ================= ACTION ================= -->
-            <div
-              class="mt-8
-                     flex gap-3"
-            >
+            <div class="mt-8 flex gap-3">
 
               <!-- Close -->
               <button
                 type="button"
                 @click="$emit('close')"
-                class="flex-1
+                class="w-full
                        border border-slate-200
                        hover:bg-slate-50
                        text-slate-700
@@ -325,41 +337,6 @@
                        transition"
               >
                 Close
-              </button>
-
-
-              <!-- Borrow -->
-              <button
-                v-if="book.status === true"
-                type="button"
-                @click="borrowBook"
-                class="flex-1
-                       bg-blue-600
-                       hover:bg-blue-700
-                       text-white
-                       py-3
-                       rounded-xl
-                       font-medium
-                       transition"
-              >
-                Borrow Book
-              </button>
-
-
-              <!-- Already Borrowed -->
-              <button
-                v-else
-                type="button"
-                disabled
-                class="flex-1
-                       bg-slate-100
-                       text-slate-400
-                       py-3
-                       rounded-xl
-                       font-medium
-                       cursor-not-allowed"
-              >
-                Currently Borrowed
               </button>
 
             </div>
@@ -389,17 +366,8 @@ export default {
   },
 
   emits: [
-    "close",
-    "borrow"
-  ],
-
-  methods: {
-
-    borrowBook() {
-      this.$emit("borrow", this.book);
-    }
-
-  }
+    "close"
+  ]
 
 };
 </script>

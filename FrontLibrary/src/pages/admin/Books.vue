@@ -1,29 +1,74 @@
 <template>
+
   <div class="books-page">
 
-    <!-- =========================
+    <!-- =====================================================
+         LOADING
+    ====================================================== -->
+
+    <div
+      v-if="loading"
+      class="loading-container"
+    >
+
+      <i class="bi bi-arrow-repeat loading-icon"></i>
+
+      <p>Loading books...</p>
+
+    </div>
+
+
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
+
+    <div
+      v-else-if="errorMessage"
+      class="error-container"
+    >
+
+      <i class="bi bi-exclamation-circle"></i>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        @click="fetchBooks"
+      >
+        Try Again
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
          BOOK TABLE
-    ========================== -->
+    ====================================================== -->
+
     <BookTable
-      v-if="currentView === 'list'"
+      v-else-if="currentView === 'list'"
       :books="books"
       @add-book="openAddBook"
       @edit-book="openEditBook"
       @delete-book="deleteBook"
     />
 
-    <!-- =========================
+
+    <!-- =====================================================
          ADD BOOK
-    ========================== -->
+    ====================================================== -->
+
     <AddBook
       v-else-if="currentView === 'add'"
       @close="closeAddBook"
       @saved="handleBookSaved"
     />
 
-    <!-- =========================
+
+    <!-- =====================================================
          EDIT BOOK
-    ========================== -->
+    ====================================================== -->
+
     <EditBook
       v-else-if="currentView === 'edit'"
       :book="selectedBook"
@@ -32,15 +77,42 @@
     />
 
   </div>
+
 </template>
 
 
 <script setup>
-import { ref } from "vue";
 
-import BookTable from "../../components/books/BookTable.vue";
-import AddBook from "../../components/admin/AddBook.vue";
-import EditBook from "../../components/books/EditBook.vue";
+import {
+  ref,
+  onMounted
+} from "vue";
+
+
+// =====================================================
+// COMPONENTS
+// =====================================================
+
+import BookTable
+  from "../../components/books/BookTable.vue";
+
+import AddBook
+  from "../../components/admin/AddBook.vue";
+
+import EditBook
+  from "../../components/books/EditBook.vue";
+
+
+// =====================================================
+// SERVICE
+// =====================================================
+
+import {
+  getBooks,
+  createBook,
+  updateBook,
+  deleteBookById
+} from "../../service/bookService";
 
 
 // =====================================================
@@ -51,76 +123,10 @@ const currentView = ref("list");
 
 
 // =====================================================
-// BOOKS DATA
+// BOOKS
 // =====================================================
 
-const books = ref([
-  {
-    id: 1,
-    title: "Clean Code",
-    description: "A Handbook of Agile Software Craftsmanship",
-    author: "Robert C. Martin",
-    category: "Programming",
-    isbn: "978-0132350884",
-    quantity: 5,
-    status: "Available"
-  },
-
-  {
-    id: 2,
-    title: "Java Programming",
-    description: "Comprehensive Guide",
-    author: "John Smith",
-    category: "Programming",
-    isbn: "978-0321573513",
-    quantity: 3,
-    status: "Borrowed"
-  },
-
-  {
-    id: 3,
-    title: "Database System Concepts",
-    description: "Database Management",
-    author: "Abraham Silberschatz",
-    category: "Database",
-    isbn: "978-0078022159",
-    quantity: 4,
-    status: "Available"
-  },
-
-  {
-    id: 4,
-    title: "Computer Networking",
-    description: "A Top-Down Approach",
-    author: "James F. Kurose",
-    category: "Networking",
-    isbn: "978-0133594140",
-    quantity: 2,
-    status: "Borrowed"
-  },
-
-  {
-    id: 5,
-    title: "Web Development",
-    description: "Modern Web Development",
-    author: "David Miller",
-    category: "Web Development",
-    isbn: "978-1492052203",
-    quantity: 6,
-    status: "Available"
-  },
-
-  {
-    id: 6,
-    title: "Cyber Security",
-    description: "Introduction to Security",
-    author: "William Stallings",
-    category: "Security",
-    isbn: "978-0134091305",
-    quantity: 2,
-    status: "Overdue"
-  }
-]);
+const books = ref([]);
 
 
 // =====================================================
@@ -131,79 +137,279 @@ const selectedBook = ref(null);
 
 
 // =====================================================
-// ADD BOOK
+// LOADING
+// =====================================================
+
+const loading = ref(false);
+
+
+// =====================================================
+// ERROR
+// =====================================================
+
+const errorMessage = ref("");
+
+
+// =====================================================
+// FETCH BOOKS
+// =====================================================
+
+async function fetchBooks() {
+
+  loading.value = true;
+
+  errorMessage.value = "";
+
+  try {
+
+    const response = await getBooks();
+
+    console.log(
+      "BOOK API RESPONSE:",
+      response
+    );
+
+
+    // ===================================================
+    // BACKEND RESPONSE
+    //
+    // { 
+    //   status: 200,
+    //   data: [...]
+    // }
+    // ===================================================
+
+    let bookData = [];
+
+
+    if (
+      response &&
+      Array.isArray(response.data)
+    ) {
+
+      bookData = response.data;
+
+    }
+
+    // If backend directly returns array
+    else if (
+      Array.isArray(response)
+    ) {
+
+      bookData = response;
+
+    }
+
+
+    // ===================================================
+    // NORMALIZE BOOK DATA
+    // ===================================================
+
+    books.value = bookData.map(book => ({
+
+      id: book.id,
+
+      title: book.title || "",
+
+      description:
+        book.description || "",
+
+      author:
+        book.author || "",
+
+      isbn:
+        book.isbn || "",
+
+      // Backend uses qty
+      quantity:
+        book.qty ?? 0,
+
+      // Keep original qty too
+      qty:
+        book.qty ?? 0,
+
+      status:
+        book.status || "",
+
+      pages:
+        book.pages ?? null,
+
+      language:
+        book.language || "",
+
+      image:
+        book.image || "",
+
+      // Backend Category object
+      category:
+        book.category || null,
+
+      // Useful for edit/filter
+      categoryId:
+        book.category?.id ?? null,
+
+      categoryName:
+        book.category?.name || ""
+
+    }));
+
+
+    console.log(
+      "BOOKS:",
+      books.value
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Failed to fetch books:",
+      error
+    );
+
+    errorMessage.value =
+      error.response?.data?.msg ||
+      "Failed to load books.";
+
+  } finally {
+
+    loading.value = false;
+
+  }
+
+}
+
+
+// =====================================================
+// OPEN ADD BOOK
 // =====================================================
 
 function openAddBook() {
+
+  console.log(
+    "Opening Add Book..."
+  );
+
   currentView.value = "add";
-}
 
-
-function closeAddBook() {
-  currentView.value = "list";
-}
-
-
-function handleBookSaved(newBook) {
-  if (newBook) {
-    books.value.push({
-      ...newBook,
-      id: newBook.id || Date.now()
-    });
-  }
-
-  currentView.value = "list";
 }
 
 
 // =====================================================
-// EDIT BOOK
+// CLOSE ADD BOOK
+// =====================================================
+
+function closeAddBook() {
+
+  currentView.value = "list";
+
+}
+
+
+// =====================================================
+// HANDLE BOOK SAVED
+// =====================================================
+
+async function handleBookSaved(newBook) {
+
+  console.log(
+    "New book received:",
+    newBook
+  );
+
+
+  currentView.value = "list";
+
+
+  // Fetch from backend again
+  // so database becomes the source of truth.
+
+  await fetchBooks();
+
+}
+
+
+// =====================================================
+// OPEN EDIT BOOK
 // =====================================================
 
 function openEditBook(bookId) {
-  console.log("Edit book ID:", bookId);
 
-  const book = books.value.find(
-    item => item.id === Number(bookId)
+  console.log(
+    "Edit book ID:",
+    bookId
   );
+
+
+  const book =
+    books.value.find(
+      item =>
+        Number(item.id) ===
+        Number(bookId)
+    );
+
 
   if (!book) {
-    alert("Book not found.");
+
+    window.alert(
+      "Book not found."
+    );
+
     return;
+
   }
 
-  selectedBook.value = book;
 
-  currentView.value = "edit";
-}
-
-
-function closeEditBook() {
-  selectedBook.value = null;
-
-  currentView.value = "list";
-}
+  // Copy book
+  selectedBook.value = {
+    ...book
+  };
 
 
-function handleBookUpdated(updatedBook) {
-  if (!updatedBook) {
-    currentView.value = "list";
-    return;
-  }
-
-  const index = books.value.findIndex(
-    item => item.id === updatedBook.id
+  console.log(
+    "Selected book:",
+    selectedBook.value
   );
 
-  if (index !== -1) {
-    books.value[index] = {
-      ...updatedBook
-    };
-  }
+
+  currentView.value = "edit";
+
+}
+
+
+// =====================================================
+// CLOSE EDIT BOOK
+// =====================================================
+
+function closeEditBook() {
 
   selectedBook.value = null;
 
   currentView.value = "list";
+
+}
+
+
+// =====================================================
+// HANDLE BOOK UPDATED
+// =====================================================
+
+async function handleBookUpdated(updatedBook) {
+
+  console.log(
+    "Updated book:",
+    updatedBook
+  );
+
+
+  selectedBook.value = null;
+
+  currentView.value = "list";
+
+
+  // Reload real data from backend
+
+  await fetchBooks();
+
 }
 
 
@@ -211,32 +417,196 @@ function handleBookUpdated(updatedBook) {
 // DELETE BOOK
 // =====================================================
 
-function deleteBook(bookId) {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this book?"
+async function deleteBook(bookId) {
+
+  const book = books.value.find(
+    item => Number(item.id) === Number(bookId)
   );
 
-  if (!confirmDelete) {
+  if (!book) {
+    alert("Book not found.");
     return;
   }
 
-  books.value = books.value.filter(
-    book => book.id !== Number(bookId)
+
+  const confirmed = window.confirm(
+    `Are you sure you want to delete "${book.title}"?`
   );
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    await deleteBookById(bookId);
+
+
+    // Remove from frontend after backend success
+    books.value = books.value.filter(
+      item => Number(item.id) !== Number(bookId)
+    );
+
+
+    alert("Book deleted successfully.");
+
+
+  } catch (error) {
+
+    console.error(
+      "Delete book error:",
+      error
+    );
+
+    alert(
+      error?.message ||
+      "Failed to delete book."
+    );
+
+  }
+
 }
+
+
+// =====================================================
+// ON MOUNTED
+// =====================================================
+
+onMounted(() => {
+
+  fetchBooks();
+
+});
+
 </script>
 
 
 <style scoped>
 
 .books-page {
-  min-height: calc(100vh - 70px);
+
+  min-height:
+    calc(100vh - 70px);
 
   padding: 30px;
 
-  background: #f8fafc;
+  background:
+    #f8fafc;
 
-  box-sizing: border-box;
+  box-sizing:
+    border-box;
+
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.loading-container {
+
+  min-height: 400px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #667085;
+
+}
+
+
+.loading-icon {
+
+  font-size: 32px;
+
+  margin-bottom: 10px;
+
+  animation:
+    spin 1s linear infinite;
+
+}
+
+
+@keyframes spin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.error-container {
+
+  min-height: 400px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #d93636;
+
+}
+
+
+.error-container i {
+
+  font-size: 35px;
+
+  margin-bottom: 10px;
+
+}
+
+
+.error-container button {
+
+  margin-top: 10px;
+
+  padding: 10px 18px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #5b3df5;
+
+  color: white;
+
+  cursor: pointer;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .books-page {
+
+    padding: 20px;
+
+  }
+
 }
 
 </style>
