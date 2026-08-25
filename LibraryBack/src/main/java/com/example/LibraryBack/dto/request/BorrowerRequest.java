@@ -19,6 +19,5 @@ public class BorrowerRequest {
     private LocalDate dueDate;
     private LocalDate returnDate;
     private BorrowingStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
 }

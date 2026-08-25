@@ -25,6 +25,7 @@ public class FineResponse {
     private BigDecimal fineRate;
     private BigDecimal totalAmount;
     private FineStatus status;
+    private LocalDateTime paidAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

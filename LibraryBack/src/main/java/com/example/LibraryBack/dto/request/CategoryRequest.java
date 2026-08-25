@@ -13,6 +13,5 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CategoryRequest {
     private String name;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
 }

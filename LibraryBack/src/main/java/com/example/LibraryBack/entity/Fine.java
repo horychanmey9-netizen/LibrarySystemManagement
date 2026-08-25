@@ -46,7 +46,11 @@ public class Fine {
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private FineStatus status;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -57,9 +61,10 @@ public class Fine {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (status == null) {
+            status = FineStatus.UNPAID;
+        }
     }
     @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    protected void onUpdate() {updatedAt = LocalDateTime.now();}
 }
