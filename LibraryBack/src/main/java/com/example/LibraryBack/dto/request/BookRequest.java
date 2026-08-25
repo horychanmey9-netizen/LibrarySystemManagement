@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookRequest {
+    private Long categoryId;
     private String title;
     private Integer qty;
     private String description;
@@ -23,6 +24,5 @@ public class BookRequest {
     private String language;
     private String image;
     private Status status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
 }

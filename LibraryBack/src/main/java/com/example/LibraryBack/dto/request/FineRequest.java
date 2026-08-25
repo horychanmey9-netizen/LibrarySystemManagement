@@ -19,7 +19,4 @@ public class FineRequest {
     private LocalDate dueDate;
     private LocalDate returnedDate;
     private BigDecimal fineRate;
-    private FineStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

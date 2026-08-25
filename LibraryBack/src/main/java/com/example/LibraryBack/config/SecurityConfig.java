@@ -21,10 +21,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->auth
                         .requestMatchers("/api/auth/**","/error").permitAll()
-                        .requestMatchers("/api/profile/**").hasRole("USER")
+                        .requestMatchers("/api/profile/**").permitAll()
                         .requestMatchers("/api/book/**").hasRole("ADMIN")
                         .requestMatchers("/api/category/**").hasRole("ADMIN")
                         .requestMatchers("/api/fine/**").hasRole("ADMIN")
+                        .requestMatchers("/api/fine/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().authenticated()
                 )

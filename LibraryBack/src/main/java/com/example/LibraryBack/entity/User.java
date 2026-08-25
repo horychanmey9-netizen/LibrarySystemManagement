@@ -53,4 +53,7 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Fine> fines;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Notification> notifications;
 }
