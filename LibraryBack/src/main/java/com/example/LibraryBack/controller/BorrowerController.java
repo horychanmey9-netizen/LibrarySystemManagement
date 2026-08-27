@@ -18,7 +18,7 @@ public class BorrowerController {
     private final BorrowerService borrowerService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<BorrowerResponse> create(
             @RequestBody BorrowerRequest borrowerRequest) {
 

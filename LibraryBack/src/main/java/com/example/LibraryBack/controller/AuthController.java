@@ -1,5 +1,6 @@
 package com.example.LibraryBack.controller;
 
+import com.example.LibraryBack.dto.request.ChangePasswordRequest;
 import com.example.LibraryBack.dto.request.LoginRequest;
 import com.example.LibraryBack.dto.request.RegisterRequest;
 import com.example.LibraryBack.dto.request.VerifyOtpRequest;
@@ -9,10 +10,7 @@ import com.example.LibraryBack.dto.response.RegisterResponse;
 import com.example.LibraryBack.dto.response.VerifyOtpResponse;
 import com.example.LibraryBack.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,5 +32,9 @@ public class AuthController {
                 200,
                 authService.verifyOtp(request)
         );
+    }
+    @PutMapping("/change-password")
+    public String changePassword(@RequestBody ChangePasswordRequest request) {
+        return authService.changePassword(request);
     }
 }

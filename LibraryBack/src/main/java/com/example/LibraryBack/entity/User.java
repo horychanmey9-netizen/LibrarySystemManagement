@@ -56,4 +56,7 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Notification> notifications;
+
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    private Profile profile;
 }

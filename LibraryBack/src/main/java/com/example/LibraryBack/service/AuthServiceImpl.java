@@ -1,5 +1,6 @@
 package com.example.LibraryBack.service;
 
+import com.example.LibraryBack.dto.request.ChangePasswordRequest;
 import com.example.LibraryBack.dto.request.LoginRequest;
 import com.example.LibraryBack.dto.request.RegisterRequest;
 import com.example.LibraryBack.dto.request.VerifyOtpRequest;
@@ -17,6 +18,8 @@ import com.example.LibraryBack.repositoy.OtpRepository;
 import com.example.LibraryBack.repositoy.UserRepository;
 import com.example.LibraryBack.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -86,5 +89,29 @@ public class AuthServiceImpl implements AuthService {
         response.setToken(token);
 
         return response;
+    }
+    @Override
+    public String changePassword(ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotException("Email not found"));
+
+        if (!passwordEncoder.matches(
+                request.getCurrentPassword(),
+                user.getPassword()
+        )) {
+            throw new EmailAndPasswordAreNotMatch(
+                    "Current password is incorrect"
+            );
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(request.getNewPassword())
+        );
+
+        userRepository.save(user);
+        return "Password has been changed successfully";
     }
 }
