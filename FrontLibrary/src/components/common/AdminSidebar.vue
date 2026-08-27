@@ -662,9 +662,17 @@ const mainMenu = [
 
 
   {
-    label: "Borrowings",
+    label: "Borrowing",
 
-    to: "/admin/borrowings",
+    to: "/admin/borrowing",
+
+    icon: "bi bi-journal-arrow-down"
+  },
+
+  {
+    label: "Borrower",
+
+    to: "/admin/borrower",
 
     icon: "bi bi-journal-arrow-down"
   },

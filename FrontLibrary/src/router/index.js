@@ -1,11 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-// Layouts
+// =====================================================
+// LAYOUTS
+// =====================================================
 
 import UserLayout from "../Layouts/UserLayout.vue";
 import AdminLayout from "../Layouts/AdminLayout.vue";
 
-// User Page
+// =====================================================
+// USER PAGES
+// =====================================================
+
 import Home from "../pages/user/Home.vue";
 import BrowseBooks from "../pages/user/BrowseBooks.vue";
 import MyBorrowings from "../pages/user/MyBorrowings.vue";
@@ -13,29 +18,47 @@ import MyFines from "../pages/user/MyFines.vue";
 import Notification from "../pages/user/Notification.vue";
 import UserProfile from "../pages/user/UserProfile.vue";
 
+// =====================================================
+// ADMIN PAGES
+// =====================================================
 
-// Admin Pages
 import AdminDashboard from "../pages/admin/AdminDashboard.vue";
 import Books from "../pages/admin/Books.vue";
-import Borrowings from "../pages/admin/Borrowings.vue";
+import Borrower from "../pages/admin/Borrower.vue";
 import Returns from "../pages/admin/Returns.vue";
 import Users from "../pages/admin/Users.vue";
 import Fines from "../pages/admin/Fines.vue";
 import AdminNotification from "../pages/admin/AdminNotification.vue";
 import AdminProfile from "../pages/admin/AdminProfile.vue";
-import Login from "../pages/auth/login.vue";
-import Register from "../pages/auth/Register.vue"
-import OTPForm from "../pages/auth/OTPForm.vue";
 import Categories from "../pages/admin/Categories.vue";
+import Borrowing from "../pages/admin/Borrowing.vue";
 
+// =====================================================
+// AUTH PAGES
+// =====================================================
+
+import Login from "../pages/auth/login.vue";
+import Register from "../pages/auth/Register.vue";
+import OTPForm from "../pages/auth/OTPForm.vue";
+
+// =====================================================
+// ROUTES
+// =====================================================
 
 const routes = [
-  // ================= AUTH =================
+
+  // ===================================================
+  // ROOT
+  // ===================================================
 
   {
     path: "/",
     redirect: "/login",
   },
+
+  // ===================================================
+  // AUTH
+  // ===================================================
 
   {
     path: "/login",
@@ -55,47 +78,65 @@ const routes = [
     component: OTPForm,
   },
 
-
-  // ================= USER =================
+  // ===================================================
+  // USER
+  // ===================================================
 
   {
-  path: "/user",
-  component: UserLayout,
-  meta: {
-    requiresAuth: true,
-  },
+    path: "/user",
+    component: UserLayout,
+
+    meta: {
+      requiresAuth: true,
+    },
 
     children: [
+
+      // /user
+      // -> /user/home
+      {
+        path: "",
+        redirect: {
+          name: "Home",
+        },
+      },
+
+      // /user/home
       {
         path: "home",
         name: "Home",
         component: Home,
       },
 
+      // /user/browse-books
       {
         path: "browse-books",
         name: "BrowseBooks",
         component: BrowseBooks,
       },
 
+      // /user/my-borrowings
       {
         path: "my-borrowings",
         name: "MyBorrowings",
         component: MyBorrowings,
       },
 
+      // /user/my-fines
       {
         path: "my-fines",
         name: "MyFines",
         component: MyFines,
       },
 
+      // /user/notifications
       {
         path: "notifications",
         name: "Notification",
         component: Notification,
       },
 
+      // /user/profile
       {
         path: "profile",
         name: "UserProfile",
@@ -104,8 +145,9 @@ const routes = [
     ],
   },
 
-
-  // ================= ADMIN =================
+  // ===================================================
+  // ADMIN
+  // ===================================================
 
   {
     path: "/admin",
@@ -117,52 +159,80 @@ const routes = [
     },
 
     children: [
+
+      // /admin
+      // -> /admin/dashboard
+      {
+        path: "",
+        redirect: {
+          name: "AdminDashboard",
+        },
+      },
+
+      // /admin/dashboard
       {
         path: "dashboard",
         name: "AdminDashboard",
         component: AdminDashboard,
       },
 
+      // /admin/books
       {
         path: "books",
         name: "AdminBooks",
         component: Books,
       },
+
+      // /admin/categories
       {
         path: "categories",
         name: "AdminCategories",
         component: Categories,
       },
 
+      // /admin/borrowing
       {
-        path: "borrowings",
-        name: "AdminBorrowings",
-        component: Borrowings,
+        path: "borrowing",
+        name: "AdminBorrowing",
+        component: Borrowing,
       },
 
+      // /admin/borrower
+      {
+        path: "borrower",
+        name: "AdminBorrower",
+        component: Borrower,
+      },
+
+      // /admin/returns
       {
         path: "returns",
         name: "AdminReturns",
         component: Returns,
       },
 
+      // /admin/users
       {
         path: "users",
         name: "AdminUsers",
         component: Users,
       },
+
+      // /admin/fines
       {
         path: "fines",
         name: "AdminFines",
         component: Fines,
       },
 
+      // /admin/notifications
       {
         path: "notifications",
         name: "AdminNotification",
         component: AdminNotification,
       },
 
+      // /admin/profile
       {
         path: "profile",
         name: "AdminProfile",
@@ -171,8 +241,9 @@ const routes = [
     ],
   },
 
-
-  // ================= NOT FOUND =================
+  // ===================================================
+  // NOT FOUND
+  // ===================================================
 
   {
     path: "/:pathMatch(.*)*",
@@ -180,131 +251,138 @@ const routes = [
   },
 ];
 
+// =====================================================
+// CREATE ROUTER
+// =====================================================
+
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+
+  // Optional:
+  // When navigating back/forward, keep scroll at top
+  scrollBehavior() {
+    return {
+      top: 0,
+    };
+  },
 });
+
+// =====================================================
+// AUTHENTICATION GUARD
+// =====================================================
+
 router.beforeEach((to, from, next) => {
 
-  const token =
-    sessionStorage.getItem("token");
+  // ---------------------------------------------------
+  // GET AUTH DATA
+  // ---------------------------------------------------
 
-  const role =
-    sessionStorage.getItem("role");
+  const token = sessionStorage.getItem("token");
+  const role = sessionStorage.getItem("role");
 
+  // ---------------------------------------------------
+  // DEBUG
+  // ---------------------------------------------------
 
-  // =====================================
-  // NOT LOGIN
-  // =====================================
+  console.log("=================================");
+  console.log("ROUTER GUARD");
+  console.log("From:", from.fullPath);
+  console.log("To:", to.fullPath);
+  console.log("Token:", token ? "EXISTS" : "NONE");
+  console.log("Role:", role);
+  console.log("=================================");
+
+  // ===================================================
+  // PUBLIC ROUTES
+  // ===================================================
+
+  const publicRoutes = [
+    "Login",
+    "Register",
+    "OTPForm",
+  ];
+
+  // ===================================================
+  // NOT LOGGED IN
+  // ===================================================
 
   if (!token) {
 
-    if (
-      to.name === "Login" ||
-      to.name === "Register" ||
-      to.name === "OTPForm"
-    ) {
-
+    // Allow public pages
+    if (publicRoutes.includes(to.name)) {
       return next();
-
     }
 
+    // Any protected page -> Login
     return next({
-      name: "Login"
+      name: "Login",
     });
-
   }
 
+  // ===================================================
+  // LOGGED IN
+  // ===================================================
 
-  // =====================================
-  // LOGIN PAGE
-  // =====================================
-
-  if (to.name === "Login") {
-
-    if (role === "ADMIN") {
-
-      return next({
-        name: "AdminDashboard"
-      });
-
-    }
-
-
-    if (role === "USER") {
-
-      return next({
-        name: "Home"
-      });
-
-    }
-
-
-    sessionStorage.clear();
-
-    return next({
-      name: "Login"
-    });
-
-  }
-
-
-  // =====================================
+  // ---------------------------------------------------
   // ADMIN
-  // =====================================
+  // ---------------------------------------------------
 
   if (role === "ADMIN") {
 
-    /*
-     * ADMIN can access:
-     *
-     * /admin/*
-     * /user/*
-     *
-     * Therefore do NOT redirect ADMIN
-     * to dashboard when visiting user pages.
-     */
+    // If ADMIN tries to open Login
+    if (to.name === "Login") {
 
+      return next({
+        name: "AdminDashboard",
+      });
+    }
+
+    // ADMIN can access admin and user pages
     return next();
-
   }
 
-
-  // =====================================
+  // ---------------------------------------------------
   // USER
-  // =====================================
+  // ---------------------------------------------------
 
   if (role === "USER") {
 
-    /*
-     * USER cannot access ADMIN pages
-     */
-
-    if (
-      to.path.startsWith("/admin")
-    ) {
+    // If USER tries to open Login
+    if (to.name === "Login") {
 
       return next({
-        name: "Home"
+        name: "Home",
       });
-
     }
 
+    // USER cannot access ADMIN
+    if (to.path.startsWith("/admin")) {
 
+      return next({
+        name: "Home",
+      });
+    }
+
+    // USER can access user pages
     return next();
-
   }
 
-
-  // =====================================
+  // ===================================================
   // INVALID ROLE
-  // =====================================
+  // ===================================================
+
+  console.warn("Invalid role:", role);
 
   sessionStorage.clear();
 
   return next({
-    name: "Login"
+    name: "Login",
   });
-
 });
+
+// =====================================================
+// EXPORT
+// =====================================================
+
 export default router;

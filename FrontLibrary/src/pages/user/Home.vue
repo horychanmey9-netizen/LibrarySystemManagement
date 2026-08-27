@@ -2,7 +2,9 @@
 
   <div class="home-page">
 
-    <!-- ================= CATEGORIES ================= -->
+    <!-- =====================================================
+         CATEGORIES
+    ====================================================== -->
 
     <section class="section">
 
@@ -29,7 +31,9 @@
       </div>
 
 
-      <!-- ================= CATEGORY LOADING ================= -->
+      <!-- =====================================================
+           CATEGORY LOADING
+      ====================================================== -->
 
       <div
         v-if="loadingCategories"
@@ -43,7 +47,9 @@
       </div>
 
 
-      <!-- ================= CATEGORY CARDS ================= -->
+      <!-- =====================================================
+           CATEGORY CARDS
+      ====================================================== -->
 
       <div
         v-else-if="categories.length > 0"
@@ -60,7 +66,9 @@
       </div>
 
 
-      <!-- ================= NO CATEGORIES ================= -->
+      <!-- =====================================================
+           NO CATEGORIES
+      ====================================================== -->
 
       <div
         v-else
@@ -78,7 +86,9 @@
     </section>
 
 
-    <!-- ================= RECOMMENDED BOOKS ================= -->
+    <!-- =====================================================
+         RECOMMENDED BOOKS
+    ====================================================== -->
 
     <section class="section">
 
@@ -105,7 +115,9 @@
       </div>
 
 
-      <!-- ================= BOOK LOADING ================= -->
+      <!-- =====================================================
+           BOOK LOADING
+      ====================================================== -->
 
       <div
         v-if="loadingBooks"
@@ -119,7 +131,9 @@
       </div>
 
 
-      <!-- ================= BOOK CARDS ================= -->
+      <!-- =====================================================
+           BOOK CARDS
+      ====================================================== -->
 
       <div
         v-else-if="books.length > 0"
@@ -137,7 +151,9 @@
       </div>
 
 
-      <!-- ================= NO BOOKS ================= -->
+      <!-- =====================================================
+           NO BOOKS
+      ====================================================== -->
 
       <div
         v-else
@@ -159,7 +175,9 @@
     </section>
 
 
-    <!-- ================= BOOK DETAILS ================= -->
+    <!-- =====================================================
+         BOOK DETAILS
+    ====================================================== -->
 
     <BookDetails
       v-if="selectedBook"
@@ -249,13 +267,24 @@ export default {
 
   async created() {
 
+    /*
+     * Load both APIs first.
+     *
+     * After books and categories are loaded,
+     * calculate the number of books for every category.
+     */
+
     await Promise.all([
-
       this.fetchCategories(),
-
       this.fetchBooks()
-
     ]);
+
+
+    /*
+     * Calculate book count
+     */
+
+    this.updateCategoryBookCount();
 
   },
 
@@ -289,7 +318,7 @@ export default {
 
 
         /*
-         * Expected:
+         * Backend response:
          *
          * {
          *   status: 200,
@@ -297,7 +326,6 @@ export default {
          *   data: [...]
          * }
          */
-
 
         if (
           response &&
@@ -329,6 +357,22 @@ export default {
           this.categories = [];
 
         }
+
+
+        /*
+         * Add default bookCount
+         *
+         * This prevents undefined.
+         */
+
+        this.categories =
+          this.categories.map(category => ({
+
+            ...category,
+
+            bookCount: 0
+
+          }));
 
 
         console.log(
@@ -382,7 +426,7 @@ export default {
 
 
         /*
-         * Expected:
+         * Backend response:
          *
          * {
          *   status: 200,
@@ -390,7 +434,6 @@ export default {
          *   data: [...]
          * }
          */
-
 
         if (
           response &&
@@ -425,8 +468,7 @@ export default {
 
 
         /*
-         * Make sure every book has
-         * bookmarked property
+         * Make sure every book has bookmarked
          */
 
         this.books =
@@ -470,13 +512,153 @@ export default {
 
 
     // ==================================================
+    // UPDATE CATEGORY BOOK COUNT
+    // ==================================================
+
+    updateCategoryBookCount() {
+
+      console.log(
+        "CALCULATING CATEGORY BOOK COUNT..."
+      );
+
+
+      this.categories =
+        this.categories.map(category => {
+
+
+          /*
+           * Count books that belong to
+           * this category.
+           */
+
+          const count =
+            this.books.filter(book => {
+
+              // =========================================
+              // CASE 1
+              // book.category = { id, name }
+              // =========================================
+
+              if (
+                book.category &&
+                typeof book.category === "object"
+              ) {
+
+                return (
+                  String(book.category.id) ===
+                  String(category.id)
+                );
+
+              }
+
+
+              // =========================================
+              // CASE 2
+              // book.categoryId = 1
+              // =========================================
+
+              if (
+                book.categoryId !== undefined &&
+                book.categoryId !== null
+              ) {
+
+                return (
+                  String(book.categoryId) ===
+                  String(category.id)
+                );
+
+              }
+
+
+              // =========================================
+              // CASE 3
+              // book.categoryName = "Programming"
+              // =========================================
+
+              if (
+                book.categoryName !== undefined &&
+                book.categoryName !== null
+              ) {
+
+                return (
+                  String(book.categoryName)
+                    .toLowerCase()
+                    ===
+                  String(category.name)
+                    .toLowerCase()
+                );
+
+              }
+
+
+              // =========================================
+              // CASE 4
+              // book.category = "Programming"
+              // =========================================
+
+              if (
+                typeof book.category === "string"
+              ) {
+
+                return (
+                  book.category
+                    .toLowerCase()
+                  ===
+                  String(category.name)
+                    .toLowerCase()
+                );
+
+              }
+
+
+              return false;
+
+            }).length;
+
+
+          console.log(
+            `Category: ${category.name} => ${count} books`
+          );
+
+
+          return {
+
+            ...category,
+
+            bookCount: count
+
+          };
+
+        });
+
+
+      console.log(
+        "FINAL CATEGORIES:",
+        this.categories
+      );
+
+    },
+
+
+    // ==================================================
     // BOOKMARK
     // ==================================================
 
     toggleBookmark(book) {
 
+      if (!book) {
+        return;
+      }
+
+
       book.bookmarked =
         !book.bookmarked;
+
+
+      console.log(
+        "Bookmark:",
+        book
+      );
 
     },
 

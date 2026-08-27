@@ -18,342 +18,58 @@ export async function getBooks() {
     }
   });
 
-  const text = await response.text();
-
-  let data;
+  let result = null;
 
   try {
-    data = text ? JSON.parse(text) : null;
-  } catch (error) {
-    console.error("Invalid JSON response:", text);
-    throw new Error(text || "Invalid server response");
+    result = await response.json();
+  } catch (e) {
+    result = null;
   }
-
-  if (!response.ok) {
-    throw new Error(
-      data?.msg ||
-      data?.message ||
-      `Failed to get books (${response.status})`
-    );
-  }
-
-  console.log("BOOK API RESPONSE:", data);
-
-  return data;
-}
-
-
-// =====================================================
-// CREATE BOOK
-// Backend:
-// POST /api/book
-// Content-Type: multipart/form-data
-// =====================================================
-
-export async function createBook(bookRequest, imageFile) {
-
-  const token = sessionStorage.getItem("token");
-
-  const formData = new FormData();
-
-
-  // ===================================================
-  // BOOK REQUEST
-  // ===================================================
-
-  formData.append(
-    "categoryId",
-    bookRequest.categoryId
-  );
-
-  formData.append(
-    "title",
-    bookRequest.title
-  );
-
-  formData.append(
-    "qty",
-    bookRequest.qty
-  );
-
-  formData.append(
-    "description",
-    bookRequest.description || ""
-  );
-
-  formData.append(
-    "author",
-    bookRequest.author
-  );
-
-  formData.append(
-    "pages",
-    bookRequest.pages || ""
-  );
-
-  formData.append(
-    "isbn",
-    bookRequest.isbn || ""
-  );
-
-  formData.append(
-    "language",
-    bookRequest.language || ""
-  );
-
-  formData.append(
-    "status",
-    bookRequest.status || "Available"
-  );
-
-
-  // ===================================================
-  // IMAGE
-  // ===================================================
-
-  if (imageFile) {
-
-    formData.append(
-      "file",
-      imageFile
-    );
-
-  }
-
-
-  console.log(
-    "CREATE BOOK REQUEST:",
-    bookRequest
-  );
-
-  console.log(
-    "CREATE BOOK IMAGE:",
-    imageFile
-  );
-
-
-  const response = await fetch(
-    API_URL,
-    {
-      method: "POST",
-
-      headers: {
-        "Authorization": `Bearer ${token}`
-      },
-
-      body: formData
-    }
-  );
-
-
-  const text = await response.text();
-
-  let data;
-
-  try {
-
-    data = text
-      ? JSON.parse(text)
-      : null;
-
-  } catch (error) {
-
-    console.error(
-      "CREATE BOOK INVALID RESPONSE:",
-      text
-    );
-
-    throw new Error(
-      text ||
-      "Server returned an invalid response"
-    );
-
-  }
-
 
   if (!response.ok) {
 
     throw new Error(
-      data?.msg ||
-      data?.message ||
-      `Failed to create book (${response.status})`
+      result?.message ||
+      result?.msg ||
+      `Failed to fetch books (${response.status})`
     );
 
   }
 
+  console.log("BOOK API RESPONSE:", result);
 
-  console.log(
-    "CREATE BOOK RESPONSE:",
-    data
-  );
+  // Backend:
+  // {
+  //   msg: "...",
+  //   status: 200,
+  //   data: [...]
+  // }
 
+  if (Array.isArray(result)) {
+    return result;
+  }
 
-  return data;
+  if (Array.isArray(result?.data)) {
+    return result.data;
+  }
+
+  return [];
 
 }
 
 
 // =====================================================
-// UPDATE BOOK
-// Backend:
-// PUT /api/book/{id}
+// GET BOOK BY ID
 // =====================================================
 
-export async function updateBook(
-  id,
-  bookRequest,
-  imageFile = null
-) {
+export async function getBookById(id) {
 
   const token = sessionStorage.getItem("token");
-
-  const formData = new FormData();
-
-
-  formData.append(
-    "categoryId",
-    bookRequest.categoryId
-  );
-
-  formData.append(
-    "title",
-    bookRequest.title
-  );
-
-  formData.append(
-    "qty",
-    bookRequest.qty
-  );
-
-  formData.append(
-    "description",
-    bookRequest.description || ""
-  );
-
-  formData.append(
-    "author",
-    bookRequest.author
-  );
-
-  formData.append(
-    "pages",
-    bookRequest.pages || ""
-  );
-
-  formData.append(
-    "isbn",
-    bookRequest.isbn || ""
-  );
-
-  formData.append(
-    "language",
-    bookRequest.language || ""
-  );
-
-  formData.append(
-    "status",
-    bookRequest.status || "Available"
-  );
-
-
-  if (imageFile) {
-
-    formData.append(
-      "file",
-      imageFile
-    );
-
-  }
-
-
-  console.log(
-    "UPDATE BOOK REQUEST:",
-    bookRequest
-  );
-
 
   const response = await fetch(
     `${API_URL}/${id}`,
     {
-      method: "PUT",
-
-      headers: {
-        "Authorization": `Bearer ${token}`
-      },
-
-      body: formData
-    }
-  );
-
-
-  const text = await response.text();
-
-  let data;
-
-  try {
-
-    data = text
-      ? JSON.parse(text)
-      : null;
-
-  } catch (error) {
-
-    console.error(
-      "UPDATE BOOK INVALID RESPONSE:",
-      text
-    );
-
-    throw new Error(
-      text ||
-      "Server returned an invalid response"
-    );
-
-  }
-
-
-  if (!response.ok) {
-
-    throw new Error(
-      data?.msg ||
-      data?.message ||
-      `Failed to update book (${response.status})`
-    );
-
-  }
-
-
-  console.log(
-    "UPDATE BOOK RESPONSE:",
-    data
-  );
-
-
-  return data;
-
-}
-
-
-// =====================================================
-// DELETE BOOK
-// Backend:
-// DELETE /api/book/{id}
-// =====================================================
-
-export async function deleteBookById(id) {
-
-  const token = sessionStorage.getItem("token");
-
-
-  console.log(
-    "DELETE BOOK ID:",
-    id
-  );
-
-
-  const response = await fetch(
-    `${API_URL}/${id}`,
-    {
-      method: "DELETE",
+      method: "GET",
 
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -362,38 +78,543 @@ export async function deleteBookById(id) {
     }
   );
 
+  let result = null;
 
-  const text = await response.text();
+  try {
+    result = await response.json();
+  } catch (e) {
+    result = null;
+  }
 
-  let data = null;
+  if (!response.ok) {
 
+    throw new Error(
+      result?.message ||
+      result?.msg ||
+      `Failed to fetch book (${response.status})`
+    );
+
+  }
+
+  console.log("BOOK BY ID RESPONSE:", result);
+
+  return result?.data ?? result;
+
+}
+
+
+// =====================================================
+// CREATE BOOK
+// =====================================================
+
+export async function createBook(book) {
+
+  const token = sessionStorage.getItem("token");
+
+  const formData = new FormData();
+
+
+  // ===================================================
+  // BASIC DATA
+  // ===================================================
+
+  formData.append(
+    "title",
+    book.title ?? ""
+  );
+
+  formData.append(
+    "description",
+    book.description ?? ""
+  );
+
+  formData.append(
+    "author",
+    book.author ?? ""
+  );
+
+  formData.append(
+    "isbn",
+    book.isbn ?? ""
+  );
+
+
+  // ===================================================
+  // CATEGORY
+  // ===================================================
+
+  if (
+    book.categoryId !== null &&
+    book.categoryId !== undefined &&
+    book.categoryId !== ""
+  ) {
+
+    formData.append(
+      "categoryId",
+      String(book.categoryId)
+    );
+
+  }
+
+
+  // ===================================================
+  // QUANTITY
+  // Backend expects qty
+  // ===================================================
+
+  formData.append(
+    "qty",
+    String(
+      book.qty ??
+      book.quantity ??
+      0
+    )
+  );
+
+
+  // ===================================================
+  // PAGES
+  // ===================================================
+
+  if (
+    book.pages !== null &&
+    book.pages !== undefined &&
+    book.pages !== ""
+  ) {
+
+    formData.append(
+      "pages",
+      String(book.pages)
+    );
+
+  }
+
+
+  // ===================================================
+  // LANGUAGE
+  // ===================================================
+
+  if (book.language) {
+
+    formData.append(
+      "language",
+      book.language
+    );
+
+  }
+
+
+  // ===================================================
+  // STATUS
+  // ===================================================
+
+  if (book.status) {
+
+    formData.append(
+      "status",
+      book.status
+    );
+
+  }
+
+
+  // ===================================================
+  // IMAGE
+  // ===================================================
+
+  if (
+    book.file &&
+    book.file instanceof File
+  ) {
+
+    formData.append(
+      "file",
+      book.file
+    );
+
+  }
+
+
+  // ===================================================
+  // DEBUG
+  // ===================================================
+
+  console.log(
+    "CREATE BOOK FORM DATA:"
+  );
+
+  for (
+    const [key, value]
+    of formData.entries()
+  ) {
+
+    console.log(
+      key,
+      value
+    );
+
+  }
+
+
+  // ===================================================
+  // REQUEST
+  // ===================================================
+
+  const response = await fetch(
+    API_URL,
+    {
+      method: "POST",
+
+      headers: {
+        "Authorization":
+          `Bearer ${token}`
+      },
+
+      body: formData
+    }
+  );
+
+
+  let result = null;
 
   try {
 
-    data = text
-      ? JSON.parse(text)
-      : null;
+    result =
+      await response.json();
 
-  } catch (error) {
+  } catch (e) {
 
-    console.error(
-      "DELETE BOOK INVALID RESPONSE:",
-      text
-    );
-
-    throw new Error(
-      text ||
-      "Server returned an invalid response"
-    );
+    result = null;
 
   }
 
 
   if (!response.ok) {
 
+    console.error(
+      "CREATE BOOK BACKEND ERROR:",
+      result
+    );
+
     throw new Error(
-      data?.msg ||
-      data?.message ||
+      result?.message ||
+      result?.msg ||
+      `Failed to create book (${response.status})`
+    );
+
+  }
+
+
+  console.log(
+    "CREATE BOOK SUCCESS:",
+    result
+  );
+
+
+  return result;
+
+}
+
+
+// =====================================================
+// UPDATE BOOK
+// =====================================================
+
+export async function updateBook(id, book) {
+
+  const token =
+    sessionStorage.getItem("token");
+
+  const formData =
+    new FormData();
+
+
+  // ===================================================
+  // BASIC DATA
+  // ===================================================
+
+  formData.append(
+    "title",
+    book.title ?? ""
+  );
+
+  formData.append(
+    "description",
+    book.description ?? ""
+  );
+
+  formData.append(
+    "author",
+    book.author ?? ""
+  );
+
+  formData.append(
+    "isbn",
+    book.isbn ?? ""
+  );
+
+
+  // ===================================================
+  // CATEGORY
+  // Backend expects categoryId
+  // ===================================================
+
+  if (
+    book.categoryId !== null &&
+    book.categoryId !== undefined &&
+    book.categoryId !== ""
+  ) {
+
+    formData.append(
+      "categoryId",
+      String(book.categoryId)
+    );
+
+  }
+
+
+  // ===================================================
+  // QUANTITY
+  // Backend expects qty
+  // ===================================================
+
+  formData.append(
+    "qty",
+    String(
+      book.qty ??
+      book.quantity ??
+      0
+    )
+  );
+
+
+  // ===================================================
+  // PAGES
+  // ===================================================
+
+  if (
+    book.pages !== null &&
+    book.pages !== undefined &&
+    book.pages !== ""
+  ) {
+
+    formData.append(
+      "pages",
+      String(book.pages)
+    );
+
+  }
+
+
+  // ===================================================
+  // LANGUAGE
+  // ===================================================
+
+  if (book.language) {
+
+    formData.append(
+      "language",
+      book.language
+    );
+
+  }
+
+
+  // ===================================================
+  // STATUS
+  // ===================================================
+
+  if (book.status) {
+
+    formData.append(
+      "status",
+      book.status
+    );
+
+  }
+
+
+  // ===================================================
+  // NEW IMAGE
+  //
+  // IMPORTANT:
+  // Only append file if user selected NEW image.
+  //
+  // If file is missing:
+  // Backend will keep old image.
+  // ===================================================
+
+  if (
+    book.file &&
+    book.file instanceof File
+  ) {
+
+    formData.append(
+      "file",
+      book.file
+    );
+
+  }
+
+
+  // ===================================================
+  // DEBUG
+  // ===================================================
+
+  console.log(
+    "================================"
+  );
+
+  console.log(
+    "UPDATE BOOK ID:",
+    id
+  );
+
+  console.log(
+    "UPDATE BOOK FORM DATA:"
+  );
+
+  for (
+    const [key, value]
+    of formData.entries()
+  ) {
+
+    console.log(
+      key,
+      value
+    );
+
+  }
+
+  console.log(
+    "================================"
+  );
+
+
+  // ===================================================
+  // REQUEST
+  // DO NOT SET Content-Type
+  // ===================================================
+
+  const response =
+    await fetch(
+      `${API_URL}/${id}`,
+      {
+        method: "PUT",
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`
+        },
+
+        body: formData
+      }
+    );
+
+
+  // ===================================================
+  // RESPONSE
+  // ===================================================
+
+  let result = null;
+
+  try {
+
+    result =
+      await response.json();
+
+  } catch (e) {
+
+    result = null;
+
+  }
+
+
+  // ===================================================
+  // ERROR
+  // ===================================================
+
+  if (!response.ok) {
+
+    console.error(
+      "UPDATE BOOK BACKEND ERROR:",
+      result
+    );
+
+    throw new Error(
+      result?.message ||
+      result?.msg ||
+      `Failed to update book (${response.status})`
+    );
+
+  }
+
+
+  // ===================================================
+  // SUCCESS
+  // ===================================================
+
+  console.log(
+    "UPDATE BOOK SUCCESS:",
+    result
+  );
+
+
+  return result;
+
+}
+
+
+// =====================================================
+// DELETE BOOK
+// =====================================================
+
+export async function deleteBookById(id) {
+
+  const token =
+    sessionStorage.getItem("token");
+
+
+  const response =
+    await fetch(
+      `${API_URL}/${id}`,
+      {
+        method: "DELETE",
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`,
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  let result = null;
+
+  try {
+
+    result =
+      await response.json();
+
+  } catch (e) {
+
+    result = null;
+
+  }
+
+
+  if (!response.ok) {
+
+    console.error(
+      "DELETE BOOK ERROR:",
+      result
+    );
+
+    throw new Error(
+      result?.message ||
+      result?.msg ||
       `Failed to delete book (${response.status})`
     );
 
@@ -401,11 +622,23 @@ export async function deleteBookById(id) {
 
 
   console.log(
-    "DELETE BOOK RESPONSE:",
-    data
+    "DELETE BOOK SUCCESS:",
+    result
   );
 
 
-  return data;
+  return result;
+
+}
+
+
+// =====================================================
+// ALIAS
+// If some file imports deleteBook()
+// =====================================================
+
+export async function deleteBook(id) {
+
+  return deleteBookById(id);
 
 }

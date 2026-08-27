@@ -2,9 +2,9 @@
 
   <div class="table-card">
 
-    <!-- =========================
-         Table Header
-    ========================== -->
+    <!-- =====================================================
+         TABLE HEADER
+    ====================================================== -->
 
     <div class="table-header">
 
@@ -30,13 +30,17 @@
     </div>
 
 
-    <!-- =========================
-         Table
-    ========================== -->
+    <!-- =====================================================
+         TABLE
+    ====================================================== -->
 
     <div class="table-wrapper">
 
       <table>
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
 
         <thead>
 
@@ -52,6 +56,10 @@
 
             <th>Due Date</th>
 
+            <th>Return Date</th>
+
+            <th>Fine</th>
+
             <th>Status</th>
 
             <th>Action</th>
@@ -61,18 +69,24 @@
         </thead>
 
 
+        <!-- =================================================
+             BODY
+        ================================================== -->
+
         <tbody>
 
-          <!-- =====================
-               Data
-          ====================== -->
+          <!-- =================================================
+               BORROWING DATA
+          ================================================== -->
 
           <tr
             v-for="item in borrowings"
             :key="item.id"
           >
 
-            <!-- ID -->
+            <!-- =================================================
+                 ID
+            ================================================== -->
 
             <td>
 
@@ -85,30 +99,37 @@
             </td>
 
 
-            <!-- User -->
+            <!-- =================================================
+                 USER
+            ================================================== -->
 
             <td>
 
               <div class="user-info">
 
+                <!-- AVATAR -->
+
                 <div class="avatar">
 
-                  {{ getInitials(item.user) }}
+                  {{ getInitials(item.userName) }}
 
                 </div>
 
+
+                <!-- USER NAME -->
 
                 <div>
 
                   <span class="user-name">
 
-                    {{ item.user }}
+                    {{ item.userName || "Unknown User" }}
 
                   </span>
 
                   <small>
 
-                    {{ item.email }}
+                    User ID:
+                    {{ item.userId || "-" }}
 
                   </small>
 
@@ -119,88 +140,146 @@
             </td>
 
 
-            <!-- Book -->
+            <!-- =================================================
+                 BOOK
+            ================================================== -->
 
             <td>
 
-              <span class="book-name">
+              <div class="book-info">
 
-                {{ item.book }}
+                <span class="book-name">
+
+                  {{ item.bookTitle || "Unknown Book" }}
+
+                </span>
+
+                <small>
+
+                  Book ID:
+                  {{ item.bookId || "-" }}
+
+                </small>
+
+              </div>
+
+            </td>
+
+
+            <!-- =================================================
+                 BORROW DATE
+            ================================================== -->
+
+            <td>
+
+              <span>
+
+                {{ formatDate(item.borrowDate) }}
 
               </span>
 
             </td>
 
 
-            <!-- Borrow Date -->
-
-            <td>
-
-              {{ item.borrowDate }}
-
-            </td>
-
-
-            <!-- Due Date -->
+            <!-- =================================================
+                 DUE DATE
+            ================================================== -->
 
             <td>
 
               <span
                 :class="{
-                  'late-date':
-                    item.status === 'Late'
+                  'late-date': isLate(item)
                 }"
               >
 
-                {{ item.dueDate }}
+                {{ formatDate(item.dueDate) }}
 
               </span>
 
             </td>
 
 
-            <!-- Status -->
+            <!-- =================================================
+                 RETURN DATE
+            ================================================== -->
+
+            <td>
+
+              <span
+                :class="{
+                  'returned-date': item.returnDate
+                }"
+              >
+
+                {{
+                  item.returnDate
+                    ? formatDate(item.returnDate)
+                    : "Not returned"
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- =================================================
+                 FINE
+            ================================================== -->
+
+            <td>
+
+              <span
+                class="fine"
+                :class="{
+                  'has-fine': Number(item.fine || 0) > 0
+                }"
+              >
+
+                ${{ formatFine(item.fine) }}
+
+              </span>
+
+            </td>
+
+
+            <!-- =================================================
+                 STATUS
+            ================================================== -->
 
             <td>
 
               <span
                 class="status-badge"
-                :class="
-                  item.status.toLowerCase()
-                "
+                :class="getStatusClass(item.status)"
               >
 
                 <i
-                  :class="
-                    item.status === 'Borrowed'
-                      ? 'bi bi-book'
-                      : item.status === 'Late'
-                        ? 'bi bi-clock'
-                        : 'bi bi-check-circle'
-                  "
+                  :class="getStatusIcon(item.status)"
                 ></i>
 
-                {{ item.status }}
+                {{ formatStatus(item.status) }}
 
               </span>
 
             </td>
 
 
-            <!-- Actions -->
+            <!-- =================================================
+                 ACTION
+            ================================================== -->
 
             <td>
 
               <div class="actions">
 
-                <!-- View -->
+                <!-- VIEW -->
 
                 <button
+                  type="button"
                   class="action-btn view"
                   title="View Details"
-                  @click="
-                    $emit('view', item)
-                  "
+                  @click="$emit('view', item)"
                 >
 
                   <i class="bi bi-eye"></i>
@@ -208,17 +287,16 @@
                 </button>
 
 
-                <!-- Return -->
+                <!-- RETURN -->
 
                 <button
+                  type="button"
                   class="action-btn return"
                   title="Return Book"
                   :disabled="
-                    item.status === 'Returned'
+                    isReturned(item)
                   "
-                  @click="
-                    $emit('return', item)
-                  "
+                  @click="$emit('return', item)"
                 >
 
                   <i class="bi bi-arrow-return-left"></i>
@@ -226,17 +304,16 @@
                 </button>
 
 
-                <!-- Renew -->
+                <!-- RENEW -->
 
                 <button
+                  type="button"
                   class="action-btn renew"
                   title="Renew Book"
                   :disabled="
-                    item.status === 'Returned'
+                    isReturned(item)
                   "
-                  @click="
-                    $emit('renew', item)
-                  "
+                  @click="$emit('renew', item)"
                 >
 
                   <i class="bi bi-arrow-clockwise"></i>
@@ -250,16 +327,16 @@
           </tr>
 
 
-          <!-- =====================
-               Empty State
-          ====================== -->
+          <!-- =================================================
+               EMPTY
+          ================================================== -->
 
           <tr
             v-if="borrowings.length === 0"
           >
 
             <td
-              colspan="7"
+              colspan="9"
               class="empty-state"
             >
 
@@ -274,7 +351,7 @@
               </h3>
 
               <p>
-                Try changing your search or filter.
+                There are currently no borrowing records.
               </p>
 
             </td>
@@ -294,44 +371,346 @@
 
 <script setup>
 
-/* =========================
-   Props
-========================= */
+/* =========================================================
+   PROPS
+========================================================= */
 
 defineProps({
 
   borrowings: {
+
     type: Array,
+
     default: () => []
+
   }
 
 });
 
 
-/* =========================
-   Events
-========================= */
+/* =========================================================
+   EVENTS
+========================================================= */
 
 defineEmits([
+
   "view",
+
   "return",
+
   "renew"
+
 ]);
 
 
-/* =========================
-   Initials
-========================= */
+/* =========================================================
+   GET INITIALS
+========================================================= */
 
 function getInitials(name) {
 
-  if (!name) return "";
+  if (!name) {
 
-  return name
-    .split(" ")
-    .map(word => word[0])
+    return "?";
+
+  }
+
+
+  return String(name)
+
+    .trim()
+
+    .split(/\s+/)
+
+    .filter(Boolean)
+
+    .map(word => word.charAt(0))
+
+    .slice(0, 2)
+
     .join("")
+
     .toUpperCase();
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(date) {
+
+  if (!date) {
+
+    return "-";
+
+  }
+
+
+  try {
+
+    const value =
+      new Date(date + "T00:00:00");
+
+
+    if (Number.isNaN(value.getTime())) {
+
+      return date;
+
+    }
+
+
+    return value.toLocaleDateString(
+      "en-GB",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }
+    );
+
+  } catch (error) {
+
+    return date;
+
+  }
+
+}
+
+
+/* =========================================================
+   FORMAT FINE
+========================================================= */
+
+function formatFine(fine) {
+
+  const value =
+    Number(fine || 0);
+
+
+  return value.toFixed(2);
+
+}
+
+
+/* =========================================================
+   FORMAT STATUS
+========================================================= */
+
+function formatStatus(status) {
+
+  if (!status) {
+
+    return "Unknown";
+
+  }
+
+
+  const value =
+    String(status)
+      .toLowerCase();
+
+
+  return value.charAt(0).toUpperCase()
+    + value.slice(1);
+
+}
+
+
+/* =========================================================
+   STATUS CLASS
+========================================================= */
+
+function getStatusClass(status) {
+
+  if (!status) {
+
+    return "unknown";
+
+  }
+
+
+  const value =
+    String(status)
+      .toLowerCase();
+
+
+  if (
+    value === "borrowed"
+  ) {
+
+    return "borrowed";
+
+  }
+
+
+  if (
+    value === "returned"
+  ) {
+
+    return "returned";
+
+  }
+
+
+  if (
+    value === "late" ||
+    value === "overdue"
+  ) {
+
+    return "late";
+
+  }
+
+
+  if (
+    value === "renewed"
+  ) {
+
+    return "renewed";
+
+  }
+
+
+  return "unknown";
+
+}
+
+
+/* =========================================================
+   STATUS ICON
+========================================================= */
+
+function getStatusIcon(status) {
+
+  if (!status) {
+
+    return "bi bi-question-circle";
+
+  }
+
+
+  const value =
+    String(status)
+      .toLowerCase();
+
+
+  if (
+    value === "borrowed"
+  ) {
+
+    return "bi bi-book";
+
+  }
+
+
+  if (
+    value === "returned"
+  ) {
+
+    return "bi bi-check-circle";
+
+  }
+
+
+  if (
+    value === "late" ||
+    value === "overdue"
+  ) {
+
+    return "bi bi-clock";
+
+  }
+
+
+  if (
+    value === "renewed"
+  ) {
+
+    return "bi bi-arrow-clockwise";
+
+  }
+
+
+  return "bi bi-question-circle";
+
+}
+
+
+/* =========================================================
+   IS RETURNED
+========================================================= */
+
+function isReturned(item) {
+
+  return (
+
+    String(item.status || "")
+      .toUpperCase() === "RETURNED"
+
+    ||
+
+    !!item.returnDate
+
+  );
+
+}
+
+
+/* =========================================================
+   IS LATE
+========================================================= */
+
+function isLate(item) {
+
+  if (!item.dueDate) {
+
+    return false;
+
+  }
+
+
+  if (isReturned(item)) {
+
+    return false;
+
+  }
+
+
+  const status =
+    String(item.status || "")
+      .toUpperCase();
+
+
+  if (
+    status === "LATE" ||
+    status === "OVERDUE"
+  ) {
+
+    return true;
+
+  }
+
+
+  const today =
+    new Date();
+
+  today.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
+  const due =
+    new Date(
+      item.dueDate + "T00:00:00"
+    );
+
+
+  return due < today;
 
 }
 
@@ -340,7 +719,12 @@ function getInitials(name) {
 
 <style scoped>
 
+/* =========================================================
+   CARD
+========================================================= */
+
 .table-card {
+
   overflow: hidden;
 
   background: white;
@@ -348,14 +732,16 @@ function getInitials(name) {
   border: 1px solid #e5e7eb;
 
   border-radius: 10px;
+
 }
 
 
-/* =========================
-   Header
-========================= */
+/* =========================================================
+   HEADER
+========================================================= */
 
 .table-header {
+
   display: flex;
 
   align-items: center;
@@ -366,28 +752,36 @@ function getInitials(name) {
 
   border-bottom:
     1px solid #e5e7eb;
+
 }
 
 
 .table-header h2 {
+
   margin: 0;
 
   color: #1f2937;
 
   font-size: 18px;
+
+  font-weight: 700;
+
 }
 
 
 .table-header p {
+
   margin: 5px 0 0;
 
   color: #6b7280;
 
   font-size: 13px;
+
 }
 
 
 .borrowing-count {
+
   padding: 6px 10px;
 
   border-radius: 6px;
@@ -397,33 +791,49 @@ function getInitials(name) {
   color: #4b5563;
 
   font-size: 13px;
+
+  font-weight: 600;
+
 }
 
 
-/* =========================
-   Table
-========================= */
+/* =========================================================
+   TABLE WRAPPER
+========================================================= */
 
 .table-wrapper {
+
+  width: 100%;
+
   overflow-x: auto;
+
 }
 
 
+/* =========================================================
+   TABLE
+========================================================= */
+
 table {
+
   width: 100%;
 
-  min-width: 950px;
+  min-width: 1200px;
 
   border-collapse: collapse;
+
 }
 
 
 thead {
+
   background: #f9fafb;
+
 }
 
 
 th {
+
   padding: 14px 18px;
 
   text-align: left;
@@ -437,10 +847,12 @@ th {
   text-transform: uppercase;
 
   white-space: nowrap;
+
 }
 
 
 td {
+
   padding: 15px 18px;
 
   border-top:
@@ -451,39 +863,54 @@ td {
   font-size: 14px;
 
   white-space: nowrap;
+
+}
+
+
+tbody tr {
+
+  transition: background 0.2s ease;
+
 }
 
 
 tbody tr:hover {
+
   background: #fafafa;
+
 }
 
 
-/* =========================
+/* =========================================================
    ID
-========================= */
+========================================================= */
 
 .id-number {
+
   color: #6b7280;
 
   font-weight: 600;
+
 }
 
 
-/* =========================
-   User
-========================= */
+/* =========================================================
+   USER
+========================================================= */
 
 .user-info {
+
   display: flex;
 
   align-items: center;
 
   gap: 10px;
+
 }
 
 
 .avatar {
+
   width: 36px;
 
   height: 36px;
@@ -494,6 +921,8 @@ tbody tr:hover {
 
   justify-content: center;
 
+  flex-shrink: 0;
+
   border-radius: 50%;
 
   background: #dbeafe;
@@ -503,54 +932,115 @@ tbody tr:hover {
   font-size: 12px;
 
   font-weight: 700;
-}
 
-
-.user-info small {
-  display: block;
-
-  margin-top: 2px;
-
-  color: #9ca3af;
-
-  font-size: 11px;
 }
 
 
 .user-name {
+
+  display: block;
+
   color: #374151;
-
-  font-weight: 500;
-}
-
-
-/* =========================
-   Book
-========================= */
-
-.book-name {
-  color: #374151;
-
-  font-weight: 500;
-}
-
-
-/* =========================
-   Late Date
-========================= */
-
-.late-date {
-  color: #dc2626;
 
   font-weight: 600;
+
 }
 
 
-/* =========================
-   Status
-========================= */
+.user-info small {
+
+  display: block;
+
+  margin-top: 3px;
+
+  color: #9ca3af;
+
+  font-size: 11px;
+
+}
+
+
+/* =========================================================
+   BOOK
+========================================================= */
+
+.book-info {
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+
+.book-name {
+
+  color: #374151;
+
+  font-weight: 600;
+
+}
+
+
+.book-info small {
+
+  margin-top: 3px;
+
+  color: #9ca3af;
+
+  font-size: 11px;
+
+}
+
+
+/* =========================================================
+   DATES
+========================================================= */
+
+.late-date {
+
+  color: #dc2626;
+
+  font-weight: 700;
+
+}
+
+
+.returned-date {
+
+  color: #15803d;
+
+  font-weight: 600;
+
+}
+
+
+/* =========================================================
+   FINE
+========================================================= */
+
+.fine {
+
+  color: #64748b;
+
+  font-weight: 600;
+
+}
+
+
+.fine.has-fine {
+
+  color: #dc2626;
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
 
 .status-badge {
+
   display: inline-flex;
 
   align-items: center;
@@ -564,42 +1054,70 @@ tbody tr:hover {
   font-size: 12px;
 
   font-weight: 600;
+
 }
 
 
 .status-badge.borrowed {
+
   background: #dbeafe;
 
   color: #2563eb;
+
 }
 
 
 .status-badge.late {
+
   background: #fee2e2;
 
   color: #dc2626;
+
 }
 
 
 .status-badge.returned {
+
   background: #dcfce7;
 
   color: #15803d;
+
 }
 
 
-/* =========================
-   Actions
-========================= */
+.status-badge.renewed {
+
+  background: #ffedd5;
+
+  color: #ea580c;
+
+}
+
+
+.status-badge.unknown {
+
+  background: #f1f5f9;
+
+  color: #64748b;
+
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
 
 .actions {
+
   display: flex;
 
   gap: 7px;
+
 }
 
 
 .action-btn {
+
   width: 34px;
 
   height: 34px;
@@ -619,93 +1137,126 @@ tbody tr:hover {
   font-size: 14px;
 
   transition: 0.2s;
+
 }
 
 
-/* View */
+/* =========================================================
+   VIEW
+========================================================= */
 
 .action-btn.view {
+
   background: #eff6ff;
 
   color: #2563eb;
+
 }
 
 
 .action-btn.view:hover {
+
   background: #dbeafe;
+
 }
 
 
-/* Return */
+/* =========================================================
+   RETURN
+========================================================= */
 
 .action-btn.return {
+
   background: #ecfdf5;
 
   color: #059669;
+
 }
 
 
 .action-btn.return:hover {
+
   background: #d1fae5;
+
 }
 
 
-/* Renew */
+/* =========================================================
+   RENEW
+========================================================= */
 
 .action-btn.renew {
+
   background: #fff7ed;
 
   color: #ea580c;
+
 }
 
 
 .action-btn.renew:hover {
+
   background: #ffedd5;
+
 }
 
 
-/* Disabled */
+/* =========================================================
+   DISABLED
+========================================================= */
 
 .action-btn:disabled {
+
   opacity: 0.4;
 
   cursor: not-allowed;
+
 }
 
 
-/* =========================
-   Empty
-========================= */
+/* =========================================================
+   EMPTY
+========================================================= */
 
 .empty-state {
-  padding: 60px 20px;
+
+  padding: 60px 20px !important;
 
   text-align: center;
+
 }
 
 
 .empty-icon {
+
   margin-bottom: 10px;
 
   color: #d1d5db;
 
   font-size: 40px;
+
 }
 
 
 .empty-state h3 {
+
   margin: 0;
 
   color: #374151;
+
+  font-size: 16px;
+
 }
 
 
 .empty-state p {
+
   margin-top: 5px;
 
   color: #9ca3af;
 
   font-size: 14px;
+
 }
 
 </style>
