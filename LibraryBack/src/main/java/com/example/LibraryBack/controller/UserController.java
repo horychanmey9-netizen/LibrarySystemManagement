@@ -1,46 +1,26 @@
 package com.example.LibraryBack.controller;
 
-import com.example.LibraryBack.dto.request.UserRequest;
+import com.example.LibraryBack.dto.response.ApiResponse;
 import com.example.LibraryBack.dto.response.UserResponse;
 import com.example.LibraryBack.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
-
     private final UserService userService;
 
-    @GetMapping("/GetUser")
-    public ResponseEntity<List<UserResponse>> getUser() {
-
-        List<UserResponse> users = userService.getUser();
-
-        return ResponseEntity.ok(users);
-    }
-    @PutMapping("/updateUser/{id}")
-    public ResponseEntity<UserResponse> updateUser(
-            @PathVariable Long id,
-            @RequestBody UserRequest userRequest) {
-
-        UserResponse response = userService.updateUser(id, userRequest);
-
-        return ResponseEntity.ok(response);
+    @GetMapping("/getData")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<UserResponse>> getData(){
+        return new ApiResponse<>("Get users sucessfully",200,userService.getData());
     }
 
-    @DeleteMapping("/deleteUser/{id}")
-    public ResponseEntity<Void> deleteUser(
-            @PathVariable Long id) {
-
-        userService.deleteUser(id);
-
-        return ResponseEntity.noContent().build();
-    }
 }
-
-
