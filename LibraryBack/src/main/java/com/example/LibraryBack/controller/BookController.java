@@ -18,6 +18,11 @@ import java.util.List;
 public class BookController {
     private final BookService bookService;
 
+    @GetMapping("/test")
+    public String test() {
+        return "BOOK CONTROLLER WORKING";
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<BookResponse> create(@ModelAttribute BookRequest bookRequest, @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
