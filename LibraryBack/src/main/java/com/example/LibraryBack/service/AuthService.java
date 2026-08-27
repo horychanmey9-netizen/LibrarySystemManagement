@@ -1,5 +1,6 @@
 package com.example.LibraryBack.service;
 
+import com.example.LibraryBack.dto.request.ChangePasswordRequest;
 import com.example.LibraryBack.dto.request.LoginRequest;
 import com.example.LibraryBack.dto.request.RegisterRequest;
 import com.example.LibraryBack.dto.request.VerifyOtpRequest;
@@ -11,4 +12,5 @@ public interface AuthService {
     RegisterResponse register(RegisterRequest registerRequest);
     LoginResponse login(LoginRequest loginRequest);
     VerifyOtpResponse verifyOtp(VerifyOtpRequest request);
+    String changePassword(ChangePasswordRequest request);
 }
