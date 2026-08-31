@@ -2,7 +2,7 @@ package com.example.LibraryBack.service;
 
 import com.example.LibraryBack.entity.Otp;
 import com.example.LibraryBack.entity.User;
-import com.example.LibraryBack.repositoy.OtpRepository;
+import com.example.LibraryBack.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

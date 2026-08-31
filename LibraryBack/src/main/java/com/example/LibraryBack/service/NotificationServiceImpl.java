@@ -8,8 +8,8 @@ import com.example.LibraryBack.dto.response.NotificationResponse;
 import com.example.LibraryBack.entity.Notification;
 import com.example.LibraryBack.entity.User;
 import com.example.LibraryBack.mapper.NotificationMapper;
-import com.example.LibraryBack.repositoy.NotificationRepository;
-import com.example.LibraryBack.repositoy.UserRepository;
+import com.example.LibraryBack.repository.NotificationRepository;
+import com.example.LibraryBack.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;

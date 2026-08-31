@@ -1,8 +1,9 @@
 package com.example.LibraryBack.controller;
 
-import com.example.LibraryBack.dto.request.ChangePasswordRequest;
+import com.example.LibraryBack.dto.request.ForgotPasswordRequest;
 import com.example.LibraryBack.dto.request.LoginRequest;
 import com.example.LibraryBack.dto.request.RegisterRequest;
+import com.example.LibraryBack.dto.request.ResetPasswordRequest;
 import com.example.LibraryBack.dto.request.VerifyOtpRequest;
 import com.example.LibraryBack.dto.response.ApiResponse;
 import com.example.LibraryBack.dto.response.LoginResponse;
@@ -17,14 +18,27 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+
     @PostMapping("/register")
-    public ApiResponse<RegisterResponse> register(@RequestBody RegisterRequest registerRequest){
-        return new ApiResponse<>("register successfully",201,authService.register(registerRequest));
+    public ApiResponse<RegisterResponse> register(@RequestBody RegisterRequest registerRequest) {
+        return new ApiResponse<>(
+                "register successfully",
+                201,
+                authService.register(registerRequest)
+        );
     }
+
+
     @PostMapping("/login")
-    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest loginRequest){
-        return new ApiResponse<>("login successfully",200,authService.login(loginRequest));
+    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        return new ApiResponse<>(
+                "login successfully",
+                200,
+                authService.login(loginRequest)
+        );
     }
+
+
     @PostMapping("/verify-otp")
     public ApiResponse<VerifyOtpResponse> verifyOtp(@RequestBody VerifyOtpRequest request) {
         return new ApiResponse<>(
@@ -33,8 +47,22 @@ public class AuthController {
                 authService.verifyOtp(request)
         );
     }
-    @PutMapping("/change-password")
-    public String changePassword(@RequestBody ChangePasswordRequest request) {
-        return authService.changePassword(request);
+
+    @PostMapping("/forgot-password")
+    public ApiResponse<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return new ApiResponse<>(
+                "Password reset email sent successfully",
+                200,
+                authService.forgotPassword(request)
+        );
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponse<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return new ApiResponse<>(
+                "Password has been changed successfully",
+                200,
+                authService.resetPassword(request)
+        );
     }
 }

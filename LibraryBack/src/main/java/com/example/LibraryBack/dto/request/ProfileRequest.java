@@ -16,5 +16,5 @@ public class ProfileRequest {
     private String gender;
     private LocalDate dateOfBirth;
     private String address;
-
+    private String name;
 }
