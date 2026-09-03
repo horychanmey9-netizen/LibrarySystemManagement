@@ -40,6 +40,8 @@ import Borrowing from "../pages/admin/Borrowing.vue";
 import Login from "../pages/auth/login.vue";
 import Register from "../pages/auth/Register.vue";
 import OTPForm from "../pages/auth/OTPForm.vue";
+import ForgotPassword from "../pages/auth/ForgotPassword.vue";
+import ResetPassword from "../pages/auth/ResetPassword.vue";
 
 // =====================================================
 // ROUTES
@@ -76,6 +78,16 @@ const routes = [
     path: "/otp",
     name: "OTPForm",
     component: OTPForm,
+  },
+  { 
+    path: "/forgot-password", 
+    name: "ForgotPassword", 
+    component: ForgotPassword, 
+  }, 
+  {
+    path: '/reset-password',
+    name: "ResetPassword",
+    component: ResetPassword
   },
 
   // ===================================================
@@ -297,10 +309,12 @@ router.beforeEach((to, from, next) => {
   // PUBLIC ROUTES
   // ===================================================
 
-  const publicRoutes = [
-    "Login",
-    "Register",
-    "OTPForm",
+  const publicRoutes = [ 
+    "Login", 
+    "Register", 
+    "OTPForm", 
+    "ForgotPassword",
+    "ResetPassword"
   ];
 
   // ===================================================

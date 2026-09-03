@@ -7,84 +7,102 @@
       <!-- LOGIN CARD -->
       <div class="bg-white rounded-2xl shadow-xl p-8">
 
-        <!-- Title -->
+        <!-- TITLE -->
         <h2 class="text-2xl text-center font-bold text-slate-800 mb-6">
           Login
         </h2>
 
-        <!-- Error Message -->
+        <!-- ERROR MESSAGE -->
         <div
           v-if="error"
           class="mb-5 bg-red-50 border border-red-200
-                 text-red-600 rounded-xl p-3 text-sm"
+                    text-red-600 rounded-xl p-3 text-sm"
         >
           {{ error }}
         </div>
 
-        <!-- Login Form -->
-        <form @submit.prevent="login" class="space-y-5">
+        <!-- LOGIN FORM -->
+        <form
+          @submit.prevent="login"
+          class="space-y-5"
+        >
 
           <!-- EMAIL -->
           <div>
             <label
+              for="email"
               class="block text-sm font-medium text-slate-700 mb-2"
             >
               Email
             </label>
 
             <input
+              id="email"
               v-model="form.email"
               type="email"
               placeholder="Enter your email"
               autocomplete="email"
               class="w-full px-4 py-3 border border-slate-300 rounded-xl
-                     outline-none focus:ring-2 focus:ring-indigo-500
-                     focus:border-indigo-500 transition"
+                      outline-none focus:ring-2 focus:ring-indigo-500
+                      focus:border-indigo-500 transition"
             />
           </div>
 
           <!-- PASSWORD -->
           <div>
-            <div class="flex justify-between mb-2">
 
-              <label
-                class="text-sm font-medium text-slate-700"
-              >
-                Password
-              </label>
+            <!-- PASSWORD LABEL -->
+            <label
+              for="password"
+              class="block text-sm font-medium text-slate-700 mb-2"
+            >
+              Password
+            </label>
 
-              <a
-                href="#"
-                class="text-sm text-indigo-600 hover:text-indigo-700"
-              >
-                Forgot password?
-              </a>
-
-            </div>
-
+            <!-- PASSWORD INPUT -->
             <input
+              id="password"
               v-model="form.password"
               type="password"
               placeholder="Enter your password"
               autocomplete="current-password"
               class="w-full px-4 py-3 border border-slate-300 rounded-xl
-                     outline-none focus:ring-2 focus:ring-indigo-500
-                     focus:border-indigo-500 transition"
+                      outline-none focus:ring-2 focus:ring-indigo-500
+                      focus:border-indigo-500 transition"
             />
+
           </div>
 
-          <!-- REMEMBER ME -->
-          <div class="flex items-center gap-2">
+          <!-- REMEMBER ME + FORGOT PASSWORD -->
+          <div class="flex justify-between items-center">
 
-            <input
-              v-model="form.remember"
-              type="checkbox"
-              class="w-4 h-4 accent-indigo-600"
-            />
+            <!-- REMEMBER ME -->
+            <div class="flex items-center gap-2">
 
-            <label class="text-sm text-slate-600">
-              Remember me
-            </label>
+              <input
+                id="remember"
+                v-model="form.remember"
+                type="checkbox"
+                class="w-4 h-4 accent-indigo-600"
+              />
+
+              <label
+                for="remember"
+                class="text-sm text-slate-600 cursor-pointer"
+              >
+                Remember me
+              </label>
+
+            </div>
+
+            <!-- FORGOT PASSWORD -->
+            <router-link
+              to="/forgot-password"
+              class="text-sm text-indigo-600 hover:text-indigo-700
+                     hover:underline transition"
+            >
+              Forgot password?
+            </router-link>
 
           </div>
 
@@ -93,7 +111,7 @@
             type="submit"
             :disabled="loading"
             class="w-full py-3 bg-indigo-600 hover:bg-indigo-700
-                   disabled:bg-indigo-300
+                   disabled:bg-indigo-300 disabled:cursor-not-allowed
                    text-white font-semibold rounded-xl transition
                    shadow-md hover:shadow-lg"
           >
@@ -127,6 +145,9 @@ import { useRouter } from "vue-router";
 
 import { Login } from "../../service/autherService";
 
+// =========================
+// ROUTER
+// =========================
 const router = useRouter();
 
 // =========================
@@ -148,6 +169,8 @@ const error = ref("");
 // LOGIN
 // =========================
 const login = async () => {
+
+  // Clear old error
   error.value = "";
 
   // =========================
@@ -164,6 +187,8 @@ const login = async () => {
   }
 
   try {
+
+    // Start loading
     loading.value = true;
 
     // =========================
@@ -180,13 +205,15 @@ const login = async () => {
     // GET LOGIN DATA
     // =========================
     const token = response?.data?.token;
-    const user = response?.data?.userResponse;
+
+    const user =
+      response?.data?.userResponse;
 
     console.log("Token:", token);
     console.log("User:", user);
 
     // =========================
-    // CHECK DATA
+    // CHECK LOGIN RESPONSE
     // =========================
     if (!token || !user) {
       throw new Error(
@@ -224,25 +251,40 @@ const login = async () => {
     // =========================
     console.log(
       "Saved user:",
-      JSON.parse(sessionStorage.getItem("user"))
+      JSON.parse(
+        sessionStorage.getItem("user")
+      )
     );
 
     // =========================
     // REDIRECT BY ROLE
     // =========================
     if (user.role === "ADMIN") {
-      router.push("/admin/dashboard");
+
+      router.push(
+        "/admin/dashboard"
+      );
+
     } else {
-      router.push("/user/home");
+
+      router.push(
+        "/user/home"
+      );
+
     }
 
   } catch (err) {
-    console.error("Login error:", err);
+
+    console.error(
+      "Login error:",
+      err
+    );
 
     // =========================
     // ACCOUNT NOT FOUND
     // =========================
     if (err.status === 404) {
+
       error.value =
         "Account not found. Please register first.";
 
@@ -254,9 +296,10 @@ const login = async () => {
     }
 
     // =========================
-    // ACCOUNT NOT ACTIVE
+    // ACCOUNT NOT VERIFIED
     // =========================
     if (err.status === 403) {
+
       error.value =
         "Your account is not verified. Please verify OTP.";
 
@@ -267,6 +310,7 @@ const login = async () => {
     // WRONG EMAIL / PASSWORD
     // =========================
     if (err.status === 401) {
+
       error.value =
         "Incorrect email or password.";
 
@@ -281,7 +325,10 @@ const login = async () => {
       "Login failed. Please try again.";
 
   } finally {
+
+    // Stop loading
     loading.value = false;
+
   }
 };
 </script>
