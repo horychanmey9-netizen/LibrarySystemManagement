@@ -8,551 +8,595 @@
 
     <div class="mb-6">
 
-      <h1 class="text-2xl font-bold text-slate-800">
-        Create Borrowing
-      </h1>
+      <div class="flex items-center justify-between">
 
-      <p class="mt-1 text-sm text-slate-500">
-        Select a book and enter borrower information
-      </p>
+        <div>
 
-    </div>
+          <h1 class="text-2xl font-bold text-slate-800">
+            Borrowing
+          </h1>
 
-
-    <!-- =====================================================
-         MAIN LAYOUT
-    ====================================================== -->
-
-    <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
-
-
-      <!-- ===================================================
-           LEFT SIDE - BOOK SEARCH
-      ==================================================== -->
-
-      <div
-        class="xl:col-span-3 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
-      >
-
-        <!-- BOOK HEADER -->
-
-        <div class="p-5 border-b border-slate-200">
-
-          <div class="flex items-center justify-between mb-4">
-
-            <div>
-
-              <h2 class="text-lg font-bold text-slate-800">
-                Select Book
-              </h2>
-
-              <p class="text-sm text-slate-500 mt-1">
-                Search by title, author or ISBN
-              </p>
-
-            </div>
-
-
-            <!-- BOOK COUNT -->
-
-            <div
-              class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-sm font-semibold"
-            >
-              {{ filteredBooks.length }} Books
-            </div>
-
-          </div>
-
-
-          <!-- SEARCH -->
-
-          <div class="relative">
-
-            <span
-              class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            >
-              🔍
-            </span>
-
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Search book title, author or ISBN..."
-              class="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            />
-
-          </div>
-
-        </div>
-
-
-        <!-- BOOK LIST -->
-
-        <div class="p-5 h-[650px] overflow-y-auto">
-
-          <!-- LOADING -->
-
-          <div
-            v-if="loading"
-            class="h-full flex items-center justify-center"
-          >
-
-            <div class="text-center">
-
-              <div
-                class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"
-              ></div>
-
-              <p class="mt-3 text-sm text-slate-500">
-                Loading books...
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <!-- NO BOOK -->
-
-          <div
-            v-else-if="filteredBooks.length === 0"
-            class="h-full flex items-center justify-center"
-          >
-
-            <div class="text-center">
-
-              <div class="text-5xl mb-3">
-                📚
-              </div>
-
-              <h3 class="font-semibold text-slate-700">
-                No books found
-              </h3>
-
-              <p class="text-sm text-slate-400 mt-1">
-                Try another search keyword
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <!-- BOOK GRID -->
-
-          <div
-            v-else
-            class="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-
-            <div
-              v-for="book in filteredBooks"
-              :key="book.id"
-              class="relative"
-            >
-
-              <BorrowBookCard
-                :book="book"
-                @select="selectBook"
-              />
-
-
-              <!-- SELECTED OVERLAY -->
-
-              <div
-                v-if="
-                  selectedBook &&
-                  String(selectedBook.id) === String(book.id)
-                "
-                class="absolute inset-0 rounded-2xl border-2 border-blue-500 pointer-events-none"
-              >
-
-                <div
-                  class="absolute top-3 right-3 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full"
-                >
-                  Selected
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- ===================================================
-           RIGHT SIDE - BORROWER
-      ==================================================== -->
-
-      <div
-        class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
-      >
-
-        <!-- BORROWER HEADER -->
-
-        <div class="p-5 border-b border-slate-200">
-
-          <h2 class="text-lg font-bold text-slate-800">
-            Borrower Information
-          </h2>
-
-          <p class="text-sm text-slate-500 mt-1">
-            Enter information of the person borrowing
+          <p class="mt-1 text-sm text-slate-500">
+            Manage borrowing requests
           </p>
 
         </div>
 
 
-        <!-- RIGHT CONTENT -->
+        <button
+          type="button"
+          @click="loadBorrowings"
+          :disabled="loading"
+          class="px-4 py-2.5 rounded-xl
+                 bg-white border border-slate-200
+                 text-slate-700 font-semibold
+                 hover:bg-slate-50
+                 disabled:opacity-50"
+        >
 
-        <div class="p-5 h-[700px] overflow-y-auto">
+          <span v-if="loading">
+            Loading...
+          </span>
+
+          <span v-else>
+            ↻ Refresh
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
 
 
-          <!-- =================================================
-               SELECTED BOOK
-          ================================================== -->
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
 
-          <div class="mb-6">
+    <div
+      class="grid grid-cols-1
+             sm:grid-cols-2
+             lg:grid-cols-4
+             gap-4 mb-6"
+    >
 
-            <h3 class="text-sm font-bold text-slate-700 mb-3">
-              Selected Book
-            </h3>
+      <!-- PENDING -->
+
+      <div
+        class="bg-white rounded-2xl
+               border border-slate-200
+               shadow-sm p-5"
+      >
+
+        <p class="text-sm text-slate-500">
+          Pending
+        </p>
+
+        <p class="text-2xl font-bold
+                  text-amber-600 mt-1">
+          {{ pendingCount }}
+        </p>
+
+      </div>
 
 
-            <!-- NO BOOK -->
+      <!-- BORROWED -->
 
-            <div
-              v-if="!selectedBook"
-              class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center"
+      <div
+        class="bg-white rounded-2xl
+               border border-slate-200
+               shadow-sm p-5"
+      >
+
+        <p class="text-sm text-slate-500">
+          Borrowed
+        </p>
+
+        <p class="text-2xl font-bold
+                  text-blue-600 mt-1">
+          {{ borrowedCount }}
+        </p>
+
+      </div>
+
+
+      <!-- RETURNED -->
+
+      <div
+        class="bg-white rounded-2xl
+               border border-slate-200
+               shadow-sm p-5"
+      >
+
+        <p class="text-sm text-slate-500">
+          Returned
+        </p>
+
+        <p class="text-2xl font-bold
+                  text-green-600 mt-1">
+          {{ returnedCount }}
+        </p>
+
+      </div>
+
+
+      <!-- REJECTED -->
+
+      <div
+        class="bg-white rounded-2xl
+               border border-slate-200
+               shadow-sm p-5"
+      >
+
+        <p class="text-sm text-slate-500">
+          Rejected
+        </p>
+
+        <p class="text-2xl font-bold
+                  text-red-600 mt-1">
+          {{ rejectedCount }}
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SEARCH + FILTER
+    ====================================================== -->
+
+    <div
+      class="bg-white rounded-2xl
+             border border-slate-200
+             shadow-sm mb-6 p-5"
+    >
+
+      <div
+        class="flex flex-col
+               lg:flex-row
+               lg:items-center
+               lg:justify-between
+               gap-4"
+      >
+
+        <!-- SEARCH -->
+
+        <div class="relative w-full lg:max-w-md">
+
+          <span
+            class="absolute left-4 top-1/2
+                   -translate-y-1/2
+                   text-slate-400"
+          >
+            🔍
+          </span>
+
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search book or borrower..."
+            class="w-full pl-11 pr-4 py-3
+                   border border-slate-200
+                   rounded-xl outline-none
+                   focus:ring-2
+                   focus:ring-blue-500"
+          />
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div class="flex flex-wrap gap-2">
+
+          <button
+            v-for="status in statuses"
+            :key="status"
+            type="button"
+            @click="selectedStatus = status"
+            class="px-4 py-2 rounded-lg
+                   text-sm font-semibold"
+            :class="
+              selectedStatus === status
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            "
+          >
+
+            {{ status }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
+
+    <div
+      v-if="error"
+      class="mb-6 p-4 rounded-xl
+             bg-red-50
+             border border-red-200
+             text-red-700"
+    >
+
+      {{ error }}
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLE
+    ====================================================== -->
+
+    <div
+      class="bg-white rounded-2xl
+             border border-slate-200
+             shadow-sm overflow-hidden"
+    >
+
+      <!-- LOADING -->
+
+      <div
+        v-if="loading"
+        class="py-20 text-center"
+      >
+
+        <div
+          class="w-10 h-10
+                 border-4 border-blue-200
+                 border-t-blue-600
+                 rounded-full
+                 animate-spin mx-auto"
+        ></div>
+
+        <p class="mt-4 text-sm text-slate-500">
+          Loading borrowing requests...
+        </p>
+
+      </div>
+
+
+      <!-- EMPTY -->
+
+      <div
+        v-else-if="filteredBorrowings.length === 0"
+        class="py-20 text-center"
+      >
+
+        <div class="text-5xl mb-4">
+          📭
+        </div>
+
+        <h3 class="font-bold text-slate-700">
+          No borrowing requests
+        </h3>
+
+        <p class="text-sm text-slate-400 mt-1">
+          No records found.
+        </p>
+
+      </div>
+
+
+      <!-- TABLE -->
+
+      <div
+        v-else
+        class="overflow-x-auto"
+      >
+
+        <table class="w-full min-w-[1000px]">
+
+          <thead
+            class="bg-slate-50
+                   border-b border-slate-200"
+          >
+
+            <tr>
+
+              <th
+                class="px-6 py-4 text-left
+                       text-xs font-bold
+                       uppercase
+                       text-slate-500"
+              >
+                Book
+              </th>
+
+              <th
+                class="px-6 py-4 text-left
+                       text-xs font-bold
+                       uppercase
+                       text-slate-500"
+              >
+                Borrower
+              </th>
+
+              <th
+                class="px-6 py-4 text-left
+                       text-xs font-bold
+                       uppercase
+                       text-slate-500"
+              >
+                Borrow Date
+              </th>
+
+              <th
+                class="px-6 py-4 text-left
+                       text-xs font-bold
+                       uppercase
+                       text-slate-500"
+              >
+                Due Date
+              </th>
+
+              <th
+                class="px-6 py-4 text-left
+                       text-xs font-bold
+                       uppercase
+                       text-slate-500"
+              >
+                Status
+              </th>
+
+              <th
+                class="px-6 py-4 text-right
+                       text-xs font-bold
+                       uppercase
+                       text-slate-500"
+              >
+                Action
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody
+            class="divide-y divide-slate-100"
+          >
+
+            <tr
+              v-for="item in filteredBorrowings"
+              :key="item.id"
+              class="hover:bg-slate-50"
             >
 
-              <div class="text-4xl">
-                📖
-              </div>
+              <!-- BOOK -->
 
-              <p class="mt-2 text-sm font-medium text-slate-600">
-                No book selected
-              </p>
+              <td class="px-6 py-4">
 
-              <p class="text-xs text-slate-400 mt-1">
-                Select a book from the left side
-              </p>
-
-            </div>
-
-
-            <!-- SELECTED BOOK -->
-
-            <div
-              v-else
-              class="rounded-xl border border-blue-200 bg-blue-50 p-4"
-            >
-
-              <div class="flex items-start gap-4">
-
-                <!-- IMAGE -->
-
-                <div
-                  class="w-16 h-20 rounded-lg overflow-hidden bg-white flex-shrink-0"
-                >
-
-                  <img
-                    v-if="selectedBook.image"
-                    :src="selectedBook.image"
-                    :alt="selectedBook.title"
-                    class="w-full h-full object-cover"
-                  />
+                <div class="flex items-center gap-3">
 
                   <div
-                    v-else
-                    class="w-full h-full flex items-center justify-center text-2xl"
+                    class="w-12 h-14
+                           rounded-lg
+                           bg-slate-100
+                           flex items-center
+                           justify-center
+                           overflow-hidden"
                   >
-                    📚
-                  </div>
 
-                </div>
+                    <img
+                      v-if="getBookImage(item)"
+                      :src="getBookImage(item)"
+                      :alt="getBookTitle(item)"
+                      class="w-full h-full object-cover"
+                    />
 
-
-                <!-- INFO -->
-
-                <div class="min-w-0 flex-1">
-
-                  <h4
-                    class="font-bold text-slate-800 truncate"
-                  >
-                    {{ selectedBook.title }}
-                  </h4>
-
-                  <p class="text-sm text-slate-500 mt-1">
-                    {{ selectedBook.author }}
-                  </p>
-
-                  <div class="flex items-center gap-2 mt-2">
-
-                    <span
-                      class="text-xs font-semibold text-blue-600"
-                    >
-                      Available:
-                    </span>
-
-                    <span
-                      class="text-xs font-bold text-slate-700"
-                    >
-                      {{ maxQuantity }}
+                    <span v-else>
+                      📚
                     </span>
 
                   </div>
 
+
+                  <div>
+
+                    <p
+                      class="font-semibold
+                             text-slate-800"
+                    >
+                      {{ getBookTitle(item) }}
+                    </p>
+
+                    <p
+                      class="text-xs
+                             text-slate-400 mt-1"
+                    >
+                      Book ID:
+                      {{ item.bookId }}
+                    </p>
+
+                  </div>
+
                 </div>
 
+              </td>
 
-                <!-- REMOVE -->
 
-                <button
-                  type="button"
-                  @click="removeSelectedBook"
-                  class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-red-500 transition"
+              <!-- USER -->
+
+              <td class="px-6 py-4">
+
+                <p
+                  class="font-semibold
+                         text-slate-800"
                 >
-                  ✕
-                </button>
+                  {{ getUserName(item) }}
+                </p>
 
-              </div>
+                <p
+                  class="text-xs
+                         text-slate-400 mt-1"
+                >
+                  User ID:
+                  {{ item.userId }}
+                </p>
 
-            </div>
+              </td>
 
-          </div>
-
-
-          <!-- =================================================
-               BORROWER FORM
-          ================================================== -->
-
-          <div class="space-y-5">
-
-
-            <!-- NAME -->
-
-            <div>
-
-              <label
-                class="block text-sm font-semibold text-slate-700 mb-2"
-              >
-                Borrower Name
-                <span class="text-red-500">*</span>
-              </label>
-
-              <input
-                v-model="borrower.name"
-                type="text"
-                placeholder="Enter borrower name"
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              />
-
-            </div>
-
-
-            <!-- EMAIL -->
-
-            <div>
-
-              <label
-                class="block text-sm font-semibold text-slate-700 mb-2"
-              >
-                Email
-                <span class="text-red-500">*</span>
-              </label>
-
-              <input
-                v-model="borrower.email"
-                @input="onEmailInput"
-                type="email"
-                placeholder="Enter borrower email"
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              />
-
-              <p
-                v-if="selectedUser"
-                class="text-xs text-green-600 mt-2"
-              >
-                ✓ User found: {{ selectedUser.name }}
-              </p>
-
-            </div>
-
-
-            <!-- PHONE -->
-
-            <div>
-
-              <label
-                class="block text-sm font-semibold text-slate-700 mb-2"
-              >
-                Phone
-              </label>
-
-              <input
-                v-model="borrower.phone"
-                type="text"
-                placeholder="Enter phone number"
-                class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              />
-
-            </div>
-
-
-            <!-- DATE -->
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
               <!-- BORROW DATE -->
 
-              <div>
+              <td
+                class="px-6 py-4
+                       text-sm
+                       text-slate-600"
+              >
 
-                <label
-                  class="block text-sm font-semibold text-slate-700 mb-2"
-                >
-                  Borrow Date
-                  <span class="text-red-500">*</span>
-                </label>
+                {{ formatDate(item.borrowDate) }}
 
-                <input
-                  v-model="borrower.borrowDate"
-                  type="date"
-                  class="w-full px-3 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                />
-
-              </div>
+              </td>
 
 
               <!-- DUE DATE -->
 
-              <div>
-
-                <label
-                  class="block text-sm font-semibold text-slate-700 mb-2"
-                >
-                  Due Date
-                  <span class="text-red-500">*</span>
-                </label>
-
-                <input
-                  v-model="borrower.dueDate"
-                  type="date"
-                  :min="borrower.borrowDate"
-                  class="w-full px-3 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                />
-
-              </div>
-
-            </div>
-
-
-            <!-- QUANTITY -->
-
-            <div>
-
-              <label
-                class="block text-sm font-semibold text-slate-700 mb-2"
+              <td
+                class="px-6 py-4
+                       text-sm
+                       text-slate-600"
               >
-                Quantity
-              </label>
 
-              <div class="flex items-center gap-3">
+                {{ formatDate(item.dueDate) }}
 
-                <button
-                  type="button"
-                  @click="decreaseQuantity"
-                  :disabled="borrower.quantity <= 1"
-                  class="w-11 h-11 rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold"
-                >
-                  −
-                </button>
+              </td>
 
 
-                <input
-                  v-model.number="borrower.quantity"
-                  type="number"
-                  min="1"
-                  :max="maxQuantity"
-                  class="flex-1 text-center px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              <!-- STATUS -->
 
+              <td class="px-6 py-4">
 
-                <button
-                  type="button"
-                  @click="increaseQuantity"
-                  :disabled="
-                    !selectedBook ||
-                    borrower.quantity >= maxQuantity
+                <span
+                  class="inline-flex
+                         px-3 py-1.5
+                         rounded-full
+                         text-xs
+                         font-bold"
+                  :class="
+                    statusClass(item.status)
                   "
-                  class="w-11 h-11 rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold"
                 >
-                  +
-                </button>
 
-              </div>
+                  {{ item.status }}
 
-              <p class="text-xs text-slate-400 mt-2">
-                Maximum available:
-                {{ maxQuantity }}
-              </p>
+                </span>
 
-            </div>
+              </td>
 
 
-            <!-- ERROR -->
+              <!-- ACTION -->
 
-            <div
-              v-if="validationError"
-              class="p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600"
-            >
-              {{ validationError }}
-            </div>
+              <td class="px-6 py-4">
+
+                <div
+                  v-if="
+                    String(item.status)
+                      .toUpperCase()
+                      === 'PENDING'
+                  "
+                  class="flex
+                         justify-end
+                         gap-2"
+                >
+
+                  <!-- ACCEPT -->
+
+                  <button
+                    type="button"
+                    @click="acceptRequest(item)"
+                    :disabled="
+                      processingId === item.id
+                    "
+                    class="px-3 py-2
+                           rounded-lg
+                           bg-green-600
+                           text-white
+                           text-sm
+                           font-semibold
+                           hover:bg-green-700
+                           disabled:opacity-50"
+                  >
+
+                    <span
+                      v-if="
+                        processingId === item.id &&
+                        processingAction === 'accept'
+                      "
+                    >
+                      Accepting...
+                    </span>
+
+                    <span v-else>
+                      ✓ Accept
+                    </span>
+
+                  </button>
 
 
-            <!-- CREATE BUTTON -->
+                  <!-- REJECT -->
 
-            <button
-              type="button"
-              @click="submitBorrowing"
-              :disabled="submitting || !canSubmit"
-              class="w-full py-3.5 rounded-xl font-semibold text-white transition"
-              :class="
-                submitting || !canSubmit
-                  ? 'bg-slate-300 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              "
-            >
+                  <button
+                    type="button"
+                    @click="rejectRequest(item)"
+                    :disabled="
+                      processingId === item.id
+                    "
+                    class="px-3 py-2
+                           rounded-lg
+                           bg-red-50
+                           text-red-600
+                           border
+                           border-red-200
+                           text-sm
+                           font-semibold
+                           hover:bg-red-100
+                           disabled:opacity-50"
+                  >
 
-              <span v-if="submitting">
-                Creating Borrowing...
-              </span>
+                    <span
+                      v-if="
+                        processingId === item.id &&
+                        processingAction === 'reject'
+                      "
+                    >
+                      Rejecting...
+                    </span>
 
-              <span v-else>
-                Create Borrowing
-              </span>
+                    <span v-else>
+                      ✕ Reject
+                    </span>
 
-            </button>
+                  </button>
+
+                </div>
 
 
-            <!-- RESET -->
+                <div
+                  v-else
+                  class="text-right
+                         text-xs
+                         text-slate-400"
+                >
+                  No action
+                </div>
 
-            <button
-              type="button"
-              @click="resetForm"
-              :disabled="submitting"
-              class="w-full py-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition disabled:opacity-50"
-            >
-              Reset
-            </button>
+              </td>
 
-          </div>
+            </tr>
 
-        </div>
+          </tbody>
+
+        </table>
 
       </div>
 
@@ -565,157 +609,117 @@
 
 <script>
 
-import BorrowBookCard
-  from "../../components/admin/borrowings/BorrowBookCard.vue";
-
-import BorrowerForm
-  from "../../components/admin/borrowings/BorrowerForm.vue";
-
-import SelectBook
-  from "../../components/admin/borrowings/SelectBook.vue";
-
-
-/*
-|--------------------------------------------------------------------------
-| BOOK SERVICE
-|--------------------------------------------------------------------------
-*/
-
 import {
-  getBooks
-} from "../../service/bookService.js";
-
-
-/*
-|--------------------------------------------------------------------------
-| BORROWING SERVICE
-|--------------------------------------------------------------------------
-*/
-
-import {
-  createBorrowing
+  getBorrowings,
+  acceptBorrowing,
+  rejectBorrowing
 } from "../../service/borrowingService.js";
-
-
-/*
-|--------------------------------------------------------------------------
-| USER SERVICE
-|--------------------------------------------------------------------------
-*/
-
-import {
-  getUsers
-} from "../../service/userService.js";
 
 
 export default {
 
-  name: "CreateBorrowing",
+  name: "Borrowing",
 
-
-  // =====================================================
-  // COMPONENTS
-  // =====================================================
-
-  components: {
-
-    BorrowBookCard,
-
-    BorrowerForm,
-
-    SelectBook
-
-  },
-
-
-  // =====================================================
-  // DATA
-  // =====================================================
 
   data() {
 
     return {
 
-      // =================================================
-      // BOOKS
-      // =================================================
-
-      books: [],
-
-      search: "",
+      borrowings: [],
 
       loading: false,
 
+      error: "",
 
-      // =================================================
-      // SELECTED BOOK
-      // =================================================
+      search: "",
 
-      selectedBook: null,
+      selectedStatus: "ALL",
 
+      statuses: [
+        "ALL",
+        "PENDING",
+        "BORROWED",
+        "LATE",
+        "RETURNED",
+        "REJECTED"
+      ],
 
-      // =================================================
-      // USERS
-      // =================================================
+      processingId: null,
 
-      users: [],
-
-      usersLoading: false,
-
-      selectedUser: null,
-
-
-      // =================================================
-      // BORROWER
-      // =================================================
-
-      borrower: {
-
-        name: "",
-
-        email: "",
-
-        phone: "",
-
-        borrowDate:
-          this.getToday(),
-
-        dueDate: "",
-
-        quantity: 1
-
-      },
-
-
-      // =================================================
-      // SUBMIT
-      // =================================================
-
-      submitting: false,
-
-
-      // =================================================
-      // VALIDATION
-      // =================================================
-
-      validationError: ""
+      processingAction: ""
 
     };
 
   },
 
 
-  // =====================================================
-  // COMPUTED
-  // =====================================================
-
   computed: {
 
-    // =================================================
-    // FILTER BOOKS
-    // =================================================
+    // ===================================================
+    // PENDING
+    // ===================================================
 
-    filteredBooks() {
+    pendingCount() {
+
+      return this.borrowings.filter(
+        item =>
+          String(item.status)
+            .toUpperCase() === "PENDING"
+      ).length;
+
+    },
+
+
+    // ===================================================
+    // BORROWED
+    // ===================================================
+
+    borrowedCount() {
+
+      return this.borrowings.filter(
+        item =>
+          String(item.status)
+            .toUpperCase() === "BORROWED"
+      ).length;
+
+    },
+
+
+    // ===================================================
+    // RETURNED
+    // ===================================================
+
+    returnedCount() {
+
+      return this.borrowings.filter(
+        item =>
+          String(item.status)
+            .toUpperCase() === "RETURNED"
+      ).length;
+
+    },
+
+
+    // ===================================================
+    // REJECTED
+    // ===================================================
+
+    rejectedCount() {
+
+      return this.borrowings.filter(
+        item =>
+          String(item.status)
+            .toUpperCase() === "REJECTED"
+      ).length;
+
+    },
+
+
+    // ===================================================
+    // FILTER
+    // ===================================================
+
+    filteredBorrowings() {
 
       const keyword =
         this.search
@@ -723,257 +727,90 @@ export default {
           .toLowerCase();
 
 
-      if (!keyword) {
+      return this.borrowings.filter(
+        item => {
 
-        return this.books;
-
-      }
-
-
-      return this.books.filter(book => {
-
-        const title =
-          String(
-            book.title || ""
-          ).toLowerCase();
+          const status =
+            String(
+              item.status || ""
+            ).toUpperCase();
 
 
-        const author =
-          String(
-            book.author || ""
-          ).toLowerCase();
+          if (
+            this.selectedStatus !== "ALL" &&
+            status !== this.selectedStatus
+          ) {
+
+            return false;
+
+          }
 
 
-        const isbn =
-          String(
-            book.isbn || ""
-          ).toLowerCase();
+          if (!keyword) {
+
+            return true;
+
+          }
 
 
-        return (
-
-          title.includes(keyword) ||
-
-          author.includes(keyword) ||
-
-          isbn.includes(keyword)
-
-        );
-
-      });
-
-    },
+          const book =
+            this.getBookTitle(item)
+              .toLowerCase();
 
 
-    // =================================================
-    // MAX QUANTITY
-    // =================================================
-
-    maxQuantity() {
-
-      if (!this.selectedBook) {
-
-        return 0;
-
-      }
+          const user =
+            this.getUserName(item)
+              .toLowerCase();
 
 
-      return this.getAvailableQuantity(
-        this.selectedBook
+          return (
+            book.includes(keyword) ||
+            user.includes(keyword) ||
+            String(item.bookId)
+              .includes(keyword) ||
+            String(item.userId)
+              .includes(keyword)
+          );
+
+        }
       );
-
-    },
-
-
-    // =================================================
-    // CAN SUBMIT
-    // =================================================
-
-    canSubmit() {
-
-      /*
-       * IMPORTANT:
-       *
-       * DO NOT CHECK selectedUser HERE.
-       *
-       * selectedUser is found when submitBorrowing()
-       * calls validateForm().
-       *
-       * If we check selectedUser here,
-       * button becomes disabled before validation.
-       */
-
-      // BOOK
-
-      if (!this.selectedBook) {
-
-        return false;
-
-      }
-
-
-      // NAME
-
-      if (
-        !this.borrower.name.trim()
-      ) {
-
-        return false;
-
-      }
-
-
-      // EMAIL
-
-      if (
-        !this.borrower.email.trim()
-      ) {
-
-        return false;
-
-      }
-
-
-      // BORROW DATE
-
-      if (
-        !this.borrower.borrowDate
-      ) {
-
-        return false;
-
-      }
-
-
-      // DUE DATE
-
-      if (
-        !this.borrower.dueDate
-      ) {
-
-        return false;
-
-      }
-
-
-      // DATE
-
-      if (
-        this.borrower.dueDate <=
-        this.borrower.borrowDate
-      ) {
-
-        return false;
-
-      }
-
-
-      // QUANTITY
-
-      if (
-        !this.borrower.quantity ||
-        this.borrower.quantity < 1
-      ) {
-
-        return false;
-
-      }
-
-
-      if (
-        this.borrower.quantity >
-        this.maxQuantity
-      ) {
-
-        return false;
-
-      }
-
-
-      return true;
 
     }
 
   },
 
 
-  // =====================================================
-  // MOUNTED
-  // =====================================================
-
   mounted() {
 
-    this.loadBooks();
-
-    this.loadUsers();
+    this.loadBorrowings();
 
   },
 
 
-  // =====================================================
-  // METHODS
-  // =====================================================
-
   methods: {
 
-
     // =================================================
-    // TODAY
-    // =================================================
-
-    getToday() {
-
-      const today =
-        new Date();
-
-
-      const year =
-        today.getFullYear();
-
-
-      const month =
-        String(
-          today.getMonth() + 1
-        ).padStart(2, "0");
-
-
-      const day =
-        String(
-          today.getDate()
-        ).padStart(2, "0");
-
-
-      return `${year}-${month}-${day}`;
-
-    },
-
-
-    // =================================================
-    // LOAD BOOKS
+    // LOAD
     // =================================================
 
-    async loadBooks() {
+    async loadBorrowings() {
 
       this.loading = true;
 
+      this.error = "";
+
 
       try {
 
         const response =
-          await getBooks();
-
-
-        console.log(
-          "Books API Response:",
-          response
-        );
+          await getBorrowings();
 
 
         if (
           Array.isArray(response)
         ) {
 
-          this.books =
+          this.borrowings =
             response;
 
         }
@@ -984,768 +821,34 @@ export default {
           )
         ) {
 
-          this.books =
+          this.borrowings =
             response.data;
-
-        }
-
-        else if (
-          Array.isArray(
-            response?.data?.data
-          )
-        ) {
-
-          this.books =
-            response.data.data;
 
         }
 
         else {
 
-          this.books = [];
+          this.borrowings =
+            [];
 
         }
-
-
-        console.log(
-          "Books Loaded:",
-          this.books
-        );
 
 
       } catch (error) {
 
         console.error(
-          "Load books error:",
+          "Load borrowing error:",
           error
         );
 
 
-        this.books = [];
-
-      } finally {
-
-        this.loading = false;
-
-      }
-
-    },
-
-
-    // =================================================
-    // LOAD USERS
-    // =================================================
-
-    async loadUsers() {
-
-      this.usersLoading = true;
-
-
-      try {
-
-        const response =
-          await getUsers();
-
-
-        console.log(
-          "Users API Response:",
-          response
-        );
-
-
-        if (
-          Array.isArray(response)
-        ) {
-
-          this.users =
-            response;
-
-        }
-
-        else if (
-          Array.isArray(
-            response?.data
-          )
-        ) {
-
-          this.users =
-            response.data;
-
-        }
-
-        else if (
-          Array.isArray(
-            response?.data?.data
-          )
-        ) {
-
-          this.users =
-            response.data.data;
-
-        }
-
-        else {
-
-          this.users = [];
-
-        }
-
-
-        console.log(
-          "Users Loaded:",
-          this.users
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          "Load users error:",
-          error
-        );
-
-
-        this.users = [];
-
-      } finally {
-
-        this.usersLoading = false;
-
-      }
-
-    },
-
-
-    // =================================================
-    // FIND USER BY EMAIL
-    // =================================================
-
-    findUserByEmail() {
-
-      this.validationError = "";
-
-      this.selectedUser = null;
-
-
-      const email =
-        this.borrower.email
-          .trim()
-          .toLowerCase();
-
-
-      if (!email) {
-
-        this.validationError =
-          "Please enter borrower email.";
-
-        return null;
-
-      }
-
-
-      const user =
-        this.users.find(item => {
-
-          return String(
-            item.email || ""
-          )
-            .trim()
-            .toLowerCase() === email;
-
-        });
-
-
-      if (!user) {
-
-        this.validationError =
-          "User with this email was not found.";
-
-        return null;
-
-      }
-
-
-      this.selectedUser =
-        user;
-
-
-      /*
-       * Get name from database
-       */
-
-      this.borrower.name =
-        user.name ||
-        user.fullName ||
-        user.username ||
-        "";
-
-
-      console.log(
-        "Selected User:",
-        this.selectedUser
-      );
-
-
-      return user;
-
-    },
-
-
-    // =================================================
-    // EMAIL INPUT
-    // =================================================
-
-    onEmailInput() {
-
-      this.selectedUser =
-        null;
-
-      this.validationError =
-        "";
-
-    },
-
-
-    // =================================================
-    // AVAILABLE QUANTITY
-    // =================================================
-
-    getAvailableQuantity(book) {
-
-      if (
-        book.availableQuantity !==
-        undefined
-      ) {
-
-        return Number(
-          book.availableQuantity
-        );
-
-      }
-
-
-      if (
-        book.quantity !==
-        undefined
-      ) {
-
-        return Number(
-          book.quantity
-        );
-
-      }
-
-
-      if (
-        book.qty !==
-        undefined
-      ) {
-
-        return Number(
-          book.qty
-        );
-
-      }
-
-
-      return 0;
-
-    },
-
-
-    // =================================================
-    // SELECT BOOK
-    // =================================================
-
-    selectBook(book) {
-
-      console.log(
-        "Selected Book:",
-        book
-      );
-
-
-      const available =
-        this.getAvailableQuantity(
-          book
-        );
-
-
-      if (available <= 0) {
-
-        alert(
-          "This book is currently unavailable."
-        );
-
-        return;
-
-      }
-
-
-      this.selectedBook =
-        book;
-
-
-      this.borrower.quantity =
-        1;
-
-
-      this.validationError =
-        "";
-
-    },
-
-
-    // =================================================
-    // REMOVE BOOK
-    // =================================================
-
-    removeSelectedBook() {
-
-      this.selectedBook =
-        null;
-
-
-      this.borrower.quantity =
-        1;
-
-
-      this.validationError =
-        "";
-
-    },
-
-
-    // =================================================
-    // INCREASE QUANTITY
-    // =================================================
-
-    increaseQuantity() {
-
-      if (!this.selectedBook) {
-
-        return;
-
-      }
-
-
-      if (
-        this.borrower.quantity <
-        this.maxQuantity
-      ) {
-
-        this.borrower.quantity++;
-
-      }
-
-    },
-
-
-    // =================================================
-    // DECREASE QUANTITY
-    // =================================================
-
-    decreaseQuantity() {
-
-      if (
-        this.borrower.quantity > 1
-      ) {
-
-        this.borrower.quantity--;
-
-      }
-
-    },
-
-
-    // =================================================
-    // VALIDATE FORM
-    // =================================================
-
-    validateForm() {
-
-      this.validationError =
-        "";
-
-
-      // -----------------------------------------------
-      // BOOK
-      // -----------------------------------------------
-
-      if (!this.selectedBook) {
-
-        this.validationError =
-          "Please select a book.";
-
-        return false;
-
-      }
-
-
-      // -----------------------------------------------
-      // EMAIL
-      // -----------------------------------------------
-
-      if (
-        !this.borrower.email.trim()
-      ) {
-
-        this.validationError =
-          "Please enter borrower email.";
-
-        return false;
-
-      }
-
-
-      // -----------------------------------------------
-      // FIND USER
-      // -----------------------------------------------
-
-      const user =
-        this.findUserByEmail();
-
-
-      if (!user) {
-
-        return false;
-
-      }
-
-
-      // -----------------------------------------------
-      // USER ID
-      // -----------------------------------------------
-
-      if (!user.id) {
-
-        this.validationError =
-          "Selected user does not have a valid ID.";
-
-        return false;
-
-      }
-
-
-      // -----------------------------------------------
-      // NAME
-      // -----------------------------------------------
-
-      if (
-        !this.borrower.name.trim()
-      ) {
-
-        this.validationError =
-          "Please enter borrower name.";
-
-        return false;
-
-      }
-
-
-      // -----------------------------------------------
-      // BORROW DATE
-      // -----------------------------------------------
-
-      if (
-        !this.borrower.borrowDate
-      ) {
-
-        this.validationError =
-          "Please select borrow date.";
-
-        return false;
-
-      }
-
-
-      // -----------------------------------------------
-      // DUE DATE
-      // -----------------------------------------------
-
-      if (
-        !this.borrower.dueDate
-      ) {
-
-        this.validationError =
-          "Please select due date.";
-
-        return false;
-
-      }
-
-
-      // -----------------------------------------------
-      // DATE
-      // -----------------------------------------------
-
-      if (
-        this.borrower.dueDate <=
-        this.borrower.borrowDate
-      ) {
-
-        this.validationError =
-          "Due date must be after borrow date.";
-
-        return false;
-
-      }
-
-
-      // -----------------------------------------------
-      // QUANTITY
-      // -----------------------------------------------
-
-      if (
-        !this.borrower.quantity ||
-        this.borrower.quantity < 1
-      ) {
-
-        this.validationError =
-          "Quantity must be at least 1.";
-
-        return false;
-
-      }
-
-
-      if (
-        this.borrower.quantity >
-        this.maxQuantity
-      ) {
-
-        this.validationError =
-          `Only ${this.maxQuantity} book(s) are available.`;
-
-        return false;
-
-      }
-
-
-      return true;
-
-    },
-
-
-    // =================================================
-    // SUBMIT BORROWING
-    // =================================================
-
-    async submitBorrowing() {
-
-      console.log(
-        "Create Borrowing button clicked"
-      );
-
-
-      // -----------------------------------------------
-      // VALIDATE
-      // -----------------------------------------------
-
-      if (!this.validateForm()) {
-
-        console.log(
-          "Validation failed:",
-          this.validationError
-        );
-
-        return;
-
-      }
-
-
-      this.submitting =
-        true;
-
-
-      try {
-
-        // ---------------------------------------------
-        // USER
-        // ---------------------------------------------
-
-        const user =
-          this.selectedUser ||
-          this.findUserByEmail();
-
-
-        if (!user) {
-
-          throw new Error(
-            "Borrower user not found."
-          );
-
-        }
-
-
-        // ---------------------------------------------
-        // USER ID
-        // ---------------------------------------------
-
-        if (!user.id) {
-
-          throw new Error(
-            "Borrower user ID is missing."
-          );
-
-        }
-
-
-        // ---------------------------------------------
-        // BOOK ID
-        // ---------------------------------------------
-
-        if (!this.selectedBook?.id) {
-
-          throw new Error(
-            "Book ID is missing."
-          );
-
-        }
-
-
-        // ---------------------------------------------
-        // PAYLOAD
-        // ---------------------------------------------
-
-        /*
-         * Backend:
-         *
-         * BorrowerRequest
-         *
-         * private Long userId;
-         * private Long bookId;
-         * private LocalDate borrowDate;
-         * private LocalDate dueDate;
-         * private LocalDate returnDate;
-         * private BorrowingStatus status;
-         *
-         * So send ONLY these fields.
-         */
-
-        const payload = {
-
-          userId:
-            Number(user.id),
-
-          bookId:
-            Number(
-              this.selectedBook.id
-            ),
-
-          borrowDate:
-            this.borrower.borrowDate,
-
-          dueDate:
-            this.borrower.dueDate,
-
-          returnDate:
-            null,
-
-          status:
-            "BORROWED"
-
-        };
-
-
-        console.log(
-          "================================="
-        );
-
-        console.log(
-          "Borrowing Payload:",
-          payload
-        );
-
-        console.log(
-          "User ID:",
-          user.id
-        );
-
-        console.log(
-          "User Name:",
-          user.name
-        );
-
-        console.log(
-          "User Email:",
-          user.email
-        );
-
-        console.log(
-          "Book ID:",
-          this.selectedBook.id
-        );
-
-        console.log(
-          "================================="
-        );
-
-
-        // ---------------------------------------------
-        // CREATE BORROWING
-        // ---------------------------------------------
-
-        const response =
-          await createBorrowing(
-            payload
-          );
-
-
-        console.log(
-          "Create Borrowing Response:",
-          response
-        );
-
-
-        // ---------------------------------------------
-        // SUCCESS
-        // ---------------------------------------------
-
-        alert(
-          "Borrowing created successfully!"
-        );
-
-
-        // ---------------------------------------------
-        // RESET
-        // ---------------------------------------------
-
-        this.resetForm();
-
-
-        // ---------------------------------------------
-        // RELOAD BOOKS
-        // ---------------------------------------------
-
-        await this.loadBooks();
-
-
-      } catch (error) {
-
-        console.error(
-          "Create Borrowing Error:",
-          error
-        );
-
-
-        /*
-         * Try to show backend error message
-         */
-
-        const message =
-          error?.response?.data?.message ||
-          error?.response?.data?.msg ||
+        this.error =
           error?.message ||
-          "Failed to create borrowing.";
-
-
-        alert(message);
-
+          "Failed to load borrowing.";
 
       } finally {
 
-        this.submitting =
+        this.loading =
           false;
 
       }
@@ -1754,43 +857,288 @@ export default {
 
 
     // =================================================
-    // RESET
+    // ACCEPT
     // =================================================
 
-    resetForm() {
+    async acceptRequest(item) {
 
-      this.selectedBook =
-        null;
+      if (!item?.id) {
+
+        return;
+
+      }
 
 
-      this.selectedUser =
-        null;
+      const confirmed =
+        window.confirm(
+          `Accept "${this.getBookTitle(item)}" borrowing request?\n\nBook quantity will decrease by 1.`
+        );
 
 
-      this.search =
+      if (!confirmed) {
+
+        return;
+
+      }
+
+
+      this.processingId =
+        item.id;
+
+      this.processingAction =
+        "accept";
+
+      this.error =
         "";
 
 
-      this.validationError =
+      try {
+
+        await acceptBorrowing(
+          item.id
+        );
+
+
+        alert(
+          "Borrowing accepted successfully."
+        );
+
+
+        await this.loadBorrowings();
+
+
+      } catch (error) {
+
+        console.error(
+          "Accept error:",
+          error
+        );
+
+
+        this.error =
+          error?.message ||
+          "Failed to accept borrowing.";
+
+      } finally {
+
+        this.processingId =
+          null;
+
+        this.processingAction =
+          "";
+
+      }
+
+    },
+
+
+    // =================================================
+    // REJECT
+    // =================================================
+
+    async rejectRequest(item) {
+
+      if (!item?.id) {
+
+        return;
+
+      }
+
+
+      const confirmed =
+        window.confirm(
+          `Reject "${this.getBookTitle(item)}" borrowing request?`
+        );
+
+
+      if (!confirmed) {
+
+        return;
+
+      }
+
+
+      this.processingId =
+        item.id;
+
+      this.processingAction =
+        "reject";
+
+      this.error =
         "";
 
 
-      this.borrower = {
+      try {
 
-        name: "",
+        await rejectBorrowing(
+          item.id
+        );
 
-        email: "",
 
-        phone: "",
+        alert(
+          "Borrowing rejected successfully."
+        );
 
-        borrowDate:
-          this.getToday(),
 
-        dueDate: "",
+        await this.loadBorrowings();
 
-        quantity: 1
 
-      };
+      } catch (error) {
+
+        console.error(
+          "Reject error:",
+          error
+        );
+
+
+        this.error =
+          error?.message ||
+          "Failed to reject borrowing.";
+
+      } finally {
+
+        this.processingId =
+          null;
+
+        this.processingAction =
+          "";
+
+      }
+
+    },
+
+
+    // =================================================
+    // BOOK TITLE
+    // =================================================
+
+    getBookTitle(item) {
+
+      return (
+        item?.bookTitle ||
+        item?.title ||
+        item?.book?.title ||
+        "Unknown Book"
+      );
+
+    },
+
+
+    // =================================================
+    // BOOK IMAGE
+    // =================================================
+
+    getBookImage(item) {
+
+      return (
+        item?.bookImage ||
+        item?.image ||
+        item?.book?.image ||
+        ""
+      );
+
+    },
+
+
+    // =================================================
+    // USER NAME
+    // =================================================
+
+    getUserName(item) {
+
+      return (
+        item?.userName ||
+        item?.name ||
+        item?.user?.name ||
+        item?.user?.fullName ||
+        "Unknown User"
+      );
+
+    },
+
+
+    // =================================================
+    // DATE
+    // =================================================
+
+    formatDate(date) {
+
+      if (!date) {
+
+        return "-";
+
+      }
+
+
+      const value =
+        new Date(date);
+
+
+      if (
+        Number.isNaN(
+          value.getTime()
+        )
+      ) {
+
+        return date;
+
+      }
+
+
+      return value.toLocaleDateString(
+        "en-US",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        }
+      );
+
+    },
+
+
+    // =================================================
+    // STATUS
+    // =================================================
+
+    statusClass(status) {
+
+      switch (
+        String(
+          status || ""
+        ).toUpperCase()
+      ) {
+
+        case "PENDING":
+
+          return "bg-amber-50 text-amber-700";
+
+
+        case "BORROWED":
+
+          return "bg-blue-50 text-blue-700";
+
+
+        case "LATE":
+
+          return "bg-orange-50 text-orange-700";
+
+
+        case "RETURNED":
+
+          return "bg-green-50 text-green-700";
+
+
+        case "REJECTED":
+
+          return "bg-red-50 text-red-700";
+
+
+        default:
+
+          return "bg-slate-100 text-slate-600";
+
+      }
 
     }
 

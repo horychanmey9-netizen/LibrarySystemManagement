@@ -1,22 +1,31 @@
 <template>
 
-  <div class="home-page">
+  <div
+    class="min-h-screen w-full bg-slate-50 p-4 sm:p-6 lg:p-8"
+  >
 
     <!-- =====================================================
          CATEGORIES
     ====================================================== -->
 
-    <section class="section">
+    <section class="mb-10">
 
-      <div class="section-header">
+      <!-- SECTION HEADER -->
+      <div
+        class="mb-4 flex items-end justify-between gap-4"
+      >
 
         <div>
 
-          <h2>
+          <h2
+            class="m-0 text-xl font-bold text-slate-900"
+          >
             Categories
           </h2>
 
-          <p class="section-subtitle">
+          <p
+            class="mt-1 text-sm text-slate-400"
+          >
             Explore books by category
           </p>
 
@@ -24,6 +33,7 @@
 
         <router-link
           :to="{ name: 'BrowseBooks' }"
+          class="text-sm font-medium text-blue-600 no-underline transition hover:underline"
         >
           View all
         </router-link>
@@ -37,10 +47,12 @@
 
       <div
         v-if="loadingCategories"
-        class="loading-category"
+        class="flex items-center justify-center gap-2 px-5 py-8 text-sm text-slate-400"
       >
 
-        <i class="bi bi-arrow-repeat"></i>
+        <i
+          class="bi bi-arrow-repeat animate-spin"
+        ></i>
 
         Loading categories...
 
@@ -53,7 +65,10 @@
 
       <div
         v-else-if="categories.length > 0"
-        class="category-row"
+        class="flex gap-4 overflow-x-auto pb-2
+               [&::-webkit-scrollbar]:h-1.5
+               [&::-webkit-scrollbar-thumb]:rounded-full
+               [&::-webkit-scrollbar-thumb]:bg-slate-300"
       >
 
         <CategoryCard
@@ -72,12 +87,14 @@
 
       <div
         v-else
-        class="empty-category"
+        class="flex flex-col items-center justify-center p-8 text-slate-400"
       >
 
-        <i class="bi bi-folder2-open"></i>
+        <i
+          class="bi bi-folder2-open mb-2 text-3xl"
+        ></i>
 
-        <p>
+        <p class="m-0">
           No categories found.
         </p>
 
@@ -90,17 +107,25 @@
          RECOMMENDED BOOKS
     ====================================================== -->
 
-    <section class="section">
+    <section class="mb-10">
 
-      <div class="section-header">
+      <!-- SECTION HEADER -->
+
+      <div
+        class="mb-4 flex items-end justify-between gap-4"
+      >
 
         <div>
 
-          <h2>
+          <h2
+            class="m-0 text-xl font-bold text-slate-900"
+          >
             Recommended Books
           </h2>
 
-          <p class="section-subtitle">
+          <p
+            class="mt-1 text-sm text-slate-400"
+          >
             Books you may like
           </p>
 
@@ -108,6 +133,7 @@
 
         <router-link
           :to="{ name: 'BrowseBooks' }"
+          class="text-sm font-medium text-blue-600 no-underline transition hover:underline"
         >
           View all
         </router-link>
@@ -121,10 +147,12 @@
 
       <div
         v-if="loadingBooks"
-        class="loading-books"
+        class="flex items-center justify-center gap-2 px-5 py-12 text-sm text-slate-400"
       >
 
-        <i class="bi bi-arrow-repeat"></i>
+        <i
+          class="bi bi-arrow-repeat animate-spin"
+        ></i>
 
         Loading books...
 
@@ -137,7 +165,10 @@
 
       <div
         v-else-if="books.length > 0"
-        class="book-row"
+        class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               lg:grid-cols-3
+               xl:grid-cols-4"
       >
 
         <BookCard
@@ -157,16 +188,24 @@
 
       <div
         v-else
-        class="empty-books"
+        class="flex flex-col items-center justify-center
+               rounded-[14px] border border-slate-200
+               bg-white px-5 py-12 text-center"
       >
 
-        <i class="bi bi-book"></i>
+        <i
+          class="bi bi-book mb-2.5 text-4xl text-slate-400"
+        ></i>
 
-        <h3>
+        <h3
+          class="m-0 text-base font-medium text-slate-700"
+        >
           No books found
         </h3>
 
-        <p>
+        <p
+          class="mt-1.5 text-sm text-slate-400"
+        >
           There are no books available in the library yet.
         </p>
 
@@ -534,6 +573,7 @@ export default {
           const count =
             this.books.filter(book => {
 
+
               // =========================================
               // CASE 1
               // book.category = { id, name }
@@ -583,7 +623,7 @@ export default {
                 return (
                   String(book.categoryName)
                     .toLowerCase()
-                    ===
+                  ===
                   String(category.name)
                     .toLowerCase()
                 );
@@ -647,7 +687,9 @@ export default {
     toggleBookmark(book) {
 
       if (!book) {
+
         return;
+
       }
 
 
@@ -752,453 +794,3 @@ export default {
 };
 
 </script>
-
-
-<style scoped>
-
-/* ==================================================
-   HOME PAGE
-================================================== */
-
-.home-page {
-
-  min-height: 100vh;
-
-  padding:
-    1.5rem
-    2rem;
-
-  width: 100%;
-
-  background:
-    #f8faff;
-
-}
-
-
-/* ==================================================
-   SECTION
-================================================== */
-
-.section {
-
-  margin-bottom:
-    2.5rem;
-
-}
-
-
-/* ==================================================
-   SECTION HEADER
-================================================== */
-
-.section-header {
-
-  display:
-    flex;
-
-  justify-content:
-    space-between;
-
-  align-items:
-    flex-end;
-
-  margin-bottom:
-    1rem;
-
-}
-
-
-.section-header h2 {
-
-  font-size:
-    1.25rem;
-
-  font-weight:
-    700;
-
-  margin:
-    0;
-
-  color:
-    #0f172a;
-
-}
-
-
-.section-subtitle {
-
-  color:
-    #94a3b8;
-
-  font-size:
-    0.85rem;
-
-  margin:
-    0.3rem 0 0;
-
-}
-
-
-.section-header a {
-
-  font-size:
-    0.85rem;
-
-  color:
-    #2563eb;
-
-  text-decoration:
-    none;
-
-  font-weight:
-    500;
-
-}
-
-
-.section-header a:hover {
-
-  text-decoration:
-    underline;
-
-}
-
-
-/* ==================================================
-   CATEGORY ROW
-================================================== */
-
-.category-row {
-
-  display:
-    flex;
-
-  gap:
-    1rem;
-
-  overflow-x:
-    auto;
-
-  padding-bottom:
-    0.5rem;
-
-}
-
-
-.category-row::-webkit-scrollbar {
-
-  height:
-    6px;
-
-}
-
-
-.category-row::-webkit-scrollbar-thumb {
-
-  background:
-    #cbd5e1;
-
-  border-radius:
-    999px;
-
-}
-
-
-/* ==================================================
-   CATEGORY LOADING
-================================================== */
-
-.loading-category {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  gap:
-    8px;
-
-  padding:
-    30px;
-
-  color:
-    #94a3b8;
-
-  font-size:
-    14px;
-
-}
-
-
-.loading-category i {
-
-  animation:
-    spin 1s linear infinite;
-
-}
-
-
-/* ==================================================
-   BOOK LOADING
-================================================== */
-
-.loading-books {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  gap:
-    8px;
-
-  padding:
-    50px;
-
-  color:
-    #94a3b8;
-
-  font-size:
-    14px;
-
-}
-
-
-.loading-books i {
-
-  animation:
-    spin 1s linear infinite;
-
-}
-
-
-/* ==================================================
-   SPIN
-================================================== */
-
-@keyframes spin {
-
-  from {
-
-    transform:
-      rotate(0deg);
-
-  }
-
-  to {
-
-    transform:
-      rotate(360deg);
-
-  }
-
-}
-
-
-/* ==================================================
-   EMPTY CATEGORY
-================================================== */
-
-.empty-category {
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  padding:
-    30px;
-
-  color:
-    #94a3b8;
-
-}
-
-
-.empty-category i {
-
-  font-size:
-    30px;
-
-  margin-bottom:
-    8px;
-
-}
-
-
-.empty-category p {
-
-  margin:
-    0;
-
-}
-
-
-/* ==================================================
-   BOOK ROW
-================================================== */
-
-.book-row {
-
-  display:
-    grid;
-
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
-
-  gap:
-    1rem;
-
-}
-
-
-/* ==================================================
-   EMPTY BOOKS
-================================================== */
-
-.empty-books {
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  padding:
-    50px 20px;
-
-  background:
-    white;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius:
-    14px;
-
-  text-align:
-    center;
-
-}
-
-
-.empty-books i {
-
-  font-size:
-    40px;
-
-  color:
-    #94a3b8;
-
-  margin-bottom:
-    10px;
-
-}
-
-
-.empty-books h3 {
-
-  margin:
-    0;
-
-  color:
-    #334155;
-
-  font-size:
-    1rem;
-
-}
-
-
-.empty-books p {
-
-  margin:
-    6px 0 0;
-
-  color:
-    #94a3b8;
-
-  font-size:
-    0.85rem;
-
-}
-
-
-/* ==================================================
-   RESPONSIVE
-================================================== */
-
-@media (max-width: 1200px) {
-
-  .book-row {
-
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
-
-  }
-
-}
-
-
-@media (max-width: 900px) {
-
-  .book-row {
-
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-  }
-
-}
-
-
-@media (max-width: 640px) {
-
-  .home-page {
-
-    padding:
-      1rem;
-
-  }
-
-
-  .section-header {
-
-    align-items:
-      center;
-
-  }
-
-
-  .book-row {
-
-    grid-template-columns:
-      1fr;
-
-  }
-
-}
-
-</style>

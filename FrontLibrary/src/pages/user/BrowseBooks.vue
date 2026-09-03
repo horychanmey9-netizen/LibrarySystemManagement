@@ -1,19 +1,25 @@
 <template>
-  <div class="browse-page">
+  <div
+    class="min-h-screen w-full bg-slate-50 p-4 sm:p-6 lg:p-8"
+  >
 
     <!-- =====================================================
          HEADER
     ====================================================== -->
 
-    <div class="page-header">
+    <div class="mb-8">
 
-      <div>
-        <h1>Browse Books</h1>
+      <h1
+        class="m-0 text-2xl font-bold tracking-tight text-slate-900"
+      >
+        Browse Books
+      </h1>
 
-        <p>
-          Discover and explore books from our library collection.
-        </p>
-      </div>
+      <p
+        class="mt-1.5 text-base text-slate-400"
+      >
+        Discover and explore books from our library collection.
+      </p>
 
     </div>
 
@@ -22,18 +28,31 @@
          TOP FILTER BAR
     ====================================================== -->
 
-    <div class="top-filters">
+    <div
+      class="mb-8 grid grid-cols-1 gap-4
+             lg:grid-cols-2
+             xl:grid-cols-4"
+    >
 
       <!-- SEARCH -->
 
-      <div class="search-box">
+      <div
+        class="flex h-[58px] items-center gap-3
+               rounded-[14px] border border-slate-200
+               bg-white px-4"
+      >
 
-        <i class="bi bi-search"></i>
+        <i
+          class="bi bi-search text-base text-slate-400"
+        ></i>
 
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Search books by title, author, ISBN..."
+          class="h-full w-full border-none bg-transparent
+                 text-[15px] text-slate-700
+                 outline-none placeholder:text-slate-400"
         />
 
       </div>
@@ -41,10 +60,17 @@
 
       <!-- CATEGORY DROPDOWN -->
 
-      <div class="select-box">
+      <div class="relative h-[58px]">
 
         <select
           v-model="selectedCategory"
+          class="h-full w-full cursor-pointer
+                 appearance-none rounded-[14px]
+                 border border-slate-200 bg-white
+                 px-4 pr-11 text-[15px] text-slate-800
+                 outline-none transition
+                 focus:border-blue-300
+                 focus:ring-4 focus:ring-blue-500/10"
         >
 
           <option value="All">
@@ -65,17 +91,28 @@
 
         </select>
 
-        <i class="bi bi-chevron-down"></i>
+        <i
+          class="bi bi-chevron-down pointer-events-none
+                 absolute right-4 top-1/2
+                 -translate-y-1/2 text-slate-900"
+        ></i>
 
       </div>
 
 
       <!-- AVAILABILITY -->
 
-      <div class="select-box">
+      <div class="relative h-[58px]">
 
         <select
           v-model="selectedAvailability"
+          class="h-full w-full cursor-pointer
+                 appearance-none rounded-[14px]
+                 border border-slate-200 bg-white
+                 px-4 pr-11 text-[15px] text-slate-800
+                 outline-none transition
+                 focus:border-blue-300
+                 focus:ring-4 focus:ring-blue-500/10"
         >
 
           <option value="All">
@@ -92,17 +129,28 @@
 
         </select>
 
-        <i class="bi bi-chevron-down"></i>
+        <i
+          class="bi bi-chevron-down pointer-events-none
+                 absolute right-4 top-1/2
+                 -translate-y-1/2 text-slate-900"
+        ></i>
 
       </div>
 
 
       <!-- SORT -->
 
-      <div class="select-box">
+      <div class="relative h-[58px]">
 
         <select
           v-model="selectedSort"
+          class="h-full w-full cursor-pointer
+                 appearance-none rounded-[14px]
+                 border border-slate-200 bg-white
+                 px-4 pr-11 text-[15px] text-slate-800
+                 outline-none transition
+                 focus:border-blue-300
+                 focus:ring-4 focus:ring-blue-500/10"
         >
 
           <option value="default">
@@ -127,7 +175,11 @@
 
         </select>
 
-        <i class="bi bi-chevron-down"></i>
+        <i
+          class="bi bi-chevron-down pointer-events-none
+                 absolute right-4 top-1/2
+                 -translate-y-1/2 text-slate-900"
+        ></i>
 
       </div>
 
@@ -138,26 +190,41 @@
          MAIN CONTENT
     ====================================================== -->
 
-    <div class="browse-content">
+    <div
+      class="grid grid-cols-1 items-start gap-6
+             lg:grid-cols-[220px_minmax(0,1fr)]
+             xl:grid-cols-[260px_minmax(0,1fr)]
+             xl:gap-10"
+    >
 
 
       <!-- ===================================================
            SIDEBAR
       ==================================================== -->
 
-      <aside class="filter-sidebar">
+      <aside
+        class="w-full rounded-[14px]
+               border border-slate-200 bg-white p-5"
+      >
 
         <!-- FILTER HEADER -->
 
-        <div class="filter-header">
+        <div
+          class="mb-6 flex items-center justify-between"
+        >
 
-          <h2>
+          <h2
+            class="m-0 text-base font-bold text-slate-900"
+          >
             Filter
           </h2>
 
           <button
             type="button"
             @click="clearFilters"
+            class="border-none bg-transparent
+                   text-sm text-blue-600
+                   transition hover:underline"
           >
             Clear all
           </button>
@@ -169,9 +236,14 @@
              CATEGORIES
         ================================================== -->
 
-        <div class="filter-group">
+        <div
+          class="mb-5 border-b border-slate-100
+                 pb-5 last:mb-0 last:border-b-0"
+        >
 
-          <h3>
+          <h3
+            class="mb-3.5 text-sm font-semibold text-slate-900"
+          >
             Categories
           </h3>
 
@@ -180,7 +252,7 @@
 
           <div
             v-if="loadingCategories"
-            class="filter-loading"
+            class="py-1 text-xs text-slate-400"
           >
             Loading categories...
           </div>
@@ -190,7 +262,7 @@
 
           <div
             v-else-if="categoryError"
-            class="filter-error"
+            class="text-xs leading-relaxed text-red-600"
           >
             {{ categoryError }}
           </div>
@@ -200,7 +272,7 @@
 
           <div
             v-else
-            class="checkbox-list"
+            class="flex flex-col gap-3"
           >
 
             <!-- BACKEND CATEGORIES -->
@@ -208,7 +280,8 @@
             <label
               v-for="category in categories"
               :key="category.id"
-              class="checkbox-row"
+              class="group relative flex min-h-5
+                     cursor-pointer items-center gap-2.5"
             >
 
               <input
@@ -216,15 +289,28 @@
                 :value="category.name"
                 v-model="selectedCategories"
                 @change="syncCategoryFromCheckbox"
+                class="peer absolute h-0 w-0 opacity-0"
               />
 
-              <span class="checkbox-custom"></span>
+              <span
+                class="h-[15px] w-[15px] shrink-0
+                       rounded-[3px]
+                       border-[1.5px] border-slate-400
+                       bg-white transition
+                       peer-checked:border-blue-600
+                       peer-checked:bg-blue-600
+                       peer-checked:shadow-[inset_0_0_0_3px_white]"
+              ></span>
 
-              <span class="checkbox-name">
+              <span
+                class="flex-1 text-sm text-slate-700"
+              >
                 {{ category.name }}
               </span>
 
-              <span class="category-count">
+              <span
+                class="text-xs text-slate-400"
+              >
                 {{ getCategoryCount(category.name) }}
               </span>
 
@@ -233,22 +319,38 @@
 
             <!-- OTHER -->
 
-            <label class="checkbox-row">
+            <label
+              class="group relative flex min-h-5
+                     cursor-pointer items-center gap-2.5"
+            >
 
               <input
                 type="checkbox"
                 value="Other"
                 v-model="selectedCategories"
                 @change="syncCategoryFromCheckbox"
+                class="peer absolute h-0 w-0 opacity-0"
               />
 
-              <span class="checkbox-custom"></span>
+              <span
+                class="h-[15px] w-[15px] shrink-0
+                       rounded-[3px]
+                       border-[1.5px] border-slate-400
+                       bg-white transition
+                       peer-checked:border-blue-600
+                       peer-checked:bg-blue-600
+                       peer-checked:shadow-[inset_0_0_0_3px_white]"
+              ></span>
 
-              <span class="checkbox-name">
+              <span
+                class="flex-1 text-sm text-slate-700"
+              >
                 Other
               </span>
 
-              <span class="category-count">
+              <span
+                class="text-xs text-slate-400"
+              >
                 {{ getOtherCount() }}
               </span>
 
@@ -263,33 +365,56 @@
              AVAILABILITY
         ================================================== -->
 
-        <div class="filter-group">
+        <div
+          class="mb-5 border-b border-slate-100
+                 pb-5"
+        >
 
-          <h3>
+          <h3
+            class="mb-3.5 text-sm font-semibold text-slate-900"
+          >
             Availability
           </h3>
 
 
-          <div class="checkbox-list">
+          <div
+            class="flex flex-col gap-3"
+          >
 
             <!-- AVAILABLE -->
 
-            <label class="checkbox-row">
+            <label
+              class="relative flex min-h-5
+                     cursor-pointer items-center gap-2.5"
+            >
 
               <input
                 type="checkbox"
                 value="Available"
                 v-model="selectedAvailabilityFilters"
                 @change="syncAvailability"
+                class="peer absolute h-0 w-0 opacity-0"
               />
 
-              <span class="checkbox-custom"></span>
+              <span
+                class="h-[15px] w-[15px] shrink-0
+                       rounded-[3px]
+                       border-[1.5px] border-slate-400
+                       bg-white transition
+                       peer-checked:border-blue-600
+                       peer-checked:bg-blue-600
+                       peer-checked:shadow-[inset_0_0_0_3px_white]"
+              ></span>
 
-              <span class="checkbox-name">
+              <span
+                class="flex-1 text-sm text-slate-700"
+              >
                 Available
               </span>
 
-              <span class="category-count">
+              <span
+                class="text-xs text-slate-400"
+              >
                 {{ availableCount }}
               </span>
 
@@ -298,22 +423,38 @@
 
             <!-- BORROWED -->
 
-            <label class="checkbox-row">
+            <label
+              class="relative flex min-h-5
+                     cursor-pointer items-center gap-2.5"
+            >
 
               <input
                 type="checkbox"
                 value="Borrowed"
                 v-model="selectedAvailabilityFilters"
                 @change="syncAvailability"
+                class="peer absolute h-0 w-0 opacity-0"
               />
 
-              <span class="checkbox-custom"></span>
+              <span
+                class="h-[15px] w-[15px] shrink-0
+                       rounded-[3px]
+                       border-[1.5px] border-slate-400
+                       bg-white transition
+                       peer-checked:border-blue-600
+                       peer-checked:bg-blue-600
+                       peer-checked:shadow-[inset_0_0_0_3px_white]"
+              ></span>
 
-              <span class="checkbox-name">
+              <span
+                class="flex-1 text-sm text-slate-700"
+              >
                 Borrowed
               </span>
 
-              <span class="category-count">
+              <span
+                class="text-xs text-slate-400"
+              >
                 {{ borrowedCount }}
               </span>
 
@@ -328,32 +469,54 @@
              LANGUAGE
         ================================================== -->
 
-        <div class="filter-group">
+        <div
+          class="pb-0"
+        >
 
-          <h3>
+          <h3
+            class="mb-3.5 text-sm font-semibold text-slate-900"
+          >
             Language
           </h3>
 
 
-          <div class="checkbox-list">
+          <div
+            class="flex flex-col gap-3"
+          >
 
             <!-- ENGLISH -->
 
-            <label class="checkbox-row">
+            <label
+              class="relative flex min-h-5
+                     cursor-pointer items-center gap-2.5"
+            >
 
               <input
                 type="checkbox"
                 value="English"
                 v-model="selectedLanguages"
+                class="peer absolute h-0 w-0 opacity-0"
               />
 
-              <span class="checkbox-custom"></span>
+              <span
+                class="h-[15px] w-[15px] shrink-0
+                       rounded-[3px]
+                       border-[1.5px] border-slate-400
+                       bg-white transition
+                       peer-checked:border-blue-600
+                       peer-checked:bg-blue-600
+                       peer-checked:shadow-[inset_0_0_0_3px_white]"
+              ></span>
 
-              <span class="checkbox-name">
+              <span
+                class="flex-1 text-sm text-slate-700"
+              >
                 English
               </span>
 
-              <span class="category-count">
+              <span
+                class="text-xs text-slate-400"
+              >
                 {{ getLanguageCount("English") }}
               </span>
 
@@ -362,21 +525,37 @@
 
             <!-- KHMER -->
 
-            <label class="checkbox-row">
+            <label
+              class="relative flex min-h-5
+                     cursor-pointer items-center gap-2.5"
+            >
 
               <input
                 type="checkbox"
                 value="Khmer"
                 v-model="selectedLanguages"
+                class="peer absolute h-0 w-0 opacity-0"
               />
 
-              <span class="checkbox-custom"></span>
+              <span
+                class="h-[15px] w-[15px] shrink-0
+                       rounded-[3px]
+                       border-[1.5px] border-slate-400
+                       bg-white transition
+                       peer-checked:border-blue-600
+                       peer-checked:bg-blue-600
+                       peer-checked:shadow-[inset_0_0_0_3px_white]"
+              ></span>
 
-              <span class="checkbox-name">
+              <span
+                class="flex-1 text-sm text-slate-700"
+              >
                 Khmer
               </span>
 
-              <span class="category-count">
+              <span
+                class="text-xs text-slate-400"
+              >
                 {{ getLanguageCount("Khmer") }}
               </span>
 
@@ -393,25 +572,34 @@
            BOOK CONTENT
       ==================================================== -->
 
-      <main class="books-content">
+      <main class="min-w-0">
 
         <!-- =================================================
              BOOK TOOLBAR
         ================================================== -->
 
-        <div class="books-toolbar">
+        <div
+          class="mb-5 flex items-center
+                 justify-between gap-4"
+        >
 
-          <p class="result-count">
+          <p
+            class="m-0 text-sm text-slate-400"
+          >
 
             Showing
 
-            <strong>
+            <strong
+              class="font-semibold text-slate-600"
+            >
               {{ filteredBooks.length }}
             </strong>
 
             of
 
-            <strong>
+            <strong
+              class="font-semibold text-slate-600"
+            >
               {{ books.length }}
             </strong>
 
@@ -422,13 +610,21 @@
 
           <!-- VIEW TOGGLE -->
 
-          <div class="view-toggle">
+          <div
+            class="flex items-center gap-1
+                   rounded-[10px]
+                   border border-slate-200
+                   bg-white p-1"
+          >
 
             <button
               type="button"
-              :class="{
-                active: viewMode === 'grid'
-              }"
+              :class="[
+                'flex h-[38px] w-[42px] items-center justify-center rounded-lg border-none text-base transition',
+                viewMode === 'grid'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'bg-transparent text-slate-400 hover:bg-slate-50'
+              ]"
               @click="viewMode = 'grid'"
               aria-label="Grid view"
             >
@@ -440,9 +636,12 @@
 
             <button
               type="button"
-              :class="{
-                active: viewMode === 'list'
-              }"
+              :class="[
+                'flex h-[38px] w-[42px] items-center justify-center rounded-lg border-none text-base transition',
+                viewMode === 'list'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'bg-transparent text-slate-400 hover:bg-slate-50'
+              ]"
               @click="viewMode = 'list'"
               aria-label="List view"
             >
@@ -462,12 +661,23 @@
 
         <div
           v-if="loadingBooks"
-          class="books-loading"
+          class="flex min-h-[300px]
+                 flex-col items-center
+                 justify-center
+                 rounded-[14px]
+                 border border-slate-200
+                 bg-white text-slate-500"
         >
 
-          <i class="bi bi-arrow-repeat"></i>
+          <i
+            class="bi bi-arrow-repeat
+                   mb-3 text-3xl
+                   animate-spin text-blue-600"
+          ></i>
 
-          <p>
+          <p
+            class="m-0 text-sm"
+          >
             Loading books...
           </p>
 
@@ -480,18 +690,33 @@
 
         <div
           v-else-if="bookError"
-          class="books-error"
+          class="flex min-h-[300px]
+                 flex-col items-center
+                 justify-center
+                 rounded-[14px]
+                 border border-red-200
+                 bg-white
+                 text-center text-red-600"
         >
 
-          <i class="bi bi-exclamation-circle"></i>
+          <i
+            class="bi bi-exclamation-circle
+                   mb-3 text-3xl"
+          ></i>
 
-          <p>
+          <p
+            class="mb-4 text-sm"
+          >
             {{ bookError }}
           </p>
 
           <button
             type="button"
             @click="fetchBooks"
+            class="rounded-lg border-none
+                   bg-blue-600 px-4 py-2
+                   text-sm font-medium text-white
+                   transition hover:bg-blue-700"
           >
             Try Again
           </button>
@@ -508,7 +733,9 @@
             viewMode === 'grid' &&
             filteredBooks.length > 0
           "
-          class="book-grid"
+          class="grid grid-cols-1 gap-5
+                 sm:grid-cols-2
+                 xl:grid-cols-3"
         >
 
           <BookCard
@@ -531,27 +758,43 @@
             viewMode === 'list' &&
             filteredBooks.length > 0
           "
-          class="book-list"
+          class="flex flex-col gap-4"
         >
 
           <div
             v-for="book in filteredBooks"
             :key="book.id"
-            class="book-list-card"
+            class="flex items-center gap-5
+                   rounded-[14px]
+                   border border-slate-200
+                   bg-white p-4
+                   transition hover:shadow-sm
+                   max-sm:flex-col
+                   max-sm:items-start"
           >
 
             <!-- IMAGE -->
 
-            <div class="list-image">
+            <div
+              class="flex h-[130px] w-[100px]
+                     shrink-0 items-center
+                     justify-center overflow-hidden
+                     rounded-[10px]
+                     bg-slate-100"
+            >
 
               <img
                 v-if="book.image"
                 :src="book.image"
                 :alt="book.title"
                 @error="handleImageError"
+                class="h-full w-full object-contain"
               />
 
-              <div v-else>
+              <div
+                v-else
+                class="text-4xl"
+              >
                 📚
               </div>
 
@@ -560,44 +803,77 @@
 
             <!-- INFORMATION -->
 
-            <div class="list-info">
+            <div class="min-w-0 flex-1">
 
-              <h3>
+              <h3
+                class="m-0 text-base font-bold
+                       text-slate-900"
+              >
                 {{ book.title }}
               </h3>
 
-              <p class="list-author">
+              <p
+                class="my-1.5 text-sm text-slate-400"
+              >
                 {{ book.author }}
               </p>
 
-              <span class="book-category">
-                {{ book.category }}
-              </span>
 
-              <span
-                v-if="book.status === true"
-                class="status available"
+              <div
+                class="flex flex-wrap items-center gap-2"
               >
-                ✓ Available
-              </span>
 
-              <span
-                v-else
-                class="status borrowed"
-              >
-                × Borrowed
-              </span>
+                <span
+                  class="inline-block rounded-full
+                         bg-blue-50 px-2.5 py-1
+                         text-xs text-blue-600"
+                >
+                  {{ book.category }}
+                </span>
+
+
+                <span
+                  v-if="book.status === true"
+                  class="inline-block rounded-full
+                         bg-emerald-50 px-2.5 py-1
+                         text-xs text-emerald-600"
+                >
+                  ✓ Available
+                </span>
+
+
+                <span
+                  v-else
+                  class="inline-block rounded-full
+                         bg-red-50 px-2.5 py-1
+                         text-xs text-red-500"
+                >
+                  × Borrowed
+                </span>
+
+              </div>
 
             </div>
 
 
             <!-- ACTION -->
 
-            <div class="list-action">
+            <div
+              class="shrink-0 max-sm:w-full"
+            >
 
               <button
                 type="button"
                 @click="viewBook(book)"
+                class="rounded-[9px]
+                       border border-blue-600
+                       bg-white px-4 py-2.5
+                       text-sm font-medium
+                       text-blue-600
+                       transition
+                       hover:bg-blue-600
+                       hover:text-white
+                       max-sm:w-full"
               >
                 View Details
               </button>
@@ -615,24 +891,38 @@
 
         <div
           v-else
-          class="empty-state"
+          class="rounded-[14px]
+                 border border-slate-200
+                 bg-white px-4 py-20
+                 text-center"
         >
 
-          <div class="empty-icon">
+          <div
+            class="mb-3 text-5xl"
+          >
             📚
           </div>
 
-          <h3>
+          <h3
+            class="m-0 text-lg font-semibold
+                   text-slate-700"
+          >
             No books found
           </h3>
 
-          <p>
+          <p
+            class="mb-4 mt-1.5 text-sm text-slate-400"
+          >
             Try changing your search or filters.
           </p>
 
           <button
             type="button"
             @click="clearFilters"
+            class="rounded-lg border-none
+                   bg-blue-600 px-4 py-2
+                   text-sm font-medium text-white
+                   transition hover:bg-blue-700"
           >
             Clear Filters
           </button>
@@ -1170,16 +1460,6 @@ export default {
         let bookData = [];
 
 
-        // =================================================
-        // RESPONSE:
-        //
-        // {
-        //   status: 200,
-        //   msg: "...",
-        //   data: [...]
-        // }
-        // =================================================
-
         if (
           result &&
           Array.isArray(result.data)
@@ -1191,10 +1471,6 @@ export default {
         }
 
 
-        // =================================================
-        // ARRAY DIRECTLY
-        // =================================================
-
         else if (
           Array.isArray(result)
         ) {
@@ -1205,21 +1481,12 @@ export default {
         }
 
 
-        // =================================================
-        // NO DATA
-        // =================================================
-
         else {
 
           bookData = [];
 
         }
 
-
-        // =================================================
-        // CONVERT BACKEND BOOK
-        // TO FRONTEND BOOK FORMAT
-        // =================================================
 
         this.books =
           bookData.map(book => {
@@ -1337,16 +1604,6 @@ export default {
         );
 
 
-        // =================================================
-        // RESPONSE:
-        //
-        // {
-        //   status: 200,
-        //   msg: "...",
-        //   data: [...]
-        // }
-        // =================================================
-
         if (
           result &&
           Array.isArray(result.data)
@@ -1357,10 +1614,6 @@ export default {
 
         }
 
-
-        // =================================================
-        // ARRAY DIRECTLY
-        // =================================================
 
         else if (
           Array.isArray(result)
@@ -1460,10 +1713,6 @@ export default {
 
     syncCategoryFromCheckbox() {
 
-      // ================================================
-      // NO CATEGORY
-      // ================================================
-
       if (
         this.selectedCategories.length === 0
       ) {
@@ -1483,10 +1732,6 @@ export default {
 
       }
 
-
-      // ================================================
-      // ONE CATEGORY
-      // ================================================
 
       if (
         this.selectedCategories.length === 1
@@ -1516,10 +1761,6 @@ export default {
 
       }
 
-
-      // ================================================
-      // MULTIPLE CATEGORIES
-      // ================================================
 
       else {
 
@@ -1764,1355 +2005,3 @@ export default {
 };
 
 </script>
-
-
-<style scoped>
-
-/* =====================================================
-   PAGE
-===================================================== */
-
-.browse-page {
-
-  min-height: 100vh;
-
-  width: 100%;
-
-  background: #f8faff;
-
-  padding:
-    2rem 4.2rem;
-
-}
-
-
-/* =====================================================
-   HEADER
-===================================================== */
-
-.page-header {
-
-  margin-bottom:
-    2rem;
-
-}
-
-
-.page-header h1 {
-
-  margin: 0;
-
-  color: #0f172a;
-
-  font-size:
-    2rem;
-
-  font-weight:
-    700;
-
-  letter-spacing:
-    -0.02em;
-
-}
-
-
-.page-header p {
-
-  margin:
-    0.35rem 0 0;
-
-  color:
-    #94a3b8;
-
-  font-size:
-    1rem;
-
-}
-
-
-/* =====================================================
-   TOP FILTERS
-===================================================== */
-
-.top-filters {
-
-  display: grid;
-
-  grid-template-columns:
-    1.15fr
-    1fr
-    1fr
-    1fr;
-
-  gap:
-    1rem;
-
-  margin-bottom:
-    2rem;
-
-}
-
-
-/* =====================================================
-   SEARCH
-===================================================== */
-
-.search-box {
-
-  height:
-    58px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    0.8rem;
-
-  padding:
-    0 1rem;
-
-  background:
-    white;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius:
-    14px;
-
-  box-sizing:
-    border-box;
-
-}
-
-
-.search-box i {
-
-  color:
-    #94a3b8;
-
-  font-size:
-    1rem;
-
-}
-
-
-.search-box input {
-
-  width:
-    100%;
-
-  height:
-    100%;
-
-  border:
-    none;
-
-  outline:
-    none;
-
-  background:
-    transparent;
-
-  color:
-    #334155;
-
-  font-size:
-    0.95rem;
-
-}
-
-
-.search-box input::placeholder {
-
-  color:
-    #94a3b8;
-
-}
-
-
-/* =====================================================
-   SELECT
-===================================================== */
-
-.select-box {
-
-  position:
-    relative;
-
-  height:
-    58px;
-
-}
-
-
-.select-box select {
-
-  width:
-    100%;
-
-  height:
-    100%;
-
-  appearance:
-    none;
-
-  -webkit-appearance:
-    none;
-
-  padding:
-    0 2.8rem 0 1.2rem;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius:
-    14px;
-
-  background:
-    white;
-
-  color:
-    #1e293b;
-
-  font-size:
-    0.95rem;
-
-  outline:
-    none;
-
-  cursor:
-    pointer;
-
-}
-
-
-.select-box select:focus {
-
-  border-color:
-    #93c5fd;
-
-  box-shadow:
-    0 0 0 3px
-    rgba(59, 130, 246, 0.08);
-
-}
-
-
-.select-box i {
-
-  position:
-    absolute;
-
-  right:
-    1rem;
-
-  top:
-    50%;
-
-  transform:
-    translateY(-50%);
-
-  pointer-events:
-    none;
-
-  color:
-    #0f172a;
-
-}
-
-
-/* =====================================================
-   MAIN CONTENT
-===================================================== */
-
-.browse-content {
-
-  display:
-    grid;
-
-  grid-template-columns:
-    260px minmax(0, 1fr);
-
-  gap:
-    2.5rem;
-
-  align-items:
-    start;
-
-}
-
-
-/* =====================================================
-   SIDEBAR
-===================================================== */
-
-.filter-sidebar {
-
-  background:
-    white;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius:
-    14px;
-
-  padding:
-    1.3rem;
-
-}
-
-
-/* =====================================================
-   FILTER HEADER
-===================================================== */
-
-.filter-header {
-
-  display:
-    flex;
-
-  justify-content:
-    space-between;
-
-  align-items:
-    center;
-
-  margin-bottom:
-    1.5rem;
-
-}
-
-
-.filter-header h2 {
-
-  margin:
-    0;
-
-  color:
-    #0f172a;
-
-  font-size:
-    1rem;
-
-  font-weight:
-    700;
-
-}
-
-
-.filter-header button {
-
-  border:
-    none;
-
-  background:
-    transparent;
-
-  color:
-    #2563eb;
-
-  font-size:
-    0.85rem;
-
-  cursor:
-    pointer;
-
-}
-
-
-.filter-header button:hover {
-
-  text-decoration:
-    underline;
-
-}
-
-
-/* =====================================================
-   FILTER GROUP
-===================================================== */
-
-.filter-group {
-
-  padding:
-    0 0 1.25rem;
-
-  margin-bottom:
-    1.25rem;
-
-  border-bottom:
-    1px solid #f1f5f9;
-
-}
-
-
-.filter-group:last-child {
-
-  border-bottom:
-    none;
-
-  margin-bottom:
-    0;
-
-  padding-bottom:
-    0;
-
-}
-
-
-.filter-group h3 {
-
-  margin:
-    0 0 0.9rem;
-
-  color:
-    #0f172a;
-
-  font-size:
-    0.9rem;
-
-  font-weight:
-    600;
-
-}
-
-
-/* =====================================================
-   CHECKBOX LIST
-===================================================== */
-
-.checkbox-list {
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  gap:
-    0.75rem;
-
-}
-
-
-.checkbox-row {
-
-  position:
-    relative;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    0.65rem;
-
-  min-height:
-    20px;
-
-  cursor:
-    pointer;
-
-}
-
-
-.checkbox-row input {
-
-  position:
-    absolute;
-
-  opacity:
-    0;
-
-  pointer-events:
-    none;
-
-}
-
-
-.checkbox-custom {
-
-  width:
-    15px;
-
-  height:
-    15px;
-
-  flex-shrink:
-    0;
-
-  border:
-    1.5px solid #94a3b8;
-
-  border-radius:
-    3px;
-
-  background:
-    white;
-
-  transition:
-    all 0.2s ease;
-
-}
-
-
-.checkbox-row input:checked
-+ .checkbox-custom {
-
-  border-color:
-    #2563eb;
-
-  background:
-    #2563eb;
-
-  box-shadow:
-    inset 0 0 0 3px white;
-
-}
-
-
-.checkbox-name {
-
-  flex:
-    1;
-
-  color:
-    #334155;
-
-  font-size:
-    0.88rem;
-
-}
-
-
-.category-count {
-
-  color:
-    #94a3b8;
-
-  font-size:
-    0.82rem;
-
-}
-
-
-/* =====================================================
-   LOADING
-===================================================== */
-
-.filter-loading {
-
-  color:
-    #94a3b8;
-
-  font-size:
-    0.82rem;
-
-  padding:
-    0.3rem 0;
-
-}
-
-
-/* =====================================================
-   ERROR
-===================================================== */
-
-.filter-error {
-
-  color:
-    #dc2626;
-
-  font-size:
-    0.82rem;
-
-  line-height:
-    1.4;
-
-}
-
-
-/* =====================================================
-   BOOK CONTENT
-===================================================== */
-
-.books-content {
-
-  min-width:
-    0;
-
-}
-
-
-/* =====================================================
-   BOOK TOOLBAR
-===================================================== */
-
-.books-toolbar {
-
-  display:
-    flex;
-
-  justify-content:
-    space-between;
-
-  align-items:
-    center;
-
-  margin-bottom:
-    1.2rem;
-
-}
-
-
-.result-count {
-
-  margin:
-    0;
-
-  color:
-    #94a3b8;
-
-  font-size:
-    0.9rem;
-
-}
-
-
-.result-count strong {
-
-  color:
-    #64748b;
-
-  font-weight:
-    600;
-
-}
-
-
-/* =====================================================
-   VIEW TOGGLE
-===================================================== */
-
-.view-toggle {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    0.25rem;
-
-  padding:
-    0.2rem;
-
-  background:
-    white;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius:
-    10px;
-
-}
-
-
-.view-toggle button {
-
-  width:
-    42px;
-
-  height:
-    38px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  border:
-    none;
-
-  border-radius:
-    8px;
-
-  background:
-    transparent;
-
-  color:
-    #94a3b8;
-
-  cursor:
-    pointer;
-
-  font-size:
-    1rem;
-
-}
-
-
-.view-toggle button.active {
-
-  background:
-    #eff6ff;
-
-  color:
-    #2563eb;
-
-}
-
-
-/* =====================================================
-   BOOK LOADING
-===================================================== */
-
-.books-loading {
-
-  min-height:
-    300px;
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  background:
-    white;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius:
-    14px;
-
-  color:
-    #64748b;
-
-}
-
-
-.books-loading i {
-
-  font-size:
-    2rem;
-
-  margin-bottom:
-    0.8rem;
-
-  color:
-    #2563eb;
-
-  animation:
-    spin 1s linear infinite;
-
-}
-
-
-.books-loading p {
-
-  margin:
-    0;
-
-  font-size:
-    0.9rem;
-
-}
-
-
-/* =====================================================
-   BOOK ERROR
-===================================================== */
-
-.books-error {
-
-  min-height:
-    300px;
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  text-align:
-    center;
-
-  background:
-    white;
-
-  border:
-    1px solid #fecaca;
-
-  border-radius:
-    14px;
-
-  color:
-    #dc2626;
-
-}
-
-
-.books-error i {
-
-  font-size:
-    2rem;
-
-  margin-bottom:
-    0.8rem;
-
-}
-
-
-.books-error p {
-
-  margin:
-    0 0 1rem;
-
-  font-size:
-    0.9rem;
-
-}
-
-
-.books-error button {
-
-  border:
-    none;
-
-  border-radius:
-    8px;
-
-  padding:
-    0.6rem 1rem;
-
-  background:
-    #2563eb;
-
-  color:
-    white;
-
-  cursor:
-    pointer;
-
-}
-
-
-.books-error button:hover {
-
-  background:
-    #1d4ed8;
-
-}
-
-
-/* =====================================================
-   BOOK GRID
-===================================================== */
-
-.book-grid {
-
-  display:
-    grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap:
-    1.2rem;
-
-}
-
-
-/* =====================================================
-   LIST VIEW
-===================================================== */
-
-.book-list {
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  gap:
-    1rem;
-
-}
-
-
-.book-list-card {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    1.2rem;
-
-  padding:
-    1rem;
-
-  background:
-    white;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius:
-    14px;
-
-}
-
-
-.list-image {
-
-  width:
-    100px;
-
-  height:
-    130px;
-
-  flex-shrink:
-    0;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  overflow:
-    hidden;
-
-  background:
-    #f1f5f9;
-
-  border-radius:
-    10px;
-
-}
-
-
-.list-image img {
-
-  width:
-    100%;
-
-  height:
-    100%;
-
-  object-fit:
-    contain;
-
-}
-
-
-.list-info {
-
-  flex:
-    1;
-
-}
-
-
-.list-info h3 {
-
-  margin:
-    0;
-
-  color:
-    #0f172a;
-
-  font-size:
-    1.05rem;
-
-  font-weight:
-    700;
-
-}
-
-
-.list-author {
-
-  margin:
-    0.4rem 0;
-
-  color:
-    #94a3b8;
-
-  font-size:
-    0.85rem;
-
-}
-
-
-.book-category {
-
-  display:
-    inline-block;
-
-  margin-right:
-    0.5rem;
-
-  padding:
-    0.3rem 0.65rem;
-
-  border-radius:
-    999px;
-
-  background:
-    #eff6ff;
-
-  color:
-    #2563eb;
-
-  font-size:
-    0.75rem;
-
-}
-
-
-.status {
-
-  display:
-    inline-block;
-
-  padding:
-    0.3rem 0.65rem;
-
-  border-radius:
-    999px;
-
-  font-size:
-    0.75rem;
-
-}
-
-
-.status.available {
-
-  background:
-    #ecfdf5;
-
-  color:
-    #059669;
-
-}
-
-
-.status.borrowed {
-
-  background:
-    #fef2f2;
-
-  color:
-    #ef4444;
-
-}
-
-
-.list-action button {
-
-  padding:
-    0.65rem 1rem;
-
-  border:
-    1px solid #2563eb;
-
-  border-radius:
-    9px;
-
-  background:
-    white;
-
-  color:
-    #2563eb;
-
-  cursor:
-    pointer;
-
-}
-
-
-.list-action button:hover {
-
-  background:
-    #2563eb;
-
-  color:
-    white;
-
-}
-
-
-/* =====================================================
-   EMPTY STATE
-===================================================== */
-
-.empty-state {
-
-  padding:
-    5rem 1rem;
-
-  text-align:
-    center;
-
-  background:
-    white;
-
-  border:
-    1px solid #e2e8f0;
-
-  border-radius:
-    14px;
-
-}
-
-
-.empty-icon {
-
-  font-size:
-    3.5rem;
-
-  margin-bottom:
-    0.8rem;
-
-}
-
-
-.empty-state h3 {
-
-  margin:
-    0;
-
-  color:
-    #334155;
-
-  font-size:
-    1.1rem;
-
-}
-
-
-.empty-state p {
-
-  margin:
-    0.4rem 0 1rem;
-
-  color:
-    #94a3b8;
-
-  font-size:
-    0.85rem;
-
-}
-
-
-.empty-state button {
-
-  border:
-    none;
-
-  border-radius:
-    8px;
-
-  padding:
-    0.6rem 1rem;
-
-  background:
-    #2563eb;
-
-  color:
-    white;
-
-  cursor:
-    pointer;
-
-}
-
-
-/* =====================================================
-   ANIMATION
-===================================================== */
-
-@keyframes spin {
-
-  from {
-    transform:
-      rotate(0deg);
-  }
-
-  to {
-    transform:
-      rotate(360deg);
-  }
-
-}
-
-
-/* =====================================================
-   RESPONSIVE
-===================================================== */
-
-@media (max-width: 1400px) {
-
-  .browse-page {
-
-    padding:
-      2rem;
-
-  }
-
-}
-
-
-@media (max-width: 1100px) {
-
-  .top-filters {
-
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-  }
-
-
-  .browse-content {
-
-    grid-template-columns:
-      220px minmax(0, 1fr);
-
-    gap:
-      1.5rem;
-
-  }
-
-
-  .book-grid {
-
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-  }
-
-}
-
-
-@media (max-width: 800px) {
-
-  .browse-content {
-
-    grid-template-columns:
-      1fr;
-
-  }
-
-
-  .filter-sidebar {
-
-    width:
-      100%;
-
-    box-sizing:
-      border-box;
-
-  }
-
-
-  .book-grid {
-
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-  }
-
-}
-
-
-@media (max-width: 600px) {
-
-  .browse-page {
-
-    padding:
-      1rem;
-
-  }
-
-
-  .top-filters {
-
-    grid-template-columns:
-      1fr;
-
-  }
-
-
-  .book-grid {
-
-    grid-template-columns:
-      1fr;
-
-  }
-
-
-  .book-list-card {
-
-    flex-direction:
-      column;
-
-    align-items:
-      flex-start;
-
-  }
-
-
-  .list-action {
-
-    width:
-      100%;
-
-  }
-
-
-  .list-action button {
-
-    width:
-      100%;
-
-  }
-
-}
-
-</style>

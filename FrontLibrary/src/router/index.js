@@ -15,7 +15,7 @@ import Home from "../pages/user/Home.vue";
 import BrowseBooks from "../pages/user/BrowseBooks.vue";
 import MyBorrowings from "../pages/user/MyBorrowings.vue";
 import MyFines from "../pages/user/MyFines.vue";
-import Notification from "../pages/user/Notification.vue";
+import SettingUser from "../pages/user/SettingUser.vue";
 import UserProfile from "../pages/user/UserProfile.vue";
 
 // =====================================================
@@ -40,6 +40,7 @@ import Borrowing from "../pages/admin/Borrowing.vue";
 import Login from "../pages/auth/login.vue";
 import Register from "../pages/auth/Register.vue";
 import OTPForm from "../pages/auth/OTPForm.vue";
+
 
 // =====================================================
 // ROUTES
@@ -131,9 +132,9 @@ const routes = [
 
       // /user/notifications
       {
-        path: "notifications",
-        name: "Notification",
-        component: Notification,
+        path: "setting",
+        name: "Setting",
+        component: SettingUser,
       },
 
       // /user/profile

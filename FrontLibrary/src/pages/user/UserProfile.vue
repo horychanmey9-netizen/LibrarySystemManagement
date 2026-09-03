@@ -410,103 +410,122 @@ onMounted(() => {
 });
 </script>
 
-
 <template>
 
   <!-- =========================
-       LOADING
+       PROFILE PAGE
   ========================== -->
 
   <div
-    v-if="loading"
-    class="min-h-[400px]
-           flex items-center
-           justify-center"
+    class="min-h-screen
+           w-full
+           bg-[#f8faff]
+           px-8
+           py-6"
   >
 
-    <div class="text-center">
+    <!-- =========================
+         LOADING
+    ========================== -->
 
-      <div
-        class="w-10 h-10
-               border-4
-               border-gray-200
-               border-t-black
-               rounded-full
-               animate-spin
-               mx-auto"
-      ></div>
+    <div
+      v-if="loading"
+      class="min-h-[400px]
+             flex items-center
+             justify-center"
+    >
 
+      <div class="text-center">
 
-      <p
-        class="text-gray-500
-               mt-4"
-      >
-        Loading profile...
-      </p>
+        <div
+          class="w-10 h-10
+                 border-4
+                 border-gray-200
+                 border-t-black
+                 rounded-full
+                 animate-spin
+                 mx-auto"
+        ></div>
+
+        <p
+          class="text-gray-500
+                 mt-4"
+        >
+          Loading profile...
+        </p>
+
+      </div>
 
     </div>
 
-  </div>
 
-
-  <!-- =========================
-       ADMIN FOUND
-  ========================== -->
-
-  <ProfileCard
-    v-else-if="user"
-    :profile="profile"
-    :saving="saving"
-    role="ADMIN"
-    @save="saveProfile"
-  />
-
-
-  <!-- =========================
-       ADMIN NOT FOUND
-  ========================== -->
-
-  <div
-    v-else
-    class="min-h-[400px]
-           flex items-center
-           justify-center"
-  >
+    <!-- =========================
+         ADMIN FOUND
+    ========================== -->
 
     <div
-      class="bg-white
-             rounded-2xl
-             shadow
-             p-8
-             text-center"
+      v-else-if="user"
+      class="w-full"
     >
 
-      <i
-        class="bi bi-person-x
-               text-4xl
-               text-gray-400"
-      ></i>
+      <ProfileCard
+        :profile="profile"
+        :saving="saving"
+        role="ADMIN"
+        @save="saveProfile"
+      />
+
+    </div>
 
 
-      <h2
-        class="text-xl
-               font-semibold
-               text-gray-700
-               mt-4"
+    <!-- =========================
+         ADMIN NOT FOUND
+    ========================== -->
+
+    <div
+      v-else
+      class="min-h-[400px]
+             flex items-center
+             justify-center"
+    >
+
+      <div
+        class="bg-white
+               rounded-2xl
+               shadow
+               p-8
+               text-center"
       >
-        Admin information not found
-      </h2>
+
+        <i
+          class="bi bi-person-x
+                 text-4xl
+                 text-gray-400"
+        ></i>
 
 
-      <p
-        class="text-gray-500
-               mt-2"
-      >
-        Please login again.
-      </p>
+        <h2
+          class="text-xl
+                 font-semibold
+                 text-gray-700
+                 mt-4"
+        >
+          Admin information not found
+        </h2>
+
+
+        <p
+          class="text-gray-500
+                 mt-2"
+        >
+          Please login again.
+        </p>
+
+      </div>
 
     </div>
 
   </div>
 
 </template>
+

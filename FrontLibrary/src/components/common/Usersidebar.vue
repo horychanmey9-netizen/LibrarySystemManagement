@@ -1,50 +1,88 @@
-
 <template>
+
   <aside
     class="sidebar"
     :class="{ 'sidebar-open': sidebarOpen }"
   >
 
-    <!-- ================= HEADER ================= -->
-    <div class="sidebar-header bg-white border-b border-gray-100 shadow-sm">
+    <!-- ========================================
+         LOGO
+    ======================================== -->
 
-      <div class="logo">
+    <div class="logo-section">
 
-        <i class="bi bi-book text-black"></i>
+      <div class="logo-icon">
 
-        <h1>
-          LIBRARY SYSTEM
-        </h1>
+        <img
+          src="/logo1.png"
+          alt="Library Logo"
+          class="logo-image"
+        />
 
       </div>
 
-    </div>
-    
+      <div class="logo-text">
 
-
-    <!-- ================= MENU ================= -->
-    <nav class="sidebar-menu">
-
-      <router-link 
-  v-for="item in menuItems" 
-  :key="item.path" 
-  :to="item.path" 
-  class="menu-item" 
-  exact-active-class="active"
-  @click="closeSidebar"
->
-
-        <i :class="item.icon"></i>
+        <h1>
+          Library
+        </h1>
 
         <span>
+          Management System
+        </span>
+
+      </div>
+
+
+      <!-- Mobile Close -->
+
+      <button
+        type="button"
+        class="mobile-close"
+        title="Close Menu"
+        @click="closeSidebar"
+      >
+
+        <i class="bi bi-x-lg"></i>
+
+      </button>
+
+    </div>
+
+
+    <!-- ========================================
+         NAVIGATION
+    ======================================== -->
+
+    <nav class="navigation">
+
+      <RouterLink
+        v-for="item in menuItems"
+        :key="item.path"
+        :to="item.path"
+        class="nav-item"
+        exact-active-class="active"
+        @click="closeSidebarOnMobile"
+      >
+
+        <span class="icon">
+
+          <i
+            :class="item.icon"
+          ></i>
+
+        </span>
+
+        <span class="nav-label">
           {{ item.label }}
         </span>
 
 
         <!-- Notification Badge -->
+
         <span
           v-if="
-            item.path === '/notifications' &&
+            item.path === '/user/notifications' &&
             unreadCount > 0
           "
           class="badge-count"
@@ -52,20 +90,29 @@
           {{ unreadCount > 9 ? "9+" : unreadCount }}
         </span>
 
-      </router-link>
+      </RouterLink>
 
     </nav>
 
 
-    <!-- ================= FOOTER ================= -->
-    <div class="sidebar-footer">
+    <!-- ========================================
+         BOTTOM
+    ======================================== -->
+
+    <div class="sidebar-bottom">
 
       <button
+        type="button"
         class="logout-btn"
+        title="Logout"
         @click="handleLogout"
       >
 
-        <i class="bi bi-box-arrow-right"></i>
+        <span class="logout-icon">
+
+          <i class="bi bi-box-arrow-right"></i>
+
+        </span>
 
         <span>
           Logout
@@ -76,20 +123,38 @@
     </div>
 
   </aside>
+
+
+  <!-- ========================================
+       MOBILE OVERLAY
+  ======================================== -->
+
+  <div
+    v-if="sidebarOpen"
+    class="sidebar-overlay"
+    @click="closeSidebar"
+  ></div>
+
 </template>
 
 
 <script>
+
 import {
   getUnreadCount,
   notificationUpdatedEvent,
 } from "../../service/notificationService";
 
+
 export default {
 
   name: "Sidebar",
 
-  emits: ["close-sidebar"],
+
+  emits: [
+    "close-sidebar"
+  ],
+
 
   props: {
 
@@ -107,68 +172,90 @@ export default {
 
       unreadCount: 0,
 
+
+      // ======================================
+      // MENU
+      // ======================================
+
       menuItems: [
-  {
-    label: "Home",
-    path: "/user/home",
-    icon: "bi bi-house-door",
-  },
 
-  {
-    label: "Browse Books",
-    path: "/user/browse-books",
-    icon: "bi bi-journal-bookmark",
-  },
+        {
+          label: "Home",
+          path: "/user/home",
+          icon: "bi bi-house-door",
+        },
 
-  {
-    label: "My Borrowings",
-    path: "/user/my-borrowings",
-    icon: "bi bi-people",
-  },
+        {
+          label: "Browse Books",
+          path: "/user/browse-books",
+          icon: "bi bi-journal-bookmark",
+        },
 
-  {
-    label: "My Fines",
-    path: "/user/my-fines",
-    icon: "bi bi-search",
-  },
+        {
+          label: "My Borrowings",
+          path: "/user/my-borrowings",
+          icon: "bi bi-journal-arrow-down",
+        },
 
-  {
-    label: "Notifications",
-    path: "/user/notifications",
-    icon: "bi bi-bell",
-  },
+        {
+          label: "My Fines",
+          path: "/user/my-fines",
+          icon: "bi bi-cash-coin",
+        },
 
-  {
-    label: "Profile",
-    path: "/user/profile",
-    icon: "bi bi-person",
-  },
-],
+        {
+          label: "Setting",
+          path: "/user/setting",
+          icon: "bi bi-gear",
+        },
+
+      ],
 
     };
+
   },
 
 
   methods: {
 
+
+    // ======================================
+    // CLOSE SIDEBAR
+    // ======================================
+
     closeSidebar() {
-    this.$emit("close-sidebar");
-  },
 
-    // ===============================
-    // LOAD COUNT
-    // ===============================
-    loadUnreadCount() {
-
-      this.unreadCount =
-        getUnreadCount();
+      this.$emit(
+        "close-sidebar"
+      );
 
     },
 
 
-    // ===============================
-    // SYNC
-    // ===============================
+    // ======================================
+    // CLOSE ON MOBILE
+    // ======================================
+
+    closeSidebarOnMobile() {
+
+      if (
+        window.innerWidth <= 768
+      ) {
+
+        this.$emit(
+          "close-sidebar"
+        );
+
+      }
+
+    },
+
+
+
+    // ======================================
+    // SYNC NOTIFICATIONS
+    // ======================================
+
     syncNotifications() {
 
       this.loadUnreadCount();
@@ -176,33 +263,38 @@ export default {
     },
 
 
-    // ===============================
+    // ======================================
     // LOGOUT
-    // ===============================
+    // ======================================
+
     handleLogout() {
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("role");
-  sessionStorage.removeItem("user");
 
-  this.$router.push("/login");
-}
+      sessionStorage.removeItem(
+        "token"
+      );
+
+      sessionStorage.removeItem(
+        "role"
+      );
+
+      sessionStorage.removeItem(
+        "user"
+      );
+
+
+      this.$router.push(
+        "/login"
+      );
+
+    },
 
   },
 
 
-  mounted() {
 
-    this.loadUnreadCount();
-
-
-    // Listen for notification changes
-    window.addEventListener(
-      notificationUpdatedEvent(),
-      this.syncNotifications
-    );
-
-  },
-
+  // ========================================
+  // UNMOUNTED
+  // ========================================
 
   beforeUnmount() {
 
@@ -214,165 +306,687 @@ export default {
   },
 
 };
+
 </script>
 
 
 <style scoped>
 
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
 .sidebar {
+
   width: 250px;
+
   height: 100vh;
-  background: #ffffff;
-  color: #232d38;
-  display: flex;
-  flex-direction: column;
+
   position: sticky;
+
   top: 0;
+
+  left: 0;
+
   flex-shrink: 0;
-  z-index: 50;
-}
 
+  background: #ffffff;
 
-/* Mobile */
-@media (max-width: 1023px) {
+  border-right: 1px solid #e5e7eb;
 
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-
-    transform: translateX(-100%);
-
-    transition:
-      transform 0.3s ease;
-  }
-
-  .sidebar.sidebar-open {
-    transform: translateX(0);
-  }
-
-}
-
-
-.sidebar-header {
-  padding: 1.2rem 1rem;
-  font-size: 1rem;
-  font-weight: 500 ;
-}
-
-
-.badge {
-  background: #2563eb;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
-}
-
-
-.logo {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.8rem;
-}
 
-
-.logo h2 {
-  font-size: 0.95rem;
-  color: #fff;
-  margin: 0;
-}
-
-
-.sidebar-menu {
-  flex: 1;
-  display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  padding: 1rem 0.7rem;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  z-index: 100;
+
 }
 
 
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 0.9rem;
-  border-radius: 8px;
-  color: #3f5d81;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: background 0.2s ease;
+/* =====================================================
+   LOGO SECTION
+===================================================== */
 
-  position: relative;
-}
+.logo-section {
 
+  width: 100%;
 
-.menu-item:hover {
-  background: #f5f3ff;
-  color: #5b3df5;
-}
+  height: 75px;
 
-
-.menu-item.active {
-  background: #f5f3ff;
-  color: #5b3df5;
-}
-
-
-.badge-count {
-  position: absolute;
-  right: 0.8rem;
-
-  background: #ef4444;
-  color: #fff;
-
-  min-width: 20px;
-  height: 20px;
+  min-height: 75px;
 
   display: flex;
+
   align-items: center;
+
+  gap: 12px;
+
+  padding: 0 18px;
+
+  border-bottom: 1px solid #f0f0f0;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+}
+
+
+/* =====================================================
+   LOGO ICON
+===================================================== */
+
+.logo-icon {
+
+  width: 42px;
+
+  height: 42px;
+
+  min-width: 42px;
+
+  display: flex;
+
+  align-items: center;
+
   justify-content: center;
 
-  font-size: 0.7rem;
+  overflow: hidden;
+
+  border-radius: 10px;
+
+  background: transparent;
+
+}
+
+
+/* =====================================================
+   LOGO IMAGE
+===================================================== */
+
+.logo-image {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: contain;
+
+  display: block;
+
+}
+
+
+/* =====================================================
+   LOGO TEXT
+===================================================== */
+
+.logo-text {
+
+  min-width: 0;
+
+  overflow: hidden;
+
+}
+
+
+.logo-text h1 {
+
+  margin: 0;
+
+  padding: 0;
+
+  font-size: 18px;
+
+  line-height: 22px;
+
   font-weight: 700;
 
-  padding: 0.05rem 0.35rem;
+  color: #172033;
+
+  white-space: nowrap;
+
+}
+
+
+.logo-text span {
+
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 10px;
+
+  line-height: 14px;
+
+  color: #8a92a3;
+
+  white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.navigation {
+
+  flex: 1;
+
+  width: 100%;
+
+  padding: 20px 14px;
+
+  box-sizing: border-box;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+}
+
+
+/* =====================================================
+   SCROLLBAR
+===================================================== */
+
+.navigation::-webkit-scrollbar {
+
+  width: 5px;
+
+}
+
+
+.navigation::-webkit-scrollbar-track {
+
+  background: transparent;
+
+}
+
+
+.navigation::-webkit-scrollbar-thumb {
+
+  background: #d1d5db;
+
+  border-radius: 10px;
+
+}
+
+
+/* =====================================================
+   NAV ITEM
+===================================================== */
+
+.nav-item {
+
+  position: relative;
+
+  width: 100%;
+
+  min-height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 11px 13px;
+
+  margin-bottom: 4px;
+
+  box-sizing: border-box;
+
+  border-radius: 9px;
+
+  text-decoration: none;
+
+  color: #536b8c;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+
+}
+
+
+/* =====================================================
+   NAV HOVER
+===================================================== */
+
+.nav-item:hover {
+
+  background: #f5f3ff;
+
+  color: #5b3df5;
+
+}
+
+
+/* =====================================================
+   NAV ACTIVE
+===================================================== */
+
+.nav-item.active {
+
+  background: #eeeaff;
+
+  color: #5b3df5;
+
+  font-weight: 600;
+
+}
+
+
+/* =====================================================
+   ICON
+===================================================== */
+
+.icon {
+
+  width: 22px;
+
+  min-width: 22px;
+
+  height: 22px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 17px;
+
+}
+
+
+/* =====================================================
+   LABEL
+===================================================== */
+
+.nav-label {
+
+  flex: 1;
+
+  min-width: 0;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
+
+
+/* =====================================================
+   NOTIFICATION BADGE
+===================================================== */
+
+.badge-count {
+
+  min-width: 20px;
+
+  height: 20px;
+
+  padding: 0 5px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #ef4444;
+
+  color: #ffffff;
 
   border-radius: 999px;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  line-height: 1;
+
 }
 
 
-.sidebar-footer {
-  padding: 1rem 0.7rem;
-  border-top: 1px solid #1e293b;
+/* =====================================================
+   SIDEBAR BOTTOM
+===================================================== */
+
+.sidebar-bottom {
+
+  width: 100%;
+
+  padding: 15px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-top: 1px solid #eeeeee;
+
+  flex-shrink: 0;
+
 }
 
+
+/* =====================================================
+   LOGOUT
+===================================================== */
 
 .logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
 
-  background: none;
+  width: 100%;
+
+  min-height: 44px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 8px 13px;
+
   border: none;
 
-  color: #cbd5e1;
-  font-size: 0.9rem;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #667085;
+
+  font-size: 14px;
+
+  font-weight: 500;
 
   cursor: pointer;
 
-  width: 100%;
-  padding: 0.6rem 0.9rem;
+  text-align: left;
+
+  box-sizing: border-box;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+
 }
 
 
 .logout-btn:hover {
-  color: #fff;
+
+  background: #f5f3ff;
+
+  color: #5b3df5;
+
+}
+
+
+/* =====================================================
+   LOGOUT ICON
+===================================================== */
+
+.logout-icon {
+
+  width: 22px;
+
+  min-width: 22px;
+
+  height: 22px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 17px;
+
+}
+
+
+/* =====================================================
+   MOBILE CLOSE
+===================================================== */
+
+.mobile-close {
+
+  display: none;
+
+  margin-left: auto;
+
+  width: 36px;
+
+  height: 36px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #667085;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+
+  font-size: 17px;
+
+}
+
+
+.mobile-close:hover {
+
+  background: #f5f3ff;
+
+  color: #5b3df5;
+
+}
+
+
+/* =====================================================
+   OVERLAY
+===================================================== */
+
+.sidebar-overlay {
+
+  display: none;
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(
+    0,
+    0,
+    0,
+    0.35
+  );
+
+  z-index: 90;
+
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 1024px) {
+
+  .sidebar {
+
+    width: 230px;
+
+  }
+
+
+  .logo-section {
+
+    padding: 0 16px;
+
+  }
+
+
+  .navigation {
+
+    padding: 18px 12px;
+
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .sidebar {
+
+    width: 270px;
+
+    max-width: 85vw;
+
+    height: 100vh;
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    transform:
+      translateX(-100%);
+
+    transition:
+      transform 0.3s ease;
+
+    box-shadow:
+      8px 0 25px
+      rgba(
+        0,
+        0,
+        0,
+        0.08
+      );
+
+    z-index: 1100;
+
+  }
+
+
+  .sidebar.sidebar-open {
+
+    transform:
+      translateX(0);
+
+  }
+
+
+  .logo-section {
+
+    height: 70px;
+
+    min-height: 70px;
+
+    padding: 0 18px;
+
+  }
+
+
+  .mobile-close {
+
+    display: flex;
+
+  }
+
+
+  .navigation {
+
+    padding: 18px 12px;
+
+  }
+
+
+  .nav-item {
+
+    min-height: 48px;
+
+    padding: 12px 13px;
+
+  }
+
+
+  .sidebar-overlay {
+
+    display: block;
+
+    z-index: 1050;
+
+  }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+
+  .sidebar {
+
+    width: 260px;
+
+    max-width: 88vw;
+
+  }
+
+
+  .logo-section {
+
+    padding: 0 15px;
+
+  }
+
+
+  .navigation {
+
+    padding: 15px 10px;
+
+  }
+
+
+  .nav-item {
+
+    padding: 11px 12px;
+
+  }
+
+
+  .sidebar-bottom {
+
+    padding: 12px;
+
+  }
+
 }
 
 </style>
-
