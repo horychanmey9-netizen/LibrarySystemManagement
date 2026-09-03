@@ -1,7 +1,7 @@
 package com.example.LibraryBack.service;
 
 import com.example.LibraryBack.entity.User;
-import com.example.LibraryBack.repositoy.UserRepository;
+import com.example.LibraryBack.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

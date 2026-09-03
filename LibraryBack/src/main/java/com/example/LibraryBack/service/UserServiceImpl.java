@@ -2,7 +2,7 @@ package com.example.LibraryBack.service;
 
 import com.example.LibraryBack.dto.response.UserResponse;
 import com.example.LibraryBack.mapper.UserMapper;
-import com.example.LibraryBack.repositoy.UserRepository;
+import com.example.LibraryBack.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
