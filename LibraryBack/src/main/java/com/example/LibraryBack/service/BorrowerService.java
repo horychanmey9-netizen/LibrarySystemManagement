@@ -9,6 +9,8 @@ public interface BorrowerService {
     BorrowerResponse create(BorrowerRequest request);
     List<BorrowerResponse> getData();
     BorrowerResponse getById(Long id);
+    BorrowerResponse accept(Long id);
+    BorrowerResponse reject(Long id);
     BorrowerResponse update(Long id, BorrowerRequest request);
     void delete(Long id);
 }

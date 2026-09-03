@@ -5,6 +5,7 @@ import com.example.LibraryBack.dto.response.BorrowerResponse;
 import com.example.LibraryBack.entity.Book;
 import com.example.LibraryBack.entity.Borrower;
 import com.example.LibraryBack.entity.User;
+import com.example.LibraryBack.enums.BorrowingStatus;
 import com.example.LibraryBack.exception.NotException;
 import com.example.LibraryBack.mapper.BorrowerMapper;
 import com.example.LibraryBack.repository.BookRepository;
@@ -26,30 +27,68 @@ public class BorrowerServiceImpl implements BorrowerService {
     private final BookRepository bookRepository;
     private final BorrowerMapper borrowerMapper;
 
+
+    // =========================================================
+    // CREATE BORROW REQUEST
+    // User clicks Borrow
+    // Status = PENDING
+    // Quantity DOES NOT decrease here
+    // =========================================================
     @Override
     @Transactional
     public BorrowerResponse create(BorrowerRequest borrowerRequest) {
 
-        User user = userRepository.findById(borrowerRequest.getUserId())
-                .orElseThrow(() -> new NotException("User not found"));
+        User user = userRepository.findById(
+                borrowerRequest.getUserId()
+        ).orElseThrow(() ->
+                new NotException("User not found")
+        );
 
-        Book book = bookRepository.findById(borrowerRequest.getBookId())
-                .orElseThrow(() -> new NotException("Book not found"));
 
-        Borrower borrower = borrowerMapper.toEntity(borrowerRequest);
+        Book book = bookRepository.findById(
+                borrowerRequest.getBookId()
+        ).orElseThrow(() ->
+                new NotException("Book not found")
+        );
 
-        borrower.setUser(user);
-        borrower.setBook(book);
 
-        if (borrower.getFine() == null) {
-            borrower.setFine(BigDecimal.ZERO);
+        // Check book quantity
+        if (book.getQty() <= 0) {
+            throw new NotException(
+                    "This book is currently unavailable"
+            );
         }
 
-        Borrower savedBorrower = borrowerRepository.save(borrower);
 
-        return borrowerMapper.toResponse(savedBorrower);
+        // Create borrower only ONCE
+        Borrower borrower =
+                borrowerMapper.toEntity(borrowerRequest);
+
+
+        borrower.setUser(user);
+
+        borrower.setBook(book);
+
+        // Always PENDING when user requests
+        borrower.setStatus(
+                BorrowingStatus.PENDING
+        );
+
+        // Default fine
+        borrower.setFine(
+                BigDecimal.ZERO
+        );
+
+
+        // Save request
+        Borrower savedBorrower =
+                borrowerRepository.save(borrower);
+
+
+        return borrowerMapper.toResponse(
+                savedBorrower
+        );
     }
-
     @Override
     public List<BorrowerResponse> getData() {
 
@@ -62,48 +101,245 @@ public class BorrowerServiceImpl implements BorrowerService {
     @Override
     public BorrowerResponse getById(Long id) {
 
-        Borrower borrower = borrowerRepository.findById(id)
-                .orElseThrow(() -> new NotException("Borrower not found"));
+        Borrower borrower =
+                borrowerRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NotException(
+                                        "Borrower not found"
+                                )
+                        );
 
-        return borrowerMapper.toResponse(borrower);
+
+        return borrowerMapper.toResponse(
+                borrower
+        );
+    }
+
+
+    // =========================================================
+    @Override
+    @Transactional
+    public BorrowerResponse accept(Long id) {
+
+        Borrower borrower =
+                borrowerRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NotException(
+                                        "Borrowing not found"
+                                )
+                        );
+
+
+        // Only PENDING can be accepted
+        if (borrower.getStatus()
+                != BorrowingStatus.PENDING) {
+
+            throw new NotException(
+                    "Only PENDING requests can be accepted"
+            );
+        }
+
+
+        Book book = borrower.getBook();
+
+
+        if (book == null) {
+
+            throw new NotException(
+                    "Book not found"
+            );
+        }
+
+
+        // Check quantity again
+        if (book.getQty() <= 0) {
+
+            throw new NotException(
+                    "Book is no longer available"
+            );
+        }
+
+
+        // Decrease quantity ONLY when admin accepts
+        book.setQty(
+                book.getQty() - 1
+        );
+
+        bookRepository.save(book);
+
+
+        // Change status
+        borrower.setStatus(
+                BorrowingStatus.BORROWED
+        );
+
+
+        // Make sure fine is not null
+        if (borrower.getFine() == null) {
+
+            borrower.setFine(
+                    BigDecimal.ZERO
+            );
+        }
+
+
+        Borrower updatedBorrower =
+                borrowerRepository.save(
+                        borrower
+                );
+
+
+        return borrowerMapper.toResponse(
+                updatedBorrower
+        );
     }
 
     @Override
     @Transactional
-    public BorrowerResponse update(Long id, BorrowerRequest request) {
+    public BorrowerResponse reject(Long id) {
 
-        Borrower borrower = borrowerRepository.findById(id)
-                .orElseThrow(() -> new NotException("Borrower not found"));
+        Borrower borrower =
+                borrowerRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NotException(
+                                        "Borrowing not found"
+                                )
+                        );
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new NotException("User not found"));
 
-        Book book = bookRepository.findById(request.getBookId())
-                .orElseThrow(() -> new NotException("Book not found"));
+        // Only PENDING can be rejected
+        if (borrower.getStatus()
+                != BorrowingStatus.PENDING) {
 
-        borrower.setUser(user);
-        borrower.setBook(book);
-        borrower.setBorrowDate(request.getBorrowDate());
-        borrower.setDueDate(request.getDueDate());
-        borrower.setReturnDate(request.getReturnDate());
-        borrower.setStatus(request.getStatus());
-
-        if (borrower.getFine() == null) {
-            borrower.setFine(BigDecimal.ZERO);
+            throw new NotException(
+                    "Only PENDING requests can be rejected"
+            );
         }
 
-        Borrower updatedBorrower = borrowerRepository.save(borrower);
 
-        return borrowerMapper.toResponse(updatedBorrower);
+        // Change status to REJECTED
+        borrower.setStatus(
+                BorrowingStatus.REJECTED
+        );
+
+
+        // Make sure fine is not null
+        if (borrower.getFine() == null) {
+
+            borrower.setFine(
+                    BigDecimal.ZERO
+            );
+        }
+
+
+        // IMPORTANT:
+        // Do NOT change book quantity
+        Borrower updatedBorrower =
+                borrowerRepository.save(
+                        borrower
+                );
+
+
+        return borrowerMapper.toResponse(
+                updatedBorrower
+        );
     }
 
+
+    // =========================================================
+    // UPDATE BORROWING
+    // Admin
+    // =========================================================
+    @Override
+    @Transactional
+    public BorrowerResponse update(
+            Long id,
+            BorrowerRequest request
+    ) {
+
+        Borrower borrower =
+                borrowerRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NotException(
+                                        "Borrower not found"
+                                )
+                        );
+
+
+        User user =
+                userRepository.findById(
+                        request.getUserId()
+                ).orElseThrow(() ->
+                        new NotException(
+                                "User not found"
+                        )
+                );
+
+
+        Book book =
+                bookRepository.findById(
+                        request.getBookId()
+                ).orElseThrow(() ->
+                        new NotException(
+                                "Book not found"
+                        )
+                );
+
+
+        borrower.setUser(user);
+
+        borrower.setBook(book);
+
+        borrower.setBorrowDate(
+                request.getBorrowDate()
+        );
+
+        borrower.setDueDate(
+                request.getDueDate()
+        );
+
+        borrower.setReturnDate(
+                request.getReturnDate()
+        );
+
+        borrower.setStatus(
+                request.getStatus()
+        );
+
+
+        if (borrower.getFine() == null) {
+
+            borrower.setFine(
+                    BigDecimal.ZERO
+            );
+        }
+
+
+        Borrower updatedBorrower =
+                borrowerRepository.save(
+                        borrower
+                );
+
+
+        return borrowerMapper.toResponse(
+                updatedBorrower
+        );
+    }
     @Override
     @Transactional
     public void delete(Long id) {
 
-        Borrower borrower = borrowerRepository.findById(id)
-                .orElseThrow(() -> new NotException("Borrower not found"));
+        Borrower borrower =
+                borrowerRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NotException(
+                                        "Borrower not found"
+                                )
+                        );
 
-        borrowerRepository.delete(borrower);
+
+        borrowerRepository.delete(
+                borrower
+        );
     }
 }

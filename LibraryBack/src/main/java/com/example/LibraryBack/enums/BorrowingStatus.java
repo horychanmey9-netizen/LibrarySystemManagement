@@ -1,7 +1,9 @@
 package com.example.LibraryBack.enums;
 
 public enum BorrowingStatus {
+    PENDING,
     BORROWED,
-    LATE,
-    RETURNED
+    RETURNED,
+    OVERDUE,
+    REJECTED
 }
