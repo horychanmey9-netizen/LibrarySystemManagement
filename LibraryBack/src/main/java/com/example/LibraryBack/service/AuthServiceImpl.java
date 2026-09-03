@@ -27,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -137,7 +138,6 @@ public class AuthServiceImpl implements AuthService {
         return response;
     }
 
-
     @Override
     @Transactional
     public String forgotPassword(ForgotPasswordRequest request) {
@@ -146,21 +146,24 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() ->
                         new NotException("Email not found")
                 );
-        passwordResetTokenRepository.deleteByUser(user);
+
+        PasswordResetToken resetToken =
+                passwordResetTokenRepository.findByUser(user)
+                        .orElseGet(() ->
+                                PasswordResetToken.builder()
+                                        .user(user)
+                                        .build()
+                        );
+
         String token = UUID.randomUUID().toString();
-        LocalDateTime expiryDate =
-                LocalDateTime.now().plusMinutes(15);
 
-        PasswordResetToken passwordResetToken =
-                PasswordResetToken.builder()
-                        .token(token)
-                        .user(user)
-                        .expiryDate(expiryDate)
-                        .used(false)
-                        .build();
+        resetToken.setToken(token);
+        resetToken.setExpiryDate(
+                LocalDateTime.now().plusMinutes(15)
+        );
+        resetToken.setUsed(false);
 
-        passwordResetTokenRepository.save(passwordResetToken);
-
+        passwordResetTokenRepository.save(resetToken);
         String resetLink = frontendUrl + "/reset-password?token=" + token;
         emailService.sendPasswordResetEmail(
                 user.getEmail(),
@@ -169,8 +172,6 @@ public class AuthServiceImpl implements AuthService {
 
         return "Password reset link has been sent to your email";
     }
-
-
     @Override
     @Transactional
     public String resetPassword(ResetPasswordRequest request) {
@@ -179,28 +180,18 @@ public class AuthServiceImpl implements AuthService {
                 passwordResetTokenRepository
                         .findByToken(request.getToken())
                         .orElseThrow(() ->
-                                new NotException(
-                                        "Invalid reset token"
-                                )
+                                new NotException("Invalid reset token")
                         );
 
-        // Check if token was already used
-        if (passwordResetToken.isUsed()) {
-            throw new NotException(
-                    "This reset link has already been used"
-            );
-        }
-
-        // Check token expiration
         if (passwordResetToken.getExpiryDate()
                 .isBefore(LocalDateTime.now())) {
 
+            passwordResetTokenRepository.delete(passwordResetToken);
             throw new NotException(
                     "This reset link has expired"
             );
         }
 
-        // Check password confirmation
         if (!request.getNewPassword()
                 .equals(request.getConfirmPassword())) {
 
@@ -208,11 +199,13 @@ public class AuthServiceImpl implements AuthService {
                     "New password and confirm password do not match"
             );
         }
-
-        // Get user
+        if (passwordResetToken.isUsed()) {
+            throw new NotException(
+                    "This reset link has already been used"
+            );
+        }
         User user = passwordResetToken.getUser();
 
-        // Encode new password
         user.setPassword(
                 passwordEncoder.encode(
                         request.getNewPassword()
@@ -221,10 +214,7 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        // Mark token as used
-        passwordResetToken.setUsed(true);
-
-        passwordResetTokenRepository.save(passwordResetToken);
+        passwordResetTokenRepository.delete(passwordResetToken);
 
         return "Password has been changed successfully";
     }
