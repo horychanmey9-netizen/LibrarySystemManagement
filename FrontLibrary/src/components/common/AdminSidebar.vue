@@ -12,7 +12,11 @@
     <div class="logo-section">
 
       <div class="logo-icon">
-        <i class="bi bi-book"></i>
+        <img
+          :src="logo"
+          alt="Library Logo"
+          class="logo-image"
+        />
       </div>
 
       <div class="logo-text">
@@ -198,6 +202,7 @@ import {
   getProfile
 } from "../../service/profileservice";
 
+import logo from "../../assets/logo.png"
 
 // ========================================
 // ROUTER
@@ -786,27 +791,22 @@ const managementMenu = [
 
 
 .logo-icon {
-
   width: 42px;
-
   height: 42px;
-
   min-width: 42px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
-  background: #5b3df5;
-
-  color: white;
-
   border-radius: 10px;
+  overflow: hidden;
+  background: transparent;
+}
 
-  font-size: 21px;
-
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 

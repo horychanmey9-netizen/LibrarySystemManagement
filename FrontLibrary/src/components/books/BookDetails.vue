@@ -1,3 +1,4 @@
+
 <template>
   <!-- ================= OVERLAY ================= -->
   <div
@@ -24,10 +25,7 @@
       >
 
         <div>
-          <h2
-            class="text-xl font-bold
-                   text-slate-800"
-          >
+          <h2 class="text-xl font-bold text-slate-800">
             Book Details
           </h2>
 
@@ -36,8 +34,6 @@
           </p>
         </div>
 
-
-        <!-- Close -->
         <button
           type="button"
           @click="$emit('close')"
@@ -79,16 +75,13 @@
                      justify-center"
             >
 
-              <!-- Book Image -->
               <img
                 v-if="book.image"
                 :src="book.image"
                 :alt="book.title"
-                class="w-full h-full
-                       object-contain"
+                class="w-full h-full object-contain"
               />
 
-              <!-- No Image -->
               <div
                 v-else
                 class="text-6xl text-slate-300"
@@ -102,9 +95,8 @@
             <!-- ================= STATUS ================= -->
             <div class="mt-4">
 
-              <!-- Available -->
               <div
-                v-if="book.status === true"
+                v-if="isAvailable"
                 class="flex items-center
                        justify-center gap-2
                        w-full
@@ -118,8 +110,6 @@
                 Available
               </div>
 
-
-              <!-- Borrowed -->
               <div
                 v-else
                 class="flex items-center
@@ -132,7 +122,7 @@
                        font-semibold"
               >
                 <span>×</span>
-                Borrowed
+                Unavailable
               </div>
 
             </div>
@@ -143,7 +133,7 @@
           <!-- ================= BOOK INFO ================= -->
           <div class="md:col-span-3">
 
-            <!-- Title -->
+            <!-- TITLE -->
             <h1
               class="text-3xl
                      font-bold
@@ -154,23 +144,17 @@
             </h1>
 
 
-            <!-- Author -->
-            <p
-              class="mt-2
-                     text-slate-500"
-            >
+            <!-- AUTHOR -->
+            <p class="mt-2 text-slate-500">
               Written by
 
-              <span
-                class="font-semibold
-                       text-slate-700"
-              >
-                {{ book.author }}
+              <span class="font-semibold text-slate-700">
+                {{ book.author || "Unknown Author" }}
               </span>
             </p>
 
 
-            <!-- ================= INFORMATION GRID ================= -->
+            <!-- ================= INFORMATION ================= -->
             <div
               class="grid
                      grid-cols-2
@@ -185,7 +169,6 @@
                        rounded-xl
                        p-4"
               >
-
                 <p
                   class="text-xs
                          text-slate-400
@@ -201,9 +184,8 @@
                          font-bold
                          text-slate-800"
                 >
-                  {{ book.qty }}
+                  {{ book.qty ?? 0 }}
                 </p>
-
               </div>
 
 
@@ -213,7 +195,6 @@
                        rounded-xl
                        p-4"
               >
-
                 <p
                   class="text-xs
                          text-slate-400
@@ -229,9 +210,8 @@
                          font-bold
                          text-slate-800"
                 >
-                  {{ book.pages }}
+                  {{ book.pages || "-" }}
                 </p>
-
               </div>
 
 
@@ -241,7 +221,6 @@
                        rounded-xl
                        p-4"
               >
-
                 <p
                   class="text-xs
                          text-slate-400
@@ -257,9 +236,8 @@
                          font-bold
                          text-slate-800"
                 >
-                  {{ book.language }}
+                  {{ book.language || "-" }}
                 </p>
-
               </div>
 
 
@@ -271,7 +249,6 @@
                        rounded-xl
                        p-4"
               >
-
                 <p
                   class="text-xs
                          text-slate-400
@@ -287,9 +264,8 @@
                          text-slate-800
                          font-medium"
                 >
-                  {{ book.isbn }}
+                  {{ book.isbn || "-" }}
                 </p>
-
               </div>
 
             </div>
@@ -323,7 +299,61 @@
             <!-- ================= ACTION ================= -->
             <div class="mt-8 flex gap-3">
 
-              <!-- Close -->
+              <!-- ================= BORROW ================= -->
+              <button
+                v-if="isAvailable"
+                type="button"
+                :disabled="borrowing"
+                @click="requestBorrow"
+                class="w-full
+                       bg-blue-600
+                       hover:bg-blue-700
+                       active:bg-blue-800
+                       disabled:bg-blue-300
+                       disabled:cursor-not-allowed
+                       text-white
+                       py-3
+                       rounded-xl
+                       font-semibold
+                       transition
+                       flex items-center
+                       justify-center
+                       gap-2"
+              >
+
+                <span v-if="!borrowing">
+                  📚
+                </span>
+
+                <span v-else>
+                  ⏳
+                </span>
+
+                <span>
+                  {{ borrowing ? "Sending Request..." : "Borrow Book" }}
+                </span>
+
+              </button>
+
+
+              <!-- ================= UNAVAILABLE ================= -->
+              <button
+                v-else
+                type="button"
+                disabled
+                class="w-full
+                       bg-slate-200
+                       text-slate-400
+                       py-3
+                       rounded-xl
+                       font-semibold
+                       cursor-not-allowed"
+              >
+                Book Unavailable
+              </button>
+
+
+              <!-- ================= CLOSE ================= -->
               <button
                 type="button"
                 @click="$emit('close')"
@@ -341,6 +371,37 @@
 
             </div>
 
+
+            <!-- ================= MESSAGE ================= -->
+            <div
+              v-if="successMessage"
+              class="mt-4
+                     p-4
+                     rounded-xl
+                     bg-emerald-50
+                     border border-emerald-100
+                     text-emerald-700
+                     text-sm
+                     font-medium"
+            >
+              ✓ {{ successMessage }}
+            </div>
+
+
+            <div
+              v-if="errorMessage"
+              class="mt-4
+                     p-4
+                     rounded-xl
+                     bg-red-50
+                     border border-red-100
+                     text-red-600
+                     text-sm
+                     font-medium"
+            >
+              {{ errorMessage }}
+            </div>
+
           </div>
 
         </div>
@@ -354,20 +415,319 @@
 
 
 <script>
+import {
+  createBorrowing
+} from "../../service/borrowingService.js";
+
+
 export default {
 
   name: "BookDetail",
 
+
   props: {
+
     book: {
       type: Object,
       required: true
     }
+
   },
 
+
   emits: [
-    "close"
-  ]
+    "close",
+    "borrow"
+  ],
+
+
+  data() {
+
+    return {
+
+      borrowing: false,
+
+      successMessage: "",
+
+      errorMessage: ""
+
+    };
+
+  },
+
+
+  computed: {
+
+    isAvailable() {
+
+      if (this.book.status === false) {
+        return false;
+      }
+
+      const quantity =
+        Number(
+          this.book.availableQuantity ??
+          this.book.quantity ??
+          this.book.qty ??
+          0
+        );
+
+      return quantity > 0;
+
+    }
+
+  },
+
+
+  methods: {
+
+    // =====================================================
+    // REQUEST BORROW
+    // =====================================================
+
+    async requestBorrow() {
+
+      if (this.borrowing) {
+        return;
+      }
+
+
+      this.successMessage = "";
+
+      this.errorMessage = "";
+
+
+      // -----------------------------------------------
+      // CHECK BOOK
+      // -----------------------------------------------
+
+      if (!this.book?.id) {
+
+        this.errorMessage =
+          "Book ID is missing.";
+
+        return;
+
+      }
+
+
+      // -----------------------------------------------
+      // CHECK LOGIN
+      // -----------------------------------------------
+
+      const token =
+        sessionStorage.getItem("token");
+
+
+      if (!token) {
+
+        this.errorMessage =
+          "Please login before borrowing a book.";
+
+        return;
+
+      }
+
+
+      // -----------------------------------------------
+      // USER
+      // -----------------------------------------------
+
+      const storedUser =
+        sessionStorage.getItem("user");
+
+
+      let user = null;
+
+
+      try {
+
+        user =
+          storedUser
+            ? JSON.parse(storedUser)
+            : null;
+
+      } catch (error) {
+
+        console.error(
+          "Parse user error:",
+          error
+        );
+
+      }
+
+
+      if (!user?.id) {
+
+        this.errorMessage =
+          "User information was not found.";
+
+        return;
+
+      }
+
+
+      // -----------------------------------------------
+      // DATES
+      // -----------------------------------------------
+
+      const borrowDate =
+        this.getToday();
+
+
+      const dueDate =
+        this.getDueDate(7);
+
+
+      // -----------------------------------------------
+      // PAYLOAD
+      // -----------------------------------------------
+
+      const payload = {
+  userId: Number(user.id),
+  bookId: Number(this.book.id),
+  borrowDate: borrowDate,
+  dueDate: dueDate,
+  returnDate: null
+};
+
+
+      console.log(
+        "Borrow Request:",
+        payload
+      );
+
+
+      this.borrowing = true;
+
+
+      try {
+
+        // ---------------------------------------------
+        // CREATE BORROW REQUEST
+        // ---------------------------------------------
+
+        const response =
+          await createBorrowing(
+            payload
+          );
+
+
+        console.log(
+          "Borrow Request Response:",
+          response
+        );
+
+
+        // ---------------------------------------------
+        // SUCCESS
+        // ---------------------------------------------
+
+        this.successMessage =
+          "Borrow request sent successfully. Please wait for admin approval.";
+
+
+        // Send event to parent
+        this.$emit(
+          "borrow",
+          {
+            book: this.book,
+            response: response
+          }
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Borrow Request Error:",
+          error
+        );
+
+
+        this.errorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.msg ||
+          error?.message ||
+          "Failed to send borrow request.";
+
+      } finally {
+
+        this.borrowing = false;
+
+      }
+
+    },
+
+
+    // =====================================================
+    // TODAY
+    // =====================================================
+
+    getToday() {
+
+      const date =
+        new Date();
+
+
+      const year =
+        date.getFullYear();
+
+
+      const month =
+        String(
+          date.getMonth() + 1
+        ).padStart(2, "0");
+
+
+      const day =
+        String(
+          date.getDate()
+        ).padStart(2, "0");
+
+
+      return `${year}-${month}-${day}`;
+
+    },
+
+
+    // =====================================================
+    // DUE DATE
+    // =====================================================
+
+    getDueDate(days) {
+
+      const date =
+        new Date();
+
+
+      date.setDate(
+        date.getDate() + days
+      );
+
+
+      const year =
+        date.getFullYear();
+
+
+      const month =
+        String(
+          date.getMonth() + 1
+        ).padStart(2, "0");
+
+
+      const day =
+        String(
+          date.getDate()
+        ).padStart(2, "0");
+
+
+      return `${year}-${month}-${day}`;
+
+    }
+
+  }
 
 };
 </script>
+```

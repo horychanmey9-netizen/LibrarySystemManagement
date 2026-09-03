@@ -9,65 +9,8 @@ export async function getBooks() {
 
   const token = sessionStorage.getItem("token");
 
-  const response = await fetch(API_URL, {
-    method: "GET",
-
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    }
-  });
-
-  let result = null;
-
-  try {
-    result = await response.json();
-  } catch (e) {
-    result = null;
-  }
-
-  if (!response.ok) {
-
-    throw new Error(
-      result?.message ||
-      result?.msg ||
-      `Failed to fetch books (${response.status})`
-    );
-
-  }
-
-  console.log("BOOK API RESPONSE:", result);
-
-  // Backend:
-  // {
-  //   msg: "...",
-  //   status: 200,
-  //   data: [...]
-  // }
-
-  if (Array.isArray(result)) {
-    return result;
-  }
-
-  if (Array.isArray(result?.data)) {
-    return result.data;
-  }
-
-  return [];
-
-}
-
-
-// =====================================================
-// GET BOOK BY ID
-// =====================================================
-
-export async function getBookById(id) {
-
-  const token = sessionStorage.getItem("token");
-
   const response = await fetch(
-    `${API_URL}/${id}`,
+    API_URL,
     {
       method: "GET",
 
@@ -81,41 +24,193 @@ export async function getBookById(id) {
   let result = null;
 
   try {
-    result = await response.json();
+
+    const contentType =
+      response.headers.get("content-type");
+
+    if (
+      contentType?.includes("application/json")
+    ) {
+
+      result = await response.json();
+
+    } else {
+
+      result = await response.text();
+
+    }
+
   } catch (e) {
+
     result = null;
+
   }
+
 
   if (!response.ok) {
 
     throw new Error(
-      result?.message ||
-      result?.msg ||
-      `Failed to fetch book (${response.status})`
+      typeof result === "string"
+        ? result
+        : result?.message ||
+          result?.msg ||
+          `Failed to fetch books (${response.status})`
     );
 
   }
 
-  console.log("BOOK BY ID RESPONSE:", result);
 
-  return result?.data ?? result;
+  console.log(
+    "BOOK API RESPONSE:",
+    result
+  );
+
+
+  // Backend:
+  //
+  // {
+  //   msg: "...",
+  //   status: 200,
+  //   data: [...]
+  // }
+
+
+  if (Array.isArray(result)) {
+
+    return result;
+
+  }
+
+
+  if (
+    result &&
+    Array.isArray(result.data)
+  ) {
+
+    return result.data;
+
+  }
+
+
+  return [];
+
+}
+
+
+// =====================================================
+// GET BOOK BY ID
+// =====================================================
+
+export async function getBookById(id) {
+
+  const token =
+    sessionStorage.getItem("token");
+
+
+  const response =
+    await fetch(
+      `${API_URL}/${id}`,
+      {
+        method: "GET",
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`,
+
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  let result = null;
+
+
+  try {
+
+    const contentType =
+      response.headers.get(
+        "content-type"
+      );
+
+
+    if (
+      contentType?.includes(
+        "application/json"
+      )
+    ) {
+
+      result =
+        await response.json();
+
+    } else {
+
+      result =
+        await response.text();
+
+    }
+
+  } catch (e) {
+
+    result = null;
+
+  }
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      typeof result === "string"
+        ? result
+        : result?.message ||
+          result?.msg ||
+          `Failed to fetch book (${response.status})`
+    );
+
+  }
+
+
+  console.log(
+    "BOOK BY ID RESPONSE:",
+    result
+  );
+
+
+  return (
+    result?.data ??
+    result
+  );
 
 }
 
 
 // =====================================================
 // CREATE BOOK
+// IMPORTANT:
+// AddBook.vue calls:
+//
+// createBook(bookRequest, imageFile.value)
+//
+// So this function MUST accept imageFile
+// as the second parameter.
 // =====================================================
 
-export async function createBook(book) {
+export async function createBook(
+  book,
+  imageFile
+) {
 
-  const token = sessionStorage.getItem("token");
+  const token =
+    sessionStorage.getItem("token");
 
-  const formData = new FormData();
+
+  const formData =
+    new FormData();
 
 
   // ===================================================
-  // BASIC DATA
+  // TITLE
   // ===================================================
 
   formData.append(
@@ -123,15 +218,30 @@ export async function createBook(book) {
     book.title ?? ""
   );
 
+
+  // ===================================================
+  // DESCRIPTION
+  // ===================================================
+
   formData.append(
     "description",
     book.description ?? ""
   );
 
+
+  // ===================================================
+  // AUTHOR
+  // ===================================================
+
   formData.append(
     "author",
     book.author ?? ""
   );
+
+
+  // ===================================================
+  // ISBN
+  // ===================================================
 
   formData.append(
     "isbn",
@@ -141,6 +251,9 @@ export async function createBook(book) {
 
   // ===================================================
   // CATEGORY
+  // Backend expects:
+  //
+  // private Long categoryId;
   // ===================================================
 
   if (
@@ -159,7 +272,9 @@ export async function createBook(book) {
 
   // ===================================================
   // QUANTITY
-  // Backend expects qty
+  // Backend expects:
+  //
+  // private Integer qty;
   // ===================================================
 
   formData.append(
@@ -220,16 +335,27 @@ export async function createBook(book) {
 
   // ===================================================
   // IMAGE
+  //
+  // IMPORTANT:
+  // Backend expects:
+  //
+  // @RequestParam(
+  //   value = "file",
+  //   required = false
+  // )
+  // MultipartFile file
+  //
+  // Therefore FormData key MUST be "file".
   // ===================================================
 
   if (
-    book.file &&
-    book.file instanceof File
+    imageFile &&
+    imageFile instanceof File
   ) {
 
     formData.append(
       "file",
-      book.file
+      imageFile
     );
 
   }
@@ -240,47 +366,119 @@ export async function createBook(book) {
   // ===================================================
 
   console.log(
+    "=========================================="
+  );
+
+  console.log(
     "CREATE BOOK FORM DATA:"
   );
+
 
   for (
     const [key, value]
     of formData.entries()
   ) {
 
-    console.log(
-      key,
-      value
-    );
+    if (
+      value instanceof File
+    ) {
+
+      console.log(
+        key,
+        {
+          name: value.name,
+          type: value.type,
+          size: value.size
+        }
+      );
+
+    } else {
+
+      console.log(
+        key,
+        value
+      );
+
+    }
 
   }
 
 
-  // ===================================================
-  // REQUEST
-  // ===================================================
-
-  const response = await fetch(
-    API_URL,
-    {
-      method: "POST",
-
-      headers: {
-        "Authorization":
-          `Bearer ${token}`
-      },
-
-      body: formData
-    }
+  console.log(
+    "IMAGE FILE:",
+    imageFile
   );
 
 
+  console.log(
+    "TOKEN EXISTS:",
+    !!token
+  );
+
+
+  console.log(
+    "=========================================="
+  );
+
+
+  // ===================================================
+  // POST REQUEST
+  // ===================================================
+
+  const response =
+    await fetch(
+      API_URL,
+      {
+        method: "POST",
+
+        headers: {
+
+          // DO NOT SET Content-Type HERE.
+          //
+          // Browser automatically creates:
+          // multipart/form-data; boundary=...
+          //
+          "Authorization":
+            `Bearer ${token}`
+
+        },
+
+        body:
+          formData
+      }
+    );
+
+
+  // ===================================================
+  // READ RESPONSE
+  // ===================================================
+
   let result = null;
+
+
+  const contentType =
+    response.headers.get(
+      "content-type"
+    );
+
 
   try {
 
-    result =
-      await response.json();
+    if (
+      contentType?.includes(
+        "application/json"
+      )
+    ) {
+
+      result =
+        await response.json();
+
+    } else {
+
+      result =
+        await response.text();
+
+    }
 
   } catch (e) {
 
@@ -289,25 +487,61 @@ export async function createBook(book) {
   }
 
 
+  // ===================================================
+  // ERROR
+  // ===================================================
+
   if (!response.ok) {
+
+    console.error(
+      "=========================================="
+    );
+
+    console.error(
+      "CREATE BOOK STATUS:",
+      response.status
+    );
 
     console.error(
       "CREATE BOOK BACKEND ERROR:",
       result
     );
 
+    console.error(
+      "=========================================="
+    );
+
+
     throw new Error(
-      result?.message ||
-      result?.msg ||
-      `Failed to create book (${response.status})`
+
+      typeof result === "string"
+
+        ? result
+
+        : result?.message ||
+          result?.msg ||
+          `Failed to create book (${response.status})`
+
     );
 
   }
 
 
+  // ===================================================
+  // SUCCESS
+  // ===================================================
+
+  console.log(
+    "=========================================="
+  );
+
   console.log(
     "CREATE BOOK SUCCESS:",
     result
+  );
+
+  console.log(
+    "=========================================="
   );
 
 
@@ -320,17 +554,21 @@ export async function createBook(book) {
 // UPDATE BOOK
 // =====================================================
 
-export async function updateBook(id, book) {
+export async function updateBook(
+  id,
+  book
+) {
 
   const token =
     sessionStorage.getItem("token");
+
 
   const formData =
     new FormData();
 
 
   // ===================================================
-  // BASIC DATA
+  // TITLE
   // ===================================================
 
   formData.append(
@@ -338,15 +576,30 @@ export async function updateBook(id, book) {
     book.title ?? ""
   );
 
+
+  // ===================================================
+  // DESCRIPTION
+  // ===================================================
+
   formData.append(
     "description",
     book.description ?? ""
   );
 
+
+  // ===================================================
+  // AUTHOR
+  // ===================================================
+
   formData.append(
     "author",
     book.author ?? ""
   );
+
+
+  // ===================================================
+  // ISBN
+  // ===================================================
 
   formData.append(
     "isbn",
@@ -356,7 +609,6 @@ export async function updateBook(id, book) {
 
   // ===================================================
   // CATEGORY
-  // Backend expects categoryId
   // ===================================================
 
   if (
@@ -375,7 +627,6 @@ export async function updateBook(id, book) {
 
   // ===================================================
   // QUANTITY
-  // Backend expects qty
   // ===================================================
 
   formData.append(
@@ -435,13 +686,9 @@ export async function updateBook(id, book) {
 
 
   // ===================================================
-  // NEW IMAGE
+  // IMAGE
   //
-  // IMPORTANT:
-  // Only append file if user selected NEW image.
-  //
-  // If file is missing:
-  // Backend will keep old image.
+  // Only append if a NEW image is selected.
   // ===================================================
 
   if (
@@ -462,7 +709,7 @@ export async function updateBook(id, book) {
   // ===================================================
 
   console.log(
-    "================================"
+    "=========================================="
   );
 
   console.log(
@@ -474,26 +721,44 @@ export async function updateBook(id, book) {
     "UPDATE BOOK FORM DATA:"
   );
 
+
   for (
     const [key, value]
     of formData.entries()
   ) {
 
-    console.log(
-      key,
-      value
-    );
+    if (
+      value instanceof File
+    ) {
+
+      console.log(
+        key,
+        {
+          name: value.name,
+          type: value.type,
+          size: value.size
+        }
+      );
+
+    } else {
+
+      console.log(
+        key,
+        value
+      );
+
+    }
 
   }
 
+
   console.log(
-    "================================"
+    "=========================================="
   );
 
 
   // ===================================================
-  // REQUEST
-  // DO NOT SET Content-Type
+  // PUT REQUEST
   // ===================================================
 
   const response =
@@ -503,11 +768,14 @@ export async function updateBook(id, book) {
         method: "PUT",
 
         headers: {
+
           "Authorization":
             `Bearer ${token}`
+
         },
 
-        body: formData
+        body:
+          formData
       }
     );
 
@@ -518,10 +786,30 @@ export async function updateBook(id, book) {
 
   let result = null;
 
+
+  const contentType =
+    response.headers.get(
+      "content-type"
+    );
+
+
   try {
 
-    result =
-      await response.json();
+    if (
+      contentType?.includes(
+        "application/json"
+      )
+    ) {
+
+      result =
+        await response.json();
+
+    } else {
+
+      result =
+        await response.text();
+
+    }
 
   } catch (e) {
 
@@ -537,14 +825,27 @@ export async function updateBook(id, book) {
   if (!response.ok) {
 
     console.error(
+      "UPDATE BOOK STATUS:",
+      response.status
+    );
+
+
+    console.error(
       "UPDATE BOOK BACKEND ERROR:",
       result
     );
 
+
     throw new Error(
-      result?.message ||
-      result?.msg ||
-      `Failed to update book (${response.status})`
+
+      typeof result === "string"
+
+        ? result
+
+        : result?.message ||
+          result?.msg ||
+          `Failed to update book (${response.status})`
+
     );
 
   }
@@ -569,7 +870,9 @@ export async function updateBook(id, book) {
 // DELETE BOOK
 // =====================================================
 
-export async function deleteBookById(id) {
+export async function deleteBookById(
+  id
+) {
 
   const token =
     sessionStorage.getItem("token");
@@ -582,21 +885,49 @@ export async function deleteBookById(id) {
         method: "DELETE",
 
         headers: {
+
           "Authorization":
             `Bearer ${token}`,
+
           "Content-Type":
             "application/json"
+
         }
+
       }
     );
 
 
+  // ===================================================
+  // RESPONSE
+  // ===================================================
+
   let result = null;
+
+
+  const contentType =
+    response.headers.get(
+      "content-type"
+    );
+
 
   try {
 
-    result =
-      await response.json();
+    if (
+      contentType?.includes(
+        "application/json"
+      )
+    ) {
+
+      result =
+        await response.json();
+
+    } else {
+
+      result =
+        await response.text();
+
+    }
 
   } catch (e) {
 
@@ -605,21 +936,42 @@ export async function deleteBookById(id) {
   }
 
 
+  // ===================================================
+  // ERROR
+  // ===================================================
+
   if (!response.ok) {
+
+    console.error(
+      "DELETE BOOK STATUS:",
+      response.status
+    );
+
 
     console.error(
       "DELETE BOOK ERROR:",
       result
     );
 
+
     throw new Error(
-      result?.message ||
-      result?.msg ||
-      `Failed to delete book (${response.status})`
+
+      typeof result === "string"
+
+        ? result
+
+        : result?.message ||
+          result?.msg ||
+          `Failed to delete book (${response.status})`
+
     );
 
   }
 
+
+  // ===================================================
+  // SUCCESS
+  // ===================================================
 
   console.log(
     "DELETE BOOK SUCCESS:",
@@ -634,11 +986,19 @@ export async function deleteBookById(id) {
 
 // =====================================================
 // ALIAS
-// If some file imports deleteBook()
+// If another file imports:
+//
+// deleteBook()
+//
+// it will still work.
 // =====================================================
 
-export async function deleteBook(id) {
+export async function deleteBook(
+  id
+) {
 
-  return deleteBookById(id);
+  return deleteBookById(
+    id
+  );
 
 }

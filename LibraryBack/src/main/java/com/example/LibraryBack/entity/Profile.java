@@ -24,7 +24,7 @@ public class Profile {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
-
+    private String name;
     private String phone;
     @Enumerated(EnumType.STRING)
     private Gender gender;

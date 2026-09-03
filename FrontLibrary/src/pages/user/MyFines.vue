@@ -139,12 +139,14 @@
 
 
 <script>
-import FineCard from "../../components/user/FineCard.vue"
+import FineTemp from '../../components/user/FineTemp.vue';
+
+
 export default {
   name: "MyFines",
 
   components: {
-    FineCard  
+    FineTemp
   },
 
   data() {
@@ -320,7 +322,9 @@ export default {
   width: 100%;
   min-height: 100%;
 
-  padding: 24px;
+  padding:
+    1.5rem
+    2rem;
 
   box-sizing: border-box;
 

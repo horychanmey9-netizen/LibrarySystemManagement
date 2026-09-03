@@ -5,7 +5,7 @@ import com.example.LibraryBack.dto.response.CategoryResponse;
 import com.example.LibraryBack.entity.Category;
 import com.example.LibraryBack.exception.NotException;
 import com.example.LibraryBack.mapper.CategoryMapper;
-import com.example.LibraryBack.repositoy.CategoryRepository;
+import com.example.LibraryBack.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

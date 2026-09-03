@@ -1,4 +1,4 @@
-package com.example.LibraryBack.repositoy;
+package com.example.LibraryBack.repository;
 
 import com.example.LibraryBack.entity.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;

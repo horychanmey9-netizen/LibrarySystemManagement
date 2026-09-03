@@ -1,4 +1,4 @@
-package com.example.LibraryBack.repositoy;
+package com.example.LibraryBack.repository;
 
 import com.example.LibraryBack.entity.Otp;
 import com.example.LibraryBack.entity.User;

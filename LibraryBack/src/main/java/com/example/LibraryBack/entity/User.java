@@ -59,4 +59,7 @@ public class User {
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Profile profile;
+
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    private PasswordResetToken resetToken;
 }
