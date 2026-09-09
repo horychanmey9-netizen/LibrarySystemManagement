@@ -144,4 +144,28 @@ public class BorrowerController {
                 null
         );
     }
+
+    @PutMapping("/return/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ApiResponse<BorrowerResponse> returnBook(
+            @PathVariable Long id) {
+
+        return new ApiResponse<>(
+                "Return request submitted successfully",
+                200,
+                borrowerService.returnBook(id)
+        );
+    }
+
+    @PutMapping("/accept-return/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<BorrowerResponse> acceptReturn(
+            @PathVariable Long id) {
+
+        return new ApiResponse<>(
+                "Return accepted successfully",
+                200,
+                borrowerService.acceptReturn(id)
+        );
+    }
 }

@@ -19,6 +19,7 @@ public class BorrowerResponse {
     private Long userId;
     private String userName;
     private Long bookId;
+    private String bookImage;
     private String bookTitle;
     private LocalDate borrowDate;
     private LocalDate dueDate;

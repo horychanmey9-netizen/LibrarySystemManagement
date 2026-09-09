@@ -5,5 +5,7 @@ public enum BorrowingStatus {
     BORROWED,
     RETURNED,
     OVERDUE,
-    REJECTED
+    REJECTED,
+    RETURN_REQUESTED,
+
 }

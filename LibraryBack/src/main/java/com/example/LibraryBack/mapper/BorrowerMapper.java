@@ -19,5 +19,6 @@ public interface BorrowerMapper {
     @Mapping(target = "userName", source = "user.name")
     @Mapping(target = "bookId", source = "book.id")
     @Mapping(target = "bookTitle", source = "book.title")
+    @Mapping(target = "bookImage", source = "book.image")
     BorrowerResponse toResponse(Borrower borrower);
 }

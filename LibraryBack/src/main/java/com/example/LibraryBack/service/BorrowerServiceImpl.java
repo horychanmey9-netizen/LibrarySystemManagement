@@ -342,4 +342,95 @@ public class BorrowerServiceImpl implements BorrowerService {
                 borrower
         );
     }
+
+    @Override
+    @Transactional
+    public BorrowerResponse returnBook(Long id) {
+
+        Borrower borrower =
+                borrowerRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NotException(
+                                        "Borrowing not found"
+                                )
+                        );
+
+        if (borrower.getStatus()
+                != BorrowingStatus.BORROWED) {
+
+            throw new NotException(
+                    "Only BORROWED books can be returned"
+            );
+        }
+
+        // Only change status
+        borrower.setStatus(
+                BorrowingStatus.RETURN_REQUESTED
+        );
+
+        // DO NOT increase book quantity here
+        // DO NOT set returnDate here
+
+        Borrower updatedBorrower =
+                borrowerRepository.save(borrower);
+
+        return borrowerMapper.toResponse(
+                updatedBorrower
+        );
+    }
+
+
+    @Override
+    @Transactional
+    public BorrowerResponse acceptReturn(Long id) {
+
+        Borrower borrower =
+                borrowerRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NotException(
+                                        "Borrowing not found"
+                                )
+                        );
+
+        if (borrower.getStatus()
+                != BorrowingStatus.RETURN_REQUESTED) {
+
+            throw new NotException(
+                    "Only RETURN_REQUESTED books can be accepted"
+            );
+        }
+
+        Book book = borrower.getBook();
+
+        if (book == null) {
+            throw new NotException(
+                    "Book not found"
+            );
+        }
+
+        // Increase quantity only after admin accepts
+        book.setQty(book.getQty() + 1);
+
+        bookRepository.save(book);
+
+        // Set actual return date
+        borrower.setReturnDate(
+                java.time.LocalDate.now()
+        );
+
+        borrower.setStatus(
+                BorrowingStatus.RETURNED
+        );
+
+        if (borrower.getFine() == null) {
+            borrower.setFine(BigDecimal.ZERO);
+        }
+
+        Borrower updatedBorrower =
+                borrowerRepository.save(borrower);
+
+        return borrowerMapper.toResponse(
+                updatedBorrower
+        );
+    }
 }
