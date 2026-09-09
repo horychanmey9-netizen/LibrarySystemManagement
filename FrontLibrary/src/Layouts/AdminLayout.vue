@@ -1,41 +1,83 @@
 <template>
+
   <div class="admin-layout">
+
+    <!-- =========================
+         ADMIN SIDEBAR
+    ========================== -->
+
     <AdminSidebar />
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
     <div class="main-content">
+
+      <!-- =========================
+           ADMIN NAVBAR
+      ========================== -->
+
       <AdminNavbar />
-      <!-- Page Content -->
+
+
+      <!-- =========================
+           PAGE CONTENT
+      ========================== -->
+
       <main class="content">
+
         <RouterView />
+
       </main>
 
     </div>
 
   </div>
+
 </template>
 
 
 <script setup>
 
-import AdminSidebar from "@/components/common/AdminSidebar.vue";
-import AdminNavbar from "@/components/common/AdminNavbar.vue";
+// ========================================
+// COMPONENTS
+// ========================================
+
+import AdminSidebar
+  from "@/components/common/AdminSidebar.vue";
+
+import AdminNavbar
+  from "@/components/common/AdminNavbar.vue";
 
 </script>
 
 
 <style scoped>
 
+/* ========================================
+   ADMIN LAYOUT
+======================================== */
+
 .admin-layout {
+
   width: 100%;
+
   min-height: 100vh;
+
   background: #f8f9fc;
+
 }
 
 
-/* =========================
+/* ========================================
+   MAIN CONTENT
    Desktop
-========================= */
+======================================== */
 
 .main-content {
+
   margin-left: 250px;
 
   width: calc(100% - 250px);
@@ -43,31 +85,51 @@ import AdminNavbar from "@/components/common/AdminNavbar.vue";
   min-height: 100vh;
 
   box-sizing: border-box;
+
 }
 
 
-/* =========================
-   Page Content
-========================= */
+/* ========================================
+   PAGE CONTENT
+======================================== */
 
 .content {
-  padding-top: 75px;
+
+  width: 100%;
 
   min-height: 100vh;
 
+  padding-top: 75px;
+
   box-sizing: border-box;
+
 }
 
 
-/* =========================
-   Mobile
-========================= */
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1024px) {
+
+  .main-content {
+
+    margin-left: 230px;
+
+    width: calc(100% - 230px);
+
+  }
+
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
 
 @media (max-width: 768px) {
 
   .main-content {
-
-    /* ❌ មិនទុក 75px ទៀត */
 
     margin-left: 0;
 
@@ -77,13 +139,14 @@ import AdminNavbar from "@/components/common/AdminNavbar.vue";
 
   }
 
+
   .content {
 
     width: 100%;
 
-    padding-top: 65px;
+    min-height: 100vh;
 
-    box-sizing: border-box;
+    padding-top: 65px;
 
   }
 

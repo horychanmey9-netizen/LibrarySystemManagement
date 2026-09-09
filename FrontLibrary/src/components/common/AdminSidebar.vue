@@ -116,54 +116,27 @@
 
 
     <!-- =========================
-         Bottom Profile
+         Bottom Logout
     ========================== -->
 
     <div class="sidebar-bottom">
 
       <button
         type="button"
-        class="admin-profile"
-        title="Admin Profile"
-        @click="goToProfile"
+        class="logout-button"
+        title="Logout"
+        @click="logout"
       >
 
-        <!-- =========================
-             Profile Image
-        ========================== -->
+        <span class="logout-icon">
 
-        <div class="avatar">
+          <i class="bi bi-box-arrow-right"></i>
 
-          <img
-            v-if="adminImage"
-            :src="adminImage"
-            :alt="adminName"
-            class="avatar-image"
-            @error="handleImageError"
-          />
+        </span>
 
-          <span v-else>
-            {{ getInitial(adminName) }}
-          </span>
-
-        </div>
-
-
-        <!-- =========================
-             Admin Information
-        ========================== -->
-
-        <div class="admin-info">
-
-          <strong>
-            {{ adminName }}
-          </strong>
-
-          <span>
-            Administrator
-          </span>
-
-        </div>
+        <span class="logout-text">
+          Logout
+        </span>
 
       </button>
 
@@ -188,7 +161,6 @@
 <script setup>
 
 import {
-  computed,
   ref,
   onMounted,
   onUnmounted
@@ -198,11 +170,8 @@ import {
   useRouter
 } from "vue-router";
 
-import {
-  getProfile
-} from "../../service/profileservice";
+import logo from "../../assets/logo.png";
 
-import logo from "../../assets/logo.png"
 
 // ========================================
 // ROUTER
@@ -219,277 +188,12 @@ const isOpen = ref(false);
 
 
 // ========================================
-// ADMIN PROFILE
-// ========================================
-
-const admin = ref({
-
-  name: "",
-
-  email: "",
-
-  image: "",
-
-});
-
-
-// ========================================
-// LOAD ADMIN PROFILE
-// ========================================
-
-const loadAdminProfile = async () => {
-
-  try {
-
-    // ====================================
-    // GET PROFILE FROM BACKEND
-    // ====================================
-
-    const response =
-      await getProfile();
-
-
-    console.log(
-      "ADMIN SIDEBAR PROFILE:",
-      response
-    );
-
-
-    const data =
-      response?.data;
-
-
-    if (!data) {
-
-      console.warn(
-        "No profile data found"
-      );
-
-      return;
-
-    }
-
-
-    // ====================================
-    // SET ADMIN PROFILE
-    // SAME AS NAVBAR
-    // ====================================
-
-    admin.value = {
-
-      name:
-        data.name ||
-        data.fullName ||
-        "Admin",
-
-      email:
-        data.email ||
-        "",
-
-      image:
-        data.image ||
-        "",
-
-    };
-
-
-    console.log(
-      "ADMIN SIDEBAR NAME:",
-      admin.value.name
-    );
-
-
-    console.log(
-      "ADMIN SIDEBAR IMAGE:",
-      admin.value.image
-    );
-
-
-    // ====================================
-    // UPDATE SESSION STORAGE
-    // ====================================
-
-    try {
-
-      const currentUser =
-        JSON.parse(
-          sessionStorage.getItem(
-            "user"
-          ) || "{}"
-        );
-
-
-      const updatedUser = {
-
-        ...currentUser,
-
-        name:
-          admin.value.name,
-
-        email:
-          admin.value.email,
-
-        image:
-          admin.value.image,
-
-      };
-
-
-      sessionStorage.setItem(
-        "user",
-        JSON.stringify(
-          updatedUser
-        )
-      );
-
-
-    } catch (sessionError) {
-
-      console.error(
-        "Failed to update session user:",
-        sessionError
-      );
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      "Failed to load admin profile:",
-      error
-    );
-
-
-    // ====================================
-    // FALLBACK TO SESSION STORAGE
-    // ====================================
-
-    try {
-
-      const storedUser =
-        sessionStorage.getItem(
-          "user"
-        );
-
-
-      if (!storedUser) {
-
-        return;
-
-      }
-
-
-      const user =
-        JSON.parse(
-          storedUser
-        );
-
-
-      admin.value = {
-
-        name:
-          user?.name ||
-          user?.fullName ||
-          "Admin",
-
-        email:
-          user?.email ||
-          "",
-
-        image:
-          user?.image ||
-          "",
-
-      };
-
-
-    } catch (sessionError) {
-
-      console.error(
-        "Failed to load session user:",
-        sessionError
-      );
-
-    }
-
-  }
-
-};
-
-
-// ========================================
-// ADMIN NAME
-// ========================================
-
-const adminName = computed(() => {
-
-  return (
-    admin.value.name ||
-    "Admin"
-  );
-
-});
-
-
-// ========================================
-// ADMIN IMAGE
-// ========================================
-
-const adminImage = computed(() => {
-
-  return (
-    admin.value.image ||
-    ""
-  );
-
-});
-
-
-// ========================================
-// GET INITIAL
-// ========================================
-
-function getInitial(name) {
-
-  if (!name) {
-
-    return "A";
-
-  }
-
-
-  return name
-    .charAt(0)
-    .toUpperCase();
-
-}
-
-
-// ========================================
-// IMAGE ERROR
-// ========================================
-
-function handleImageError(event) {
-
-  console.error(
-    "Admin sidebar image failed to load:",
-    event.target.src
-  );
-
-
-  admin.value.image = "";
-
-}
-
-
-// ========================================
 // TOGGLE SIDEBAR
 // ========================================
 
 function toggleSidebar() {
 
-  isOpen.value =
-    !isOpen.value;
+  isOpen.value = !isOpen.value;
 
 }
 
@@ -511,9 +215,7 @@ function closeSidebar() {
 
 function closeSidebarOnMobile() {
 
-  if (
-    window.innerWidth <= 768
-  ) {
+  if (window.innerWidth <= 768) {
 
     isOpen.value = false;
 
@@ -523,33 +225,22 @@ function closeSidebarOnMobile() {
 
 
 // ========================================
-// GO TO PROFILE
+// LOGOUT
 // ========================================
 
-function goToProfile() {
+function logout() {
 
-  router.push(
-    "/admin/profile"
-  );
+  // Remove authentication token
+  sessionStorage.removeItem("token");
 
+  // Remove logged-in user information
+  sessionStorage.removeItem("user");
 
+  // Close sidebar
   closeSidebar();
 
-}
-
-
-// ========================================
-// PROFILE UPDATED EVENT
-// ========================================
-
-async function handleProfileUpdated() {
-
-  console.log(
-    "Profile updated → reload Admin Sidebar"
-  );
-
-
-  await loadAdminProfile();
+  // Redirect to login page
+  router.push("/login");
 
 }
 
@@ -572,29 +263,12 @@ function handleToggleSidebar() {
 onMounted(() => {
 
   // ====================================
-  // LOAD PROFILE
-  // ====================================
-
-  loadAdminProfile();
-
-
-  // ====================================
   // SIDEBAR TOGGLE
   // ====================================
 
   window.addEventListener(
     "toggle-admin-sidebar",
     handleToggleSidebar
-  );
-
-
-  // ====================================
-  // PROFILE UPDATED
-  // ====================================
-
-  window.addEventListener(
-    "profile-updated",
-    handleProfileUpdated
   );
 
 });
@@ -609,12 +283,6 @@ onUnmounted(() => {
   window.removeEventListener(
     "toggle-admin-sidebar",
     handleToggleSidebar
-  );
-
-
-  window.removeEventListener(
-    "profile-updated",
-    handleProfileUpdated
   );
 
 });
@@ -674,6 +342,7 @@ const mainMenu = [
     icon: "bi bi-journal-arrow-down"
   },
 
+
   {
     label: "Borrower",
 
@@ -683,13 +352,13 @@ const mainMenu = [
   },
 
 
-  {
-    label: "Returns",
+  // {
+  //   label: "Returns",
 
-    to: "/admin/returns",
+  //   to: "/admin/returns",
 
-    icon: "bi bi-arrow-return-left"
-  }
+  //   icon: "bi bi-arrow-return-left"
+  // }
 
 ];
 
@@ -699,32 +368,23 @@ const mainMenu = [
 // ========================================
 
 const managementMenu = [
-
   {
     label: "Users",
-
     to: "/admin/users",
-
     icon: "bi bi-people"
   },
 
   {
     label: "Fines",
-
     to: "/admin/fines",
-
     icon: "bi bi-cash-coin"
   },
 
-
   {
-    label: "Notifications",
-
-    to: "/admin/notifications",
-
-    icon: "bi bi-bell"
+    label: "AdminSettings",
+    to: "/admin/adminsettings",
+    icon: "bi bi-gear"
   }
-
 ];
 
 </script>
@@ -791,22 +451,38 @@ const managementMenu = [
 
 
 .logo-icon {
+
   width: 42px;
+
   height: 42px;
+
   min-width: 42px;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
+
   border-radius: 10px;
+
   overflow: hidden;
+
   background: transparent;
+
 }
 
+
 .logo-image {
+
   width: 100%;
+
   height: 100%;
+
   object-fit: contain;
+
   display: block;
+
 }
 
 
@@ -993,10 +669,10 @@ const managementMenu = [
 
 
 /* ========================================
-   ADMIN PROFILE
+   LOGOUT BUTTON
 ======================================== */
 
-.admin-profile {
+.logout-button {
 
   width: 100%;
 
@@ -1004,9 +680,9 @@ const managementMenu = [
 
   align-items: center;
 
-  gap: 10px;
+  gap: 13px;
 
-  padding: 8px;
+  padding: 10px 12px;
 
   border: none;
 
@@ -1014,41 +690,39 @@ const managementMenu = [
 
   background: transparent;
 
+  color: #667085;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
   cursor: pointer;
 
   text-align: left;
 
-  transition: 0.2s;
+  transition: all 0.2s ease;
 
 }
 
 
-.admin-profile:hover {
+.logout-button:hover {
 
-  background: #f5f3ff;
+  background: #fef2f2;
+
+  color: #dc2626;
 
 }
 
 
 /* ========================================
-   AVATAR
+   LOGOUT ICON
 ======================================== */
 
-.avatar {
+.logout-icon {
 
-  width: 38px;
+  width: 22px;
 
-  height: 38px;
-
-  min-width: 38px;
-
-  border-radius: 50%;
-
-  background: #5b3df5;
-
-  color: white;
-
-  font-weight: 600;
+  min-width: 22px;
 
   display: flex;
 
@@ -1056,65 +730,14 @@ const managementMenu = [
 
   justify-content: center;
 
-  overflow: hidden;
+  font-size: 18px;
 
 }
 
 
-/* ========================================
-   AVATAR IMAGE
-======================================== */
-
-.avatar-image {
-
-  width: 100%;
-
-  height: 100%;
-
-  object-fit: cover;
+.logout-text {
 
   display: block;
-
-}
-
-
-/* ========================================
-   ADMIN INFO
-======================================== */
-
-.admin-info {
-
-  overflow: hidden;
-
-}
-
-
-.admin-info strong {
-
-  display: block;
-
-  font-size: 13px;
-
-  color: #172033;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-}
-
-
-.admin-info span {
-
-  display: block;
-
-  margin-top: 2px;
-
-  font-size: 11px;
-
-  color: #8a92a3;
 
 }
 
@@ -1305,16 +928,16 @@ const managementMenu = [
   }
 
 
-  .admin-profile {
+  .logout-button {
 
     justify-content: flex-start;
 
-    padding: 8px;
+    padding: 10px 12px;
 
   }
 
 
-  .admin-info {
+  .logout-text {
 
     display: block;
 

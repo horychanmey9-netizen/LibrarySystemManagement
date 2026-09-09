@@ -38,17 +38,6 @@
     ========================== -->
     <div class="navbar-right">
 
-      <!-- Notification -->
-      <button
-        type="button"
-        class="notification-btn"
-        title="Notifications"
-        @click="goToNotifications"
-      >
-        <i class="bi bi-bell"></i>
-      </button>
-
-
       <!-- Admin Profile -->
       <button
         type="button"
@@ -89,11 +78,6 @@
           </span>
 
         </div>
-
-
-        <i
-          class="bi bi-chevron-down profile-arrow"
-        ></i>
 
       </button>
 
@@ -369,19 +353,6 @@ function openSidebar() {
 
 
 // ========================================
-// NOTIFICATIONS
-// ========================================
-
-function goToNotifications() {
-
-  router.push(
-    "/admin/notifications"
-  );
-
-}
-
-
-// ========================================
 // PROFILE
 // ========================================
 
@@ -577,54 +548,6 @@ onBeforeUnmount(() => {
   gap: 18px;
 
   flex-shrink: 0;
-
-}
-
-
-/* ========================================
-   NOTIFICATION
-======================================== */
-
-.notification-btn {
-
-  width: 42px;
-  height: 42px;
-
-  border: none;
-
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: #4b5563;
-
-  cursor: pointer;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  transition: 0.2s;
-
-  flex-shrink: 0;
-
-}
-
-
-.notification-btn:hover {
-
-  background: #f3f4f6;
-
-  color: #5b3df5;
-
-}
-
-
-.notification-btn i {
-
-  font-size: 20px;
 
 }
 
@@ -908,7 +831,7 @@ onBeforeUnmount(() => {
   }
 
 
-  .notification-btn {
+  /* .notification-btn {
 
     width: 36px;
     height: 36px;
@@ -921,7 +844,7 @@ onBeforeUnmount(() => {
     font-size: 18px;
 
   }
-
+ */
 
   .profile-avatar {
 
