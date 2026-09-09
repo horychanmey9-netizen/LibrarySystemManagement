@@ -25,13 +25,12 @@ import UserProfile from "../pages/user/UserProfile.vue";
 import AdminDashboard from "../pages/admin/AdminDashboard.vue";
 import Books from "../pages/admin/Books.vue";
 import Borrower from "../pages/admin/Borrower.vue";
-import Returns from "../pages/admin/Returns.vue";
 import Users from "../pages/admin/Users.vue";
 import Fines from "../pages/admin/Fines.vue";
-import AdminNotification from "../pages/admin/AdminNotification.vue";
 import AdminProfile from "../pages/admin/AdminProfile.vue";
 import Categories from "../pages/admin/Categories.vue";
 import Borrowing from "../pages/admin/Borrowing.vue";
+import AdminSettings from "../pages/admin/AdminSettings.vue";
 
 // =====================================================
 // AUTH PAGES
@@ -217,13 +216,6 @@ const routes = [
         component: Borrower,
       },
 
-      // /admin/returns
-      {
-        path: "returns",
-        name: "AdminReturns",
-        component: Returns,
-      },
-
       // /admin/users
       {
         path: "users",
@@ -238,19 +230,18 @@ const routes = [
         component: Fines,
       },
 
-      // /admin/notifications
-      {
-        path: "notifications",
-        name: "AdminNotification",
-        component: AdminNotification,
-      },
-
       // /admin/profile
       {
         path: "profile",
         name: "AdminProfile",
         component: AdminProfile,
       },
+
+      {
+        path: "adminsettings",
+        name: "AdminSettings",
+        component: AdminSettings,
+      }
     ],
   },
 

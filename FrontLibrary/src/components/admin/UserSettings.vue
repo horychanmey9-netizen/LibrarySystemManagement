@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
     <!-- Header -->
@@ -11,7 +10,7 @@
 
       <div>
         <h2 class="text-lg font-semibold text-gray-800">
-          4. User Settings
+          3. User Settings
         </h2>
 
         <p class="text-sm text-gray-500">
@@ -158,4 +157,3 @@ const settings = reactive({
   inactiveAccountPeriod: 90,
 });
 </script>
-```

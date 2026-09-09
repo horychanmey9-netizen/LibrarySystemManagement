@@ -10,7 +10,7 @@
 
       <div>
         <h2 class="text-lg font-semibold text-gray-800">
-          5. Notification Settings
+          4. Notification Settings
         </h2>
 
         <p class="text-sm text-gray-500">
