@@ -1,20 +1,27 @@
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 
 import BorrowCard from "../../components/user/BorrowCard.vue";
 
 import {
-  getMyBorrowings
+  getMyBorrowings,
+  returnBook
 } from "../../service/borrowingService.js";
+
+// =====================================================
+// STATE
+// =====================================================
 
 const borrowings = ref([]);
 const loading = ref(false);
 const error = ref("");
 
 
-function extractBorrowings(response) {
+// =====================================================
+// EXTRACT BORROWINGS
+// =====================================================
 
+function extractBorrowings(response) {
   if (Array.isArray(response)) {
     return response;
   }
@@ -35,7 +42,12 @@ function extractBorrowings(response) {
 }
 
 
+// =====================================================
+// FORMAT BORROWING
+// =====================================================
+
 function formatBorrowing(item) {
+  console.log("BORROWING ITEM:", item);
 
   return {
     id: item?.id,
@@ -63,10 +75,13 @@ function formatBorrowing(item) {
       item?.book?.category?.name ??
       "",
 
+    // IMAGE
     image:
       item?.image ??
       item?.bookImage ??
       item?.book?.image ??
+      item?.book?.coverImage ??
+      item?.coverImage ??
       "",
 
     borrowedDate:
@@ -79,43 +94,45 @@ function formatBorrowing(item) {
       item?.dueDate ??
       "",
 
+    // RETURNED DATE (needed by BorrowCard to show the "Returned Date" row)
+    returnedDate:
+      item?.returnedDate ??
+      item?.returnDate ??
+      "",
+
     status:
       item?.status ??
       "BORROWED"
   };
-
 }
 
 
-async function fetchMyBorrowings() {
+// =====================================================
+// FETCH MY BORROWINGS
+// =====================================================
 
+async function fetchMyBorrowings() {
   loading.value = true;
   error.value = "";
 
   try {
-
-    const response =
-      await getMyBorrowings();
+    const response = await getMyBorrowings();
 
     console.log(
       "MY BORROWINGS RESPONSE:",
       response
     );
 
-    const data =
-      extractBorrowings(response);
+    const data = extractBorrowings(response);
 
-    borrowings.value =
-      data.map(formatBorrowing);
+    borrowings.value = data.map(formatBorrowing);
 
     console.log(
       "MY BORROWINGS:",
       borrowings.value
     );
 
-  }
-  catch (err) {
-
+  } catch (err) {
     console.error(
       "FETCH MY BORROWINGS ERROR:",
       err
@@ -127,54 +144,70 @@ async function fetchMyBorrowings() {
 
     borrowings.value = [];
 
-  }
-  finally {
-
+  } finally {
     loading.value = false;
-
   }
-
 }
 
 
-const activeBorrowings = computed(() => {
+// =====================================================
+// RETURN A BOOK (wired to BorrowCard's "Return Book" button)
+// =====================================================
 
+async function handleReturn(book) {
+  try {
+    await returnBook(book.id);
+
+    // Do NOT change status to RETURNED here.
+    // Backend should change it to RETURN_REQUESTED.
+
+    await fetchMyBorrowings();
+  } catch (err) {
+    console.error("Return request error:", err);
+    error.value =
+      err?.message || "Failed to submit return request.";
+  }
+}
+
+
+// =====================================================
+// STATISTICS
+// =====================================================
+
+const activeBorrowings = computed(() => {
   return borrowings.value.filter(
     borrowing =>
-      borrowing.status === "BORROWED"
+      borrowing.status?.toUpperCase() === "BORROWED"
   ).length;
-
 });
 
 
 const returnedBorrowings = computed(() => {
-
   return borrowings.value.filter(
     borrowing =>
-      borrowing.status === "RETURNED"
+      borrowing.status?.toUpperCase() === "RETURNED"
   ).length;
-
 });
 
 
 const overdueBorrowings = computed(() => {
-
   return borrowings.value.filter(
     borrowing =>
-      borrowing.status === "OVERDUE"
+      borrowing.status?.toUpperCase() === "OVERDUE"
   ).length;
-
 });
 
 
-function formatDate(date) {
+// =====================================================
+// FORMAT DATE
+// =====================================================
 
+function formatDate(date) {
   if (!date) {
     return "-";
   }
 
   try {
-
     return new Date(date).toLocaleDateString(
       "en-US",
       {
@@ -183,21 +216,18 @@ function formatDate(date) {
         day: "numeric"
       }
     );
-
-  }
-  catch {
-
+  } catch {
     return date;
-
   }
-
 }
 
 
-function getStatusClass(status) {
+// =====================================================
+// STATUS CLASS
+// =====================================================
 
-  const value =
-    status?.toUpperCase();
+function getStatusClass(status) {
+  const value = status?.toUpperCase();
 
   if (value === "RETURNED") {
     return "returned";
@@ -208,14 +238,15 @@ function getStatusClass(status) {
   }
 
   return "borrowed";
-
 }
 
 
+// =====================================================
+// LOAD DATA
+// =====================================================
+
 onMounted(() => {
-
   fetchMyBorrowings();
-
 });
 </script>
 
@@ -224,7 +255,9 @@ onMounted(() => {
 
   <div class="my-borrowings-page">
 
-    <!-- HEADER -->
+    <!-- =================================================
+         HEADER
+    ================================================== -->
 
     <div class="page-header">
 
@@ -235,11 +268,15 @@ onMounted(() => {
         </div>
 
         <div>
-          <h1>My Borrowings</h1>
+
+          <h1>
+            My Borrowings
+          </h1>
 
           <p>
             Manage and track all your borrowed books
           </p>
+
         </div>
 
       </div>
@@ -251,26 +288,34 @@ onMounted(() => {
         :disabled="loading"
         @click="fetchMyBorrowings"
       >
+
         <i
           class="bi bi-arrow-clockwise"
           :class="{ spinning: loading }"
         ></i>
 
         Refresh
+
       </button>
 
     </div>
 
 
-    <!-- STATISTICS -->
+    <!-- =================================================
+         STATISTICS
+    ================================================== -->
 
     <div class="statistics-grid">
+
+      <!-- ACTIVE -->
 
       <div class="stat-card">
 
         <div>
 
-          <p>Active Borrowings</p>
+          <p>
+            Active Borrowings
+          </p>
 
           <h2>
             {{ activeBorrowings }}
@@ -285,11 +330,15 @@ onMounted(() => {
       </div>
 
 
+      <!-- RETURNED -->
+
       <div class="stat-card">
 
         <div>
 
-          <p>Returned Books</p>
+          <p>
+            Returned Books
+          </p>
 
           <h2>
             {{ returnedBorrowings }}
@@ -304,11 +353,15 @@ onMounted(() => {
       </div>
 
 
+      <!-- OVERDUE -->
+
       <div class="stat-card">
 
         <div>
 
-          <p>Overdue Books</p>
+          <p>
+            Overdue Books
+          </p>
 
           <h2>
             {{ overdueBorrowings }}
@@ -325,7 +378,9 @@ onMounted(() => {
     </div>
 
 
-    <!-- LOADING -->
+    <!-- =================================================
+         LOADING
+    ================================================== -->
 
     <div
       v-if="loading"
@@ -351,7 +406,9 @@ onMounted(() => {
     </div>
 
 
-    <!-- ERROR -->
+    <!-- =================================================
+         ERROR
+    ================================================== -->
 
     <div
       v-else-if="error"
@@ -389,7 +446,9 @@ onMounted(() => {
     </div>
 
 
-    <!-- BORROWINGS -->
+    <!-- =================================================
+         BORROWINGS
+    ================================================== -->
 
     <div
       v-else-if="borrowings.length > 0"
@@ -416,27 +475,28 @@ onMounted(() => {
 
 
       <div class="borrowings-list">
-  <div
-    v-for="borrowing in borrowings"
-    :key="borrowing.id"
-    class="borrowing-wrapper"
-  >
-    <div class="book-detail-center">
-      <BorrowCard
-        :book="borrowing"
-      />
+
+        <div
+          v-for="borrowing in borrowings"
+          :key="borrowing.id"
+          class="borrowing-wrapper"
+        >
+
+          <BorrowCard
+            :book="borrowing"
+            @return="handleReturn"
+          />
+
+        </div>
+
+      </div>
+
     </div>
 
-    <div class="borrowing-footer">
-      ...
-    </div>
-  </div>
-</div>
 
-    </div>
-
-
-    <!-- EMPTY -->
+    <!-- =================================================
+         EMPTY
+    ================================================== -->
 
     <div
       v-else
@@ -486,9 +546,7 @@ onMounted(() => {
 
 .my-borrowings-page {
   min-height: 100vh;
-  padding:
-    1.5rem
-    2rem;
+  padding: 1.5rem 2rem;
   background: #f8faff;
 }
 
@@ -546,29 +604,6 @@ onMounted(() => {
   color: #6b7280;
 }
 
-.borrowing-wrapper {
-  width: 100%;
-  overflow: hidden;
-  background: white;
-  border-radius: 16px;
-  border: 1px solid #edf0f5;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
-  transition: 0.25s ease;
-}
-
-.book-detail-center {
-  width: 100%;
-  max-width: 650px;
-  margin: 0 auto;
-  padding: 18px 20px;
-}
-
-.book-detail-center :deep(.borrow-card) {
-  width: 100%;
-  max-width: 650px;
-  margin: 0 auto;
-}
-
 
 /* =====================================================
    BUTTON
@@ -582,7 +617,6 @@ onMounted(() => {
   justify-content: center;
   gap: 8px;
 
-  border: none;
   border-radius: 10px;
 
   padding: 11px 18px;
@@ -605,13 +639,11 @@ onMounted(() => {
 
 .refresh-btn:hover {
   color: #2563eb;
-
   background: #f8fafc;
 }
 
 .refresh-btn:disabled {
   opacity: 0.6;
-
   cursor: not-allowed;
 }
 
@@ -741,6 +773,8 @@ onMounted(() => {
 }
 
 .borrowing-wrapper {
+  width: 100%;
+
   overflow: hidden;
 
   background: white;
@@ -760,134 +794,6 @@ onMounted(() => {
   box-shadow:
     0 10px 30px
     rgba(0, 0, 0, 0.07);
-}
-
-
-/* =====================================================
-   BORROWING FOOTER
-===================================================== */
-
-.borrowing-footer {
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr auto;
-
-  gap: 25px;
-
-  align-items: center;
-
-  padding: 18px 22px;
-
-  border-top: 1px solid #f0f1f3;
-
-  background: #fafbfc;
-}
-
-.date-info {
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-}
-
-.date-icon {
-  width: 40px;
-  height: 40px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 10px;
-
-  font-size: 17px;
-}
-
-.borrow-date-icon {
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-.due-date-icon {
-  background: #fff7ed;
-  color: #f97316;
-}
-
-.date-info span {
-  display: block;
-
-  font-size: 12px;
-
-  color: #9ca3af;
-}
-
-.date-info strong {
-  display: block;
-
-  margin-top: 3px;
-
-  font-size: 14px;
-
-  color: #374151;
-}
-
-.status-container {
-  display: flex;
-
-  justify-content: flex-end;
-}
-
-.status-badge {
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  padding: 7px 13px;
-
-  border-radius: 30px;
-
-  font-size: 12px;
-  font-weight: 600;
-
-  border: 1px solid transparent;
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-
-  border-radius: 50%;
-
-  background: currentColor;
-}
-
-.borrowed {
-  background: #eff6ff;
-
-  border-color: #dbeafe;
-
-  color: #2563eb;
-}
-
-.returned {
-  background: #ecfdf5;
-
-  border-color: #bbf7d0;
-
-  color: #16a34a;
-}
-
-.overdue {
-  background: #fef2f2;
-
-  border-color: #fecaca;
-
-  color: #ef4444;
 }
 
 
@@ -941,7 +847,7 @@ onMounted(() => {
 
 
 /* =====================================================
-   LOADING
+   STATE ICONS
 ===================================================== */
 
 .loading-icon,
@@ -964,13 +870,11 @@ onMounted(() => {
 
 .loading-icon {
   background: #eff6ff;
-
   color: #2563eb;
 }
 
 .error-icon {
   background: #fef2f2;
-
   color: #ef4444;
 }
 
@@ -985,8 +889,25 @@ onMounted(() => {
   font-size: 48px;
 }
 
+
+/* =====================================================
+   ANIMATION
+===================================================== */
+
 .spinning {
   animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
 }
 
 
@@ -996,6 +917,8 @@ onMounted(() => {
 
 .retry-btn {
   margin-top: 22px;
+
+  border: none;
 
   background: #ef4444;
 
@@ -1029,23 +952,6 @@ onMounted(() => {
 
 
 /* =====================================================
-   ANIMATION
-===================================================== */
-
-@keyframes spin {
-
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-
-}
-
-
-/* =====================================================
    RESPONSIVE
 ===================================================== */
 
@@ -1075,16 +981,6 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 
-  .borrowing-footer {
-    grid-template-columns: 1fr;
-
-    gap: 15px;
-  }
-
-  .status-container {
-    justify-content: flex-start;
-  }
-
 }
 
 
@@ -1107,4 +1003,3 @@ onMounted(() => {
 }
 
 </style>
-

@@ -23,8 +23,8 @@ export async function getBorrowings() {
   if (!response.ok) {
     throw new Error(
       result?.message ||
-      result?.msg ||
-      `Failed to fetch borrowings (${response.status})`
+        result?.msg ||
+        `Failed to fetch borrowings (${response.status})`
     );
   }
 
@@ -58,8 +58,8 @@ export async function getMyBorrowings() {
   if (!response.ok) {
     throw new Error(
       result?.message ||
-      result?.msg ||
-      `Failed to fetch my borrowings (${response.status})`
+        result?.msg ||
+        `Failed to fetch my borrowings (${response.status})`
     );
   }
 
@@ -93,8 +93,8 @@ export async function getBorrowingById(id) {
   if (!response.ok) {
     throw new Error(
       result?.message ||
-      result?.msg ||
-      `Failed to fetch borrowing (${response.status})`
+        result?.msg ||
+        `Failed to fetch borrowing (${response.status})`
     );
   }
 
@@ -123,8 +123,8 @@ export async function createBorrowing(payload) {
   if (!response.ok) {
     throw new Error(
       result?.message ||
-      result?.msg ||
-      `Failed to create borrow request (${response.status})`
+        result?.msg ||
+        `Failed to create borrow request (${response.status})`
     );
   }
 
@@ -133,6 +133,7 @@ export async function createBorrowing(payload) {
 
 // ================================
 // ACCEPT BORROWING - ADMIN
+// PENDING -> BORROWED
 // ================================
 export async function acceptBorrowing(id) {
   const token = getToken();
@@ -152,8 +153,8 @@ export async function acceptBorrowing(id) {
   if (!response.ok) {
     throw new Error(
       result?.message ||
-      result?.msg ||
-      `Failed to accept borrowing (${response.status})`
+        result?.msg ||
+        `Failed to accept borrowing (${response.status})`
     );
   }
 
@@ -162,6 +163,7 @@ export async function acceptBorrowing(id) {
 
 // ================================
 // REJECT BORROWING - ADMIN
+// PENDING -> REJECTED
 // ================================
 export async function rejectBorrowing(id) {
   const token = getToken();
@@ -181,8 +183,74 @@ export async function rejectBorrowing(id) {
   if (!response.ok) {
     throw new Error(
       result?.message ||
-      result?.msg ||
-      `Failed to reject borrowing (${response.status})`
+        result?.msg ||
+        `Failed to reject borrowing (${response.status})`
+    );
+  }
+
+  return result?.data ?? result;
+}
+
+// ================================
+// REQUEST RETURN BOOK - USER
+// BORROWED -> RETURN_REQUESTED
+//
+// IMPORTANT:
+// Book quantity is NOT increased here.
+// ================================
+export async function returnBook(id) {
+  const token = getToken();
+
+  const response = await fetch(`${API_URL}/return/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await response.json();
+
+  console.log("RETURN BOOK RESPONSE:", result);
+
+  if (!response.ok) {
+    throw new Error(
+      result?.message ||
+        result?.msg ||
+        `Failed to request return (${response.status})`
+    );
+  }
+
+  return result?.data ?? result;
+}
+
+// ================================
+// ACCEPT RETURN - ADMIN
+// RETURN_REQUESTED -> RETURNED
+//
+// Book quantity will increase in Backend.
+// Returned date will be set in Backend.
+// ================================
+export async function acceptReturn(id) {
+  const token = getToken();
+
+  const response = await fetch(`${API_URL}/accept-return/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await response.json();
+
+  console.log("ACCEPT RETURN RESPONSE:", result);
+
+  if (!response.ok) {
+    throw new Error(
+      result?.message ||
+        result?.msg ||
+        `Failed to accept return (${response.status})`
     );
   }
 
@@ -209,8 +277,8 @@ export async function updateBorrowing(id, payload) {
   if (!response.ok) {
     throw new Error(
       result?.message ||
-      result?.msg ||
-      `Failed to update borrowing (${response.status})`
+        result?.msg ||
+        `Failed to update borrowing (${response.status})`
     );
   }
 
@@ -236,8 +304,8 @@ export async function deleteBorrowing(id) {
   if (!response.ok) {
     throw new Error(
       result?.message ||
-      result?.msg ||
-      `Failed to delete borrowing (${response.status})`
+        result?.msg ||
+        `Failed to delete borrowing (${response.status})`
     );
   }
 

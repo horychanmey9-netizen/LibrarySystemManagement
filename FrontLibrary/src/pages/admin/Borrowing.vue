@@ -1,3 +1,4 @@
+```vue
 <template>
 
   <div class="min-h-screen bg-slate-50 p-6">
@@ -56,7 +57,7 @@
     <div
       class="grid grid-cols-1
              sm:grid-cols-2
-             lg:grid-cols-4
+             lg:grid-cols-5
              gap-4 mb-6"
     >
 
@@ -95,6 +96,26 @@
         <p class="text-2xl font-bold
                   text-blue-600 mt-1">
           {{ borrowedCount }}
+        </p>
+
+      </div>
+
+
+      <!-- RETURN REQUESTED -->
+
+      <div
+        class="bg-white rounded-2xl
+               border border-slate-200
+               shadow-sm p-5"
+      >
+
+        <p class="text-sm text-slate-500">
+          Return Requests
+        </p>
+
+        <p class="text-2xl font-bold
+                  text-purple-600 mt-1">
+          {{ returnRequestedCount }}
         </p>
 
       </div>
@@ -293,7 +314,7 @@
         class="overflow-x-auto"
       >
 
-        <table class="w-full min-w-[1000px]">
+        <table class="w-full min-w-[1100px]">
 
           <thead
             class="bg-slate-50
@@ -498,11 +519,14 @@
 
               <td class="px-6 py-4">
 
+                <!-- ==============================
+                     PENDING
+                =============================== -->
+
                 <div
                   v-if="
                     String(item.status)
-                      .toUpperCase()
-                      === 'PENDING'
+                      .toUpperCase() === 'PENDING'
                   "
                   class="flex
                          justify-end
@@ -581,13 +605,66 @@
                 </div>
 
 
+                <!-- ==============================
+                     RETURN REQUESTED
+                =============================== -->
+
+                <div
+                  v-else-if="
+                    String(item.status)
+                      .toUpperCase() ===
+                    'RETURN_REQUESTED'
+                  "
+                  class="flex justify-end"
+                >
+
+                  <button
+                    type="button"
+                    @click="acceptReturn(item)"
+                    :disabled="
+                      processingId === item.id
+                    "
+                    class="px-3 py-2
+                           rounded-lg
+                           bg-green-600
+                           text-white
+                           text-sm
+                           font-semibold
+                           hover:bg-green-700
+                           disabled:opacity-50"
+                  >
+
+                    <span
+                      v-if="
+                        processingId === item.id &&
+                        processingAction === 'return'
+                      "
+                    >
+                      Accepting...
+                    </span>
+
+                    <span v-else>
+                      ✓ Accept Return
+                    </span>
+
+                  </button>
+
+                </div>
+
+
+                <!-- ==============================
+                     NO ACTION
+                =============================== -->
+
                 <div
                   v-else
                   class="text-right
                          text-xs
                          text-slate-400"
                 >
+
                   No action
+
                 </div>
 
               </td>
@@ -612,7 +689,8 @@
 import {
   getBorrowings,
   acceptBorrowing,
-  rejectBorrowing
+  rejectBorrowing,
+  acceptReturn
 } from "../../service/borrowingService.js";
 
 
@@ -639,6 +717,7 @@ export default {
         "ALL",
         "PENDING",
         "BORROWED",
+        "RETURN_REQUESTED",
         "LATE",
         "RETURNED",
         "REJECTED"
@@ -680,6 +759,22 @@ export default {
         item =>
           String(item.status)
             .toUpperCase() === "BORROWED"
+      ).length;
+
+    },
+
+
+    // ===================================================
+    // RETURN REQUESTED
+    // ===================================================
+
+    returnRequestedCount() {
+
+      return this.borrowings.filter(
+        item =>
+          String(item.status)
+            .toUpperCase() ===
+          "RETURN_REQUESTED"
       ).length;
 
     },
@@ -828,8 +923,7 @@ export default {
 
         else {
 
-          this.borrowings =
-            [];
+          this.borrowings = [];
 
         }
 
@@ -857,7 +951,7 @@ export default {
 
 
     // =================================================
-    // ACCEPT
+    // ACCEPT BORROWING
     // =================================================
 
     async acceptRequest(item) {
@@ -899,10 +993,8 @@ export default {
         );
 
 
-        alert(
-          "Borrowing accepted successfully."
-        );
-
+        // No success alert.
+        // Reload data after successful request.
 
         await this.loadBorrowings();
 
@@ -933,7 +1025,7 @@ export default {
 
 
     // =================================================
-    // REJECT
+    // REJECT BORROWING
     // =================================================
 
     async rejectRequest(item) {
@@ -975,10 +1067,7 @@ export default {
         );
 
 
-        alert(
-          "Borrowing rejected successfully."
-        );
-
+        // No success alert.
 
         await this.loadBorrowings();
 
@@ -994,6 +1083,87 @@ export default {
         this.error =
           error?.message ||
           "Failed to reject borrowing.";
+
+      } finally {
+
+        this.processingId =
+          null;
+
+        this.processingAction =
+          "";
+
+      }
+
+    },
+
+
+    // =================================================
+    // ACCEPT RETURN
+    // =================================================
+
+    async acceptReturn(item) {
+
+      if (!item?.id) {
+
+        return;
+
+      }
+
+
+      const confirmed =
+        window.confirm(
+          `Accept return of "${this.getBookTitle(item)}"?\n\nBook quantity will increase by 1.`
+        );
+
+
+      if (!confirmed) {
+
+        return;
+
+      }
+
+
+      this.processingId =
+        item.id;
+
+      this.processingAction =
+        "return";
+
+      this.error =
+        "";
+
+
+      try {
+
+        await acceptReturn(
+          item.id
+        );
+
+
+        // IMPORTANT:
+        // Do NOT show success alert.
+        // Backend should change:
+        //
+        // RETURN_REQUESTED
+        //        ↓
+        // RETURNED
+        //
+        // and increase book quantity.
+
+        await this.loadBorrowings();
+
+
+      } catch (error) {
+
+        console.error(
+          "Accept return error:",
+          error
+        );
+
+
+        this.error =
+          error?.message ||
+          "Failed to accept return.";
 
       } finally {
 
@@ -1119,6 +1289,11 @@ export default {
           return "bg-blue-50 text-blue-700";
 
 
+        case "RETURN_REQUESTED":
+
+          return "bg-purple-50 text-purple-700";
+
+
         case "LATE":
 
           return "bg-orange-50 text-orange-700";
@@ -1147,3 +1322,28 @@ export default {
 };
 
 </script>
+```
+
+### One important thing
+
+This `Borrowing.vue` expects your service to have:
+
+```js
+acceptReturn(id)
+```
+
+So your `borrowingService.js` needs an API function for the admin to accept the return.
+
+The important statuses are now:
+
+```text
+PENDING
+   ↓ Accept
+BORROWED
+   ↓ User clicks Return Book
+RETURN_REQUESTED
+   ↓ Admin clicks Accept Return
+RETURNED
+```
+
+So **the user will not see `RETURNED` until the admin accepts the return**. This is different from your current `MyBorrowings.vue`, where `handleReturn()` directly sets `book.status = "RETURNED"`.

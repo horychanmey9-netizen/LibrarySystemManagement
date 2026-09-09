@@ -1,185 +1,221 @@
+
 <template>
   <div
     class="min-h-screen w-full bg-slate-50 p-4 sm:p-6 lg:p-8"
   >
 
     <!-- =====================================================
-         HEADER
-    ====================================================== -->
-
-    <div class="mb-8">
-
-      <h1
-        class="m-0 text-2xl font-bold tracking-tight text-slate-900"
-      >
-        Browse Books
-      </h1>
-
-      <p
-        class="mt-1.5 text-base text-slate-400"
-      >
-        Discover and explore books from our library collection.
-      </p>
-
-    </div>
-
-
-    <!-- =====================================================
-         TOP FILTER BAR
+         STICKY BROWSE BOOKS HEADER + FILTER BAR
     ====================================================== -->
 
     <div
-      class="mb-8 grid grid-cols-1 gap-4
-             lg:grid-cols-2
-             xl:grid-cols-4"
+      class="sticky top-16 z-30
+             -mx-4
+             mb-8
+             bg-slate-50
+             px-4
+             pb-5
+             pt-4
+             sm:-mx-6 sm:px-6
+             lg:-mx-8 lg:px-8"
     >
 
-      <!-- SEARCH -->
+      <!-- HEADER -->
+      <div class="mb-6">
+
+        <h1
+          class="m-0 text-2xl font-bold
+                 tracking-tight text-slate-900"
+        >
+          Browse Books
+        </h1>
+
+        <p
+          class="mt-1.5 text-base
+                 text-slate-400"
+        >
+          Discover and explore books from our library collection.
+        </p>
+
+      </div>
+
+
+      <!-- =================================================
+           TOP FILTER BAR
+      ================================================== -->
 
       <div
-        class="flex h-[58px] items-center gap-3
-               rounded-[14px] border border-slate-200
-               bg-white px-4"
+        class="grid grid-cols-1 gap-4
+               lg:grid-cols-2
+               xl:grid-cols-4"
       >
 
-        <i
-          class="bi bi-search text-base text-slate-400"
-        ></i>
-
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search books by title, author, ISBN..."
-          class="h-full w-full border-none bg-transparent
-                 text-[15px] text-slate-700
-                 outline-none placeholder:text-slate-400"
-        />
-
-      </div>
-
-
-      <!-- CATEGORY DROPDOWN -->
-
-      <div class="relative h-[58px]">
-
-        <select
-          v-model="selectedCategory"
-          class="h-full w-full cursor-pointer
-                 appearance-none rounded-[14px]
-                 border border-slate-200 bg-white
-                 px-4 pr-11 text-[15px] text-slate-800
-                 outline-none transition
-                 focus:border-blue-300
-                 focus:ring-4 focus:ring-blue-500/10"
+        <!-- SEARCH -->
+        <div
+          class="flex h-[58px] items-center gap-3
+                 rounded-[14px]
+                 border border-slate-200
+                 bg-white px-4"
         >
 
-          <option value="All">
-            All Categories
-          </option>
+          <i
+            class="bi bi-search text-base
+                   text-slate-400"
+          ></i>
 
-          <option
-            v-for="category in categories"
-            :key="category.id"
-            :value="category.name"
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search books by title, author, ISBN..."
+            class="h-full w-full
+                   border-none bg-transparent
+                   text-[15px] text-slate-700
+                   outline-none
+                   placeholder:text-slate-400"
+          />
+
+        </div>
+
+
+        <!-- CATEGORY -->
+        <div class="relative h-[58px]">
+
+          <select
+            v-model="selectedCategory"
+            class="h-full w-full cursor-pointer
+                   appearance-none
+                   rounded-[14px]
+                   border border-slate-200
+                   bg-white
+                   px-4 pr-11
+                   text-[15px] text-slate-800
+                   outline-none transition
+                   focus:border-blue-300
+                   focus:ring-4
+                   focus:ring-blue-500/10"
           >
-            {{ category.name }}
-          </option>
 
-          <option value="Other">
-            Other
-          </option>
+            <option value="All">
+              All Categories
+            </option>
 
-        </select>
+            <option
+              v-for="category in categories"
+              :key="category.id"
+              :value="category.name"
+            >
+              {{ category.name }}
+            </option>
 
-        <i
-          class="bi bi-chevron-down pointer-events-none
-                 absolute right-4 top-1/2
-                 -translate-y-1/2 text-slate-900"
-        ></i>
+            <option value="Other">
+              Other
+            </option>
 
-      </div>
+          </select>
 
+          <i
+            class="bi bi-chevron-down
+                   pointer-events-none
+                   absolute right-4 top-1/2
+                   -translate-y-1/2
+                   text-slate-900"
+          ></i>
 
-      <!-- AVAILABILITY -->
-
-      <div class="relative h-[58px]">
-
-        <select
-          v-model="selectedAvailability"
-          class="h-full w-full cursor-pointer
-                 appearance-none rounded-[14px]
-                 border border-slate-200 bg-white
-                 px-4 pr-11 text-[15px] text-slate-800
-                 outline-none transition
-                 focus:border-blue-300
-                 focus:ring-4 focus:ring-blue-500/10"
-        >
-
-          <option value="All">
-            All Availability
-          </option>
-
-          <option value="Available">
-            Available
-          </option>
-
-          <option value="Borrowed">
-            Borrowed
-          </option>
-
-        </select>
-
-        <i
-          class="bi bi-chevron-down pointer-events-none
-                 absolute right-4 top-1/2
-                 -translate-y-1/2 text-slate-900"
-        ></i>
-
-      </div>
+        </div>
 
 
-      <!-- SORT -->
+        <!-- AVAILABILITY -->
+        <div class="relative h-[58px]">
 
-      <div class="relative h-[58px]">
+          <select
+            v-model="selectedAvailability"
+            class="h-full w-full cursor-pointer
+                   appearance-none
+                   rounded-[14px]
+                   border border-slate-200
+                   bg-white
+                   px-4 pr-11
+                   text-[15px] text-slate-800
+                   outline-none transition
+                   focus:border-blue-300
+                   focus:ring-4
+                   focus:ring-blue-500/10"
+          >
 
-        <select
-          v-model="selectedSort"
-          class="h-full w-full cursor-pointer
-                 appearance-none rounded-[14px]
-                 border border-slate-200 bg-white
-                 px-4 pr-11 text-[15px] text-slate-800
-                 outline-none transition
-                 focus:border-blue-300
-                 focus:ring-4 focus:ring-blue-500/10"
-        >
+            <option value="All">
+              All Availability
+            </option>
 
-          <option value="default">
-            Sort by
-          </option>
+            <option value="Available">
+              Available
+            </option>
 
-          <option value="title-asc">
-            Title A-Z
-          </option>
+            <option value="Borrowed">
+              Borrowed
+            </option>
 
-          <option value="title-desc">
-            Title Z-A
-          </option>
+          </select>
 
-          <option value="author-asc">
-            Author A-Z
-          </option>
+          <i
+            class="bi bi-chevron-down
+                   pointer-events-none
+                   absolute right-4 top-1/2
+                   -translate-y-1/2
+                   text-slate-900"
+          ></i>
 
-          <option value="author-desc">
-            Author Z-A
-          </option>
+        </div>
 
-        </select>
 
-        <i
-          class="bi bi-chevron-down pointer-events-none
-                 absolute right-4 top-1/2
-                 -translate-y-1/2 text-slate-900"
-        ></i>
+        <!-- SORT -->
+        <div class="relative h-[58px]">
+
+          <select
+            v-model="selectedSort"
+            class="h-full w-full cursor-pointer
+                   appearance-none
+                   rounded-[14px]
+                   border border-slate-200
+                   bg-white
+                   px-4 pr-11
+                   text-[15px] text-slate-800
+                   outline-none transition
+                   focus:border-blue-300
+                   focus:ring-4
+                   focus:ring-blue-500/10"
+          >
+
+            <option value="default">
+              Sort by
+            </option>
+
+            <option value="title-asc">
+              Title A-Z
+            </option>
+
+            <option value="title-desc">
+              Title Z-A
+            </option>
+
+            <option value="author-asc">
+              Author A-Z
+            </option>
+
+            <option value="author-desc">
+              Author Z-A
+            </option>
+
+          </select>
+
+          <i
+            class="bi bi-chevron-down
+                   pointer-events-none
+                   absolute right-4 top-1/2
+                   -translate-y-1/2
+                   text-slate-900"
+          ></i>
+
+        </div>
 
       </div>
 
@@ -191,7 +227,9 @@
     ====================================================== -->
 
     <div
-      class="grid grid-cols-1 items-start gap-6
+      class="grid grid-cols-1
+             items-start
+             gap-6
              lg:grid-cols-[220px_minmax(0,1fr)]
              xl:grid-cols-[260px_minmax(0,1fr)]
              xl:gap-10"
@@ -199,367 +237,504 @@
 
 
       <!-- ===================================================
-           SIDEBAR
+           SIDEBAR FILTER
       ==================================================== -->
 
       <aside
-        class="w-full rounded-[14px]
-               border border-slate-200 bg-white p-5"
+        class="sticky
+               top-[140px]
+               z-10
+               w-full
+               self-start
+               rounded-[14px]
+               border border-slate-200
+               bg-white
+               shadow-sm
+
+               lg:h-[calc(100vh-160px)]
+               lg:max-h-[calc(100vh-160px)]
+               lg:overflow-y-auto
+               lg:overscroll-contain"
       >
 
-        <!-- FILTER HEADER -->
-
-        <div
-          class="mb-6 flex items-center justify-between"
-        >
-
-          <h2
-            class="m-0 text-base font-bold text-slate-900"
-          >
-            Filter
-          </h2>
-
-          <button
-            type="button"
-            @click="clearFilters"
-            class="border-none bg-transparent
-                   text-sm text-blue-600
-                   transition hover:underline"
-          >
-            Clear all
-          </button>
-
-        </div>
+        <div class="p-5">
 
 
-        <!-- =================================================
-             CATEGORIES
-        ================================================== -->
-
-        <div
-          class="mb-5 border-b border-slate-100
-                 pb-5 last:mb-0 last:border-b-0"
-        >
-
-          <h3
-            class="mb-3.5 text-sm font-semibold text-slate-900"
-          >
-            Categories
-          </h3>
-
-
-          <!-- LOADING -->
+          <!-- FILTER HEADER -->
 
           <div
-            v-if="loadingCategories"
-            class="py-1 text-xs text-slate-400"
+            class="mb-6
+                   flex
+                   items-center
+                   justify-between"
           >
-            Loading categories...
+
+            <h2
+              class="m-0
+                     text-base
+                     font-bold
+                     text-slate-900"
+            >
+              Filter
+            </h2>
+
+            <button
+              type="button"
+              @click="clearFilters"
+              class="border-none
+                     bg-transparent
+                     text-sm
+                     text-blue-600
+                     transition
+                     hover:underline"
+            >
+              Clear all
+            </button>
+
           </div>
 
 
-          <!-- ERROR -->
+          <!-- =================================================
+               CATEGORIES
+          ================================================== -->
 
           <div
-            v-else-if="categoryError"
-            class="text-xs leading-relaxed text-red-600"
+            class="mb-5
+                   border-b
+                   border-slate-100
+                   pb-5"
           >
-            {{ categoryError }}
+
+            <h3
+              class="mb-3.5
+                     text-sm
+                     font-semibold
+                     text-slate-900"
+            >
+              Categories
+            </h3>
+
+
+            <!-- LOADING -->
+
+            <div
+              v-if="loadingCategories"
+              class="py-1
+                     text-xs
+                     text-slate-400"
+            >
+              Loading categories...
+            </div>
+
+
+            <!-- ERROR -->
+
+            <div
+              v-else-if="categoryError"
+              class="text-xs
+                     leading-relaxed
+                     text-red-600"
+            >
+              {{ categoryError }}
+            </div>
+
+
+            <!-- CATEGORY LIST -->
+
+            <div
+              v-else
+              class="flex
+                     flex-col
+                     gap-3"
+            >
+
+              <!-- BACKEND CATEGORIES -->
+
+              <label
+                v-for="category in categories"
+                :key="category.id"
+                class="group
+                       relative
+                       flex
+                       min-h-5
+                       cursor-pointer
+                       items-center
+                       gap-2.5"
+              >
+
+                <input
+                  type="checkbox"
+                  :value="category.name"
+                  v-model="selectedCategories"
+                  @change="syncCategoryFromCheckbox"
+                  class="peer
+                         absolute
+                         h-0
+                         w-0
+                         opacity-0"
+                />
+
+                <span
+                  class="h-[15px]
+                         w-[15px]
+                         shrink-0
+                         rounded-[3px]
+                         border-[1.5px]
+                         border-slate-400
+                         bg-white
+                         transition
+                         peer-checked:border-blue-600
+                         peer-checked:bg-blue-600
+                         peer-checked:shadow-[inset_0_0_0_3px_white]"
+                ></span>
+
+                <span
+                  class="flex-1
+                         text-sm
+                         text-slate-700"
+                >
+                  {{ category.name }}
+                </span>
+
+                <span
+                  class="text-xs
+                         text-slate-400"
+                >
+                  {{ getCategoryCount(category.name) }}
+                </span>
+
+              </label>
+
+
+              <!-- OTHER -->
+
+              <label
+                class="group
+                       relative
+                       flex
+                       min-h-5
+                       cursor-pointer
+                       items-center
+                       gap-2.5"
+              >
+
+                <input
+                  type="checkbox"
+                  value="Other"
+                  v-model="selectedCategories"
+                  @change="syncCategoryFromCheckbox"
+                  class="peer
+                         absolute
+                         h-0
+                         w-0
+                         opacity-0"
+                />
+
+                <span
+                  class="h-[15px]
+                         w-[15px]
+                         shrink-0
+                         rounded-[3px]
+                         border-[1.5px]
+                         border-slate-400
+                         bg-white
+                         transition
+                         peer-checked:border-blue-600
+                         peer-checked:bg-blue-600
+                         peer-checked:shadow-[inset_0_0_0_3px_white]"
+                ></span>
+
+                <span
+                  class="flex-1
+                         text-sm
+                         text-slate-700"
+                >
+                  Other
+                </span>
+
+                <span
+                  class="text-xs
+                         text-slate-400"
+                >
+                  {{ getOtherCount() }}
+                </span>
+
+              </label>
+
+            </div>
+
           </div>
 
 
-          <!-- CATEGORY LIST -->
+          <!-- =================================================
+               AVAILABILITY
+          ================================================== -->
 
           <div
-            v-else
-            class="flex flex-col gap-3"
+            class="mb-5
+                   border-b
+                   border-slate-100
+                   pb-5"
           >
 
-            <!-- BACKEND CATEGORIES -->
+            <h3
+              class="mb-3.5
+                     text-sm
+                     font-semibold
+                     text-slate-900"
+            >
+              Availability
+            </h3>
 
-            <label
-              v-for="category in categories"
-              :key="category.id"
-              class="group relative flex min-h-5
-                     cursor-pointer items-center gap-2.5"
+            <div
+              class="flex
+                     flex-col
+                     gap-3"
             >
 
-              <input
-                type="checkbox"
-                :value="category.name"
-                v-model="selectedCategories"
-                @change="syncCategoryFromCheckbox"
-                class="peer absolute h-0 w-0 opacity-0"
-              />
+              <!-- AVAILABLE -->
 
-              <span
-                class="h-[15px] w-[15px] shrink-0
-                       rounded-[3px]
-                       border-[1.5px] border-slate-400
-                       bg-white transition
-                       peer-checked:border-blue-600
-                       peer-checked:bg-blue-600
-                       peer-checked:shadow-[inset_0_0_0_3px_white]"
-              ></span>
-
-              <span
-                class="flex-1 text-sm text-slate-700"
+              <label
+                class="relative
+                       flex
+                       min-h-5
+                       cursor-pointer
+                       items-center
+                       gap-2.5"
               >
-                {{ category.name }}
-              </span>
 
-              <span
-                class="text-xs text-slate-400"
+                <input
+                  type="checkbox"
+                  value="Available"
+                  v-model="selectedAvailabilityFilters"
+                  @change="syncAvailability"
+                  class="peer
+                         absolute
+                         h-0
+                         w-0
+                         opacity-0"
+                />
+
+                <span
+                  class="h-[15px]
+                         w-[15px]
+                         shrink-0
+                         rounded-[3px]
+                         border-[1.5px]
+                         border-slate-400
+                         bg-white
+                         transition
+                         peer-checked:border-blue-600
+                         peer-checked:bg-blue-600
+                         peer-checked:shadow-[inset_0_0_0_3px_white]"
+                ></span>
+
+                <span
+                  class="flex-1
+                         text-sm
+                         text-slate-700"
+                >
+                  Available
+                </span>
+
+                <span
+                  class="text-xs
+                         text-slate-400"
+                >
+                  {{ availableCount }}
+                </span>
+
+              </label>
+
+
+              <!-- BORROWED -->
+
+              <label
+                class="relative
+                       flex
+                       min-h-5
+                       cursor-pointer
+                       items-center
+                       gap-2.5"
               >
-                {{ getCategoryCount(category.name) }}
-              </span>
 
-            </label>
+                <input
+                  type="checkbox"
+                  value="Borrowed"
+                  v-model="selectedAvailabilityFilters"
+                  @change="syncAvailability"
+                  class="peer
+                         absolute
+                         h-0
+                         w-0
+                         opacity-0"
+                />
 
+                <span
+                  class="h-[15px]
+                         w-[15px]
+                         shrink-0
+                         rounded-[3px]
+                         border-[1.5px]
+                         border-slate-400
+                         bg-white
+                         transition
+                         peer-checked:border-blue-600
+                         peer-checked:bg-blue-600
+                         peer-checked:shadow-[inset_0_0_0_3px_white]"
+                ></span>
 
-            <!-- OTHER -->
+                <span
+                  class="flex-1
+                         text-sm
+                         text-slate-700"
+                >
+                  Borrowed
+                </span>
 
-            <label
-              class="group relative flex min-h-5
-                     cursor-pointer items-center gap-2.5"
-            >
+                <span
+                  class="text-xs
+                         text-slate-400"
+                >
+                  {{ borrowedCount }}
+                </span>
 
-              <input
-                type="checkbox"
-                value="Other"
-                v-model="selectedCategories"
-                @change="syncCategoryFromCheckbox"
-                class="peer absolute h-0 w-0 opacity-0"
-              />
+              </label>
 
-              <span
-                class="h-[15px] w-[15px] shrink-0
-                       rounded-[3px]
-                       border-[1.5px] border-slate-400
-                       bg-white transition
-                       peer-checked:border-blue-600
-                       peer-checked:bg-blue-600
-                       peer-checked:shadow-[inset_0_0_0_3px_white]"
-              ></span>
-
-              <span
-                class="flex-1 text-sm text-slate-700"
-              >
-                Other
-              </span>
-
-              <span
-                class="text-xs text-slate-400"
-              >
-                {{ getOtherCount() }}
-              </span>
-
-            </label>
+            </div>
 
           </div>
 
-        </div>
 
+          <!-- =================================================
+               LANGUAGE
+          ================================================== -->
 
-        <!-- =================================================
-             AVAILABILITY
-        ================================================== -->
+          <div>
 
-        <div
-          class="mb-5 border-b border-slate-100
-                 pb-5"
-        >
+            <h3
+              class="mb-3.5
+                     text-sm
+                     font-semibold
+                     text-slate-900"
+            >
+              Language
+            </h3>
 
-          <h3
-            class="mb-3.5 text-sm font-semibold text-slate-900"
-          >
-            Availability
-          </h3>
-
-
-          <div
-            class="flex flex-col gap-3"
-          >
-
-            <!-- AVAILABLE -->
-
-            <label
-              class="relative flex min-h-5
-                     cursor-pointer items-center gap-2.5"
+            <div
+              class="flex
+                     flex-col
+                     gap-3"
             >
 
-              <input
-                type="checkbox"
-                value="Available"
-                v-model="selectedAvailabilityFilters"
-                @change="syncAvailability"
-                class="peer absolute h-0 w-0 opacity-0"
-              />
+              <!-- ENGLISH -->
 
-              <span
-                class="h-[15px] w-[15px] shrink-0
-                       rounded-[3px]
-                       border-[1.5px] border-slate-400
-                       bg-white transition
-                       peer-checked:border-blue-600
-                       peer-checked:bg-blue-600
-                       peer-checked:shadow-[inset_0_0_0_3px_white]"
-              ></span>
-
-              <span
-                class="flex-1 text-sm text-slate-700"
+              <label
+                class="relative
+                       flex
+                       min-h-5
+                       cursor-pointer
+                       items-center
+                       gap-2.5"
               >
-                Available
-              </span>
 
-              <span
-                class="text-xs text-slate-400"
+                <input
+                  type="checkbox"
+                  value="English"
+                  v-model="selectedLanguages"
+                  class="peer
+                         absolute
+                         h-0
+                         w-0
+                         opacity-0"
+                />
+
+                <span
+                  class="h-[15px]
+                         w-[15px]
+                         shrink-0
+                         rounded-[3px]
+                         border-[1.5px]
+                         border-slate-400
+                         bg-white
+                         transition
+                         peer-checked:border-blue-600
+                         peer-checked:bg-blue-600
+                         peer-checked:shadow-[inset_0_0_0_3px_white]"
+                ></span>
+
+                <span
+                  class="flex-1
+                         text-sm
+                         text-slate-700"
+                >
+                  English
+                </span>
+
+                <span
+                  class="text-xs
+                         text-slate-400"
+                >
+                  {{ getLanguageCount("English") }}
+                </span>
+
+              </label>
+
+
+              <!-- KHMER -->
+
+              <label
+                class="relative
+                       flex
+                       min-h-5
+                       cursor-pointer
+                       items-center
+                       gap-2.5"
               >
-                {{ availableCount }}
-              </span>
 
-            </label>
+                <input
+                  type="checkbox"
+                  value="Khmer"
+                  v-model="selectedLanguages"
+                  class="peer
+                         absolute
+                         h-0
+                         w-0
+                         opacity-0"
+                />
 
+                <span
+                  class="h-[15px]
+                         w-[15px]
+                         shrink-0
+                         rounded-[3px]
+                         border-[1.5px]
+                         border-slate-400
+                         bg-white
+                         transition
+                         peer-checked:border-blue-600
+                         peer-checked:bg-blue-600
+                         peer-checked:shadow-[inset_0_0_0_3px_white]"
+                ></span>
 
-            <!-- BORROWED -->
+                <span
+                  class="flex-1
+                         text-sm
+                         text-slate-700"
+                >
+                  Khmer
+                </span>
 
-            <label
-              class="relative flex min-h-5
-                     cursor-pointer items-center gap-2.5"
-            >
+                <span
+                  class="text-xs
+                         text-slate-400"
+                >
+                  {{ getLanguageCount("Khmer") }}
+                </span>
 
-              <input
-                type="checkbox"
-                value="Borrowed"
-                v-model="selectedAvailabilityFilters"
-                @change="syncAvailability"
-                class="peer absolute h-0 w-0 opacity-0"
-              />
+              </label>
 
-              <span
-                class="h-[15px] w-[15px] shrink-0
-                       rounded-[3px]
-                       border-[1.5px] border-slate-400
-                       bg-white transition
-                       peer-checked:border-blue-600
-                       peer-checked:bg-blue-600
-                       peer-checked:shadow-[inset_0_0_0_3px_white]"
-              ></span>
-
-              <span
-                class="flex-1 text-sm text-slate-700"
-              >
-                Borrowed
-              </span>
-
-              <span
-                class="text-xs text-slate-400"
-              >
-                {{ borrowedCount }}
-              </span>
-
-            </label>
-
-          </div>
-
-        </div>
-
-
-        <!-- =================================================
-             LANGUAGE
-        ================================================== -->
-
-        <div
-          class="pb-0"
-        >
-
-          <h3
-            class="mb-3.5 text-sm font-semibold text-slate-900"
-          >
-            Language
-          </h3>
-
-
-          <div
-            class="flex flex-col gap-3"
-          >
-
-            <!-- ENGLISH -->
-
-            <label
-              class="relative flex min-h-5
-                     cursor-pointer items-center gap-2.5"
-            >
-
-              <input
-                type="checkbox"
-                value="English"
-                v-model="selectedLanguages"
-                class="peer absolute h-0 w-0 opacity-0"
-              />
-
-              <span
-                class="h-[15px] w-[15px] shrink-0
-                       rounded-[3px]
-                       border-[1.5px] border-slate-400
-                       bg-white transition
-                       peer-checked:border-blue-600
-                       peer-checked:bg-blue-600
-                       peer-checked:shadow-[inset_0_0_0_3px_white]"
-              ></span>
-
-              <span
-                class="flex-1 text-sm text-slate-700"
-              >
-                English
-              </span>
-
-              <span
-                class="text-xs text-slate-400"
-              >
-                {{ getLanguageCount("English") }}
-              </span>
-
-            </label>
-
-
-            <!-- KHMER -->
-
-            <label
-              class="relative flex min-h-5
-                     cursor-pointer items-center gap-2.5"
-            >
-
-              <input
-                type="checkbox"
-                value="Khmer"
-                v-model="selectedLanguages"
-                class="peer absolute h-0 w-0 opacity-0"
-              />
-
-              <span
-                class="h-[15px] w-[15px] shrink-0
-                       rounded-[3px]
-                       border-[1.5px] border-slate-400
-                       bg-white transition
-                       peer-checked:border-blue-600
-                       peer-checked:bg-blue-600
-                       peer-checked:shadow-[inset_0_0_0_3px_white]"
-              ></span>
-
-              <span
-                class="flex-1 text-sm text-slate-700"
-              >
-                Khmer
-              </span>
-
-              <span
-                class="text-xs text-slate-400"
-              >
-                {{ getLanguageCount("Khmer") }}
-              </span>
-
-            </label>
+            </div>
 
           </div>
 
@@ -572,25 +747,35 @@
            BOOK CONTENT
       ==================================================== -->
 
-      <main class="min-w-0">
+      <main
+        class="relative
+               z-0
+               min-w-0"
+      >
 
         <!-- =================================================
              BOOK TOOLBAR
         ================================================== -->
 
         <div
-          class="mb-5 flex items-center
-                 justify-between gap-4"
+          class="mb-5
+                 flex
+                 items-center
+                 justify-between
+                 gap-4"
         >
 
           <p
-            class="m-0 text-sm text-slate-400"
+            class="m-0
+                   text-sm
+                   text-slate-400"
           >
 
             Showing
 
             <strong
-              class="font-semibold text-slate-600"
+              class="font-semibold
+                     text-slate-600"
             >
               {{ filteredBooks.length }}
             </strong>
@@ -598,7 +783,8 @@
             of
 
             <strong
-              class="font-semibold text-slate-600"
+              class="font-semibold
+                     text-slate-600"
             >
               {{ books.length }}
             </strong>
@@ -611,11 +797,17 @@
           <!-- VIEW TOGGLE -->
 
           <div
-            class="flex items-center gap-1
+            class="flex
+                   items-center
+                   gap-1
                    rounded-[10px]
-                   border border-slate-200
-                   bg-white p-1"
+                   border
+                   border-slate-200
+                   bg-white
+                   p-1"
           >
+
+            <!-- GRID -->
 
             <button
               type="button"
@@ -629,10 +821,15 @@
               aria-label="Grid view"
             >
 
-              <i class="bi bi-grid-3x3-gap"></i>
+              <i
+                class="bi
+                       bi-grid-3x3-gap"
+              ></i>
 
             </button>
 
+
+            <!-- LIST -->
 
             <button
               type="button"
@@ -646,7 +843,10 @@
               aria-label="List view"
             >
 
-              <i class="bi bi-list"></i>
+              <i
+                class="bi
+                       bi-list"
+              ></i>
 
             </button>
 
@@ -661,22 +861,30 @@
 
         <div
           v-if="loadingBooks"
-          class="flex min-h-[300px]
-                 flex-col items-center
+          class="flex
+                 min-h-[300px]
+                 flex-col
+                 items-center
                  justify-center
                  rounded-[14px]
-                 border border-slate-200
-                 bg-white text-slate-500"
+                 border
+                 border-slate-200
+                 bg-white
+                 text-slate-500"
         >
 
           <i
-            class="bi bi-arrow-repeat
-                   mb-3 text-3xl
-                   animate-spin text-blue-600"
+            class="bi
+                   bi-arrow-repeat
+                   mb-3
+                   animate-spin
+                   text-3xl
+                   text-blue-600"
           ></i>
 
           <p
-            class="m-0 text-sm"
+            class="m-0
+                   text-sm"
           >
             Loading books...
           </p>
@@ -690,22 +898,29 @@
 
         <div
           v-else-if="bookError"
-          class="flex min-h-[300px]
-                 flex-col items-center
+          class="flex
+                 min-h-[300px]
+                 flex-col
+                 items-center
                  justify-center
                  rounded-[14px]
-                 border border-red-200
+                 border
+                 border-red-200
                  bg-white
-                 text-center text-red-600"
+                 text-center
+                 text-red-600"
         >
 
           <i
-            class="bi bi-exclamation-circle
-                   mb-3 text-3xl"
+            class="bi
+                   bi-exclamation-circle
+                   mb-3
+                   text-3xl"
           ></i>
 
           <p
-            class="mb-4 text-sm"
+            class="mb-4
+                   text-sm"
           >
             {{ bookError }}
           </p>
@@ -713,10 +928,16 @@
           <button
             type="button"
             @click="fetchBooks"
-            class="rounded-lg border-none
-                   bg-blue-600 px-4 py-2
-                   text-sm font-medium text-white
-                   transition hover:bg-blue-700"
+            class="rounded-lg
+                   border-none
+                   bg-blue-600
+                   px-4
+                   py-2
+                   text-sm
+                   font-medium
+                   text-white
+                   transition
+                   hover:bg-blue-700"
           >
             Try Again
           </button>
@@ -733,7 +954,9 @@
             viewMode === 'grid' &&
             filteredBooks.length > 0
           "
-          class="grid grid-cols-1 gap-5
+          class="grid
+                 grid-cols-1
+                 gap-5
                  sm:grid-cols-2
                  xl:grid-cols-3"
         >
@@ -758,17 +981,24 @@
             viewMode === 'list' &&
             filteredBooks.length > 0
           "
-          class="flex flex-col gap-4"
+          class="flex
+                 flex-col
+                 gap-4"
         >
 
           <div
             v-for="book in filteredBooks"
             :key="book.id"
-            class="flex items-center gap-5
+            class="flex
+                   items-center
+                   gap-5
                    rounded-[14px]
-                   border border-slate-200
-                   bg-white p-4
-                   transition hover:shadow-sm
+                   border
+                   border-slate-200
+                   bg-white
+                   p-4
+                   transition
+                   hover:shadow-sm
                    max-sm:flex-col
                    max-sm:items-start"
           >
@@ -776,9 +1006,13 @@
             <!-- IMAGE -->
 
             <div
-              class="flex h-[130px] w-[100px]
-                     shrink-0 items-center
-                     justify-center overflow-hidden
+              class="flex
+                     h-[130px]
+                     w-[100px]
+                     shrink-0
+                     items-center
+                     justify-center
+                     overflow-hidden
                      rounded-[10px]
                      bg-slate-100"
             >
@@ -788,7 +1022,9 @@
                 :src="book.image"
                 :alt="book.title"
                 @error="handleImageError"
-                class="h-full w-full object-contain"
+                class="h-full
+                       w-full
+                       object-contain"
               />
 
               <div
@@ -803,30 +1039,44 @@
 
             <!-- INFORMATION -->
 
-            <div class="min-w-0 flex-1">
+            <div
+              class="min-w-0
+                     flex-1"
+            >
 
               <h3
-                class="m-0 text-base font-bold
+                class="m-0
+                       text-base
+                       font-bold
                        text-slate-900"
               >
                 {{ book.title }}
               </h3>
 
               <p
-                class="my-1.5 text-sm text-slate-400"
+                class="my-1.5
+                       text-sm
+                       text-slate-400"
               >
                 {{ book.author }}
               </p>
 
 
               <div
-                class="flex flex-wrap items-center gap-2"
+                class="flex
+                       flex-wrap
+                       items-center
+                       gap-2"
               >
 
                 <span
-                  class="inline-block rounded-full
-                         bg-blue-50 px-2.5 py-1
-                         text-xs text-blue-600"
+                  class="inline-block
+                         rounded-full
+                         bg-blue-50
+                         px-2.5
+                         py-1
+                         text-xs
+                         text-blue-600"
                 >
                   {{ book.category }}
                 </span>
@@ -834,9 +1084,13 @@
 
                 <span
                   v-if="book.status === true"
-                  class="inline-block rounded-full
-                         bg-emerald-50 px-2.5 py-1
-                         text-xs text-emerald-600"
+                  class="inline-block
+                         rounded-full
+                         bg-emerald-50
+                         px-2.5
+                         py-1
+                         text-xs
+                         text-emerald-600"
                 >
                   ✓ Available
                 </span>
@@ -844,9 +1098,13 @@
 
                 <span
                   v-else
-                  class="inline-block rounded-full
-                         bg-red-50 px-2.5 py-1
-                         text-xs text-red-500"
+                  class="inline-block
+                         rounded-full
+                         bg-red-50
+                         px-2.5
+                         py-1
+                         text-xs
+                         text-red-500"
                 >
                   × Borrowed
                 </span>
@@ -859,16 +1117,21 @@
             <!-- ACTION -->
 
             <div
-              class="shrink-0 max-sm:w-full"
+              class="shrink-0
+                     max-sm:w-full"
             >
 
               <button
                 type="button"
                 @click="viewBook(book)"
                 class="rounded-[9px]
-                       border border-blue-600
-                       bg-white px-4 py-2.5
-                       text-sm font-medium
+                       border
+                       border-blue-600
+                       bg-white
+                       px-4
+                       py-2.5
+                       text-sm
+                       font-medium
                        text-blue-600
                        transition
                        hover:bg-blue-600
@@ -892,26 +1155,35 @@
         <div
           v-else
           class="rounded-[14px]
-                 border border-slate-200
-                 bg-white px-4 py-20
+                 border
+                 border-slate-200
+                 bg-white
+                 px-4
+                 py-20
                  text-center"
         >
 
           <div
-            class="mb-3 text-5xl"
+            class="mb-3
+                   text-5xl"
           >
             📚
           </div>
 
           <h3
-            class="m-0 text-lg font-semibold
+            class="m-0
+                   text-lg
+                   font-semibold
                    text-slate-700"
           >
             No books found
           </h3>
 
           <p
-            class="mb-4 mt-1.5 text-sm text-slate-400"
+            class="mb-4
+                   mt-1.5
+                   text-sm
+                   text-slate-400"
           >
             Try changing your search or filters.
           </p>
@@ -919,10 +1191,16 @@
           <button
             type="button"
             @click="clearFilters"
-            class="rounded-lg border-none
-                   bg-blue-600 px-4 py-2
-                   text-sm font-medium text-white
-                   transition hover:bg-blue-700"
+            class="rounded-lg
+                   border-none
+                   bg-blue-600
+                   px-4
+                   py-2
+                   text-sm
+                   font-medium
+                   text-white
+                   transition
+                   hover:bg-blue-700"
           >
             Clear Filters
           </button>
@@ -1041,7 +1319,7 @@ export default {
 
 
       // ==================================================
-      // BOOKS FROM BACKEND
+      // BOOKS
       // ==================================================
 
       books: [],
@@ -1470,7 +1748,6 @@ export default {
 
         }
 
-
         else if (
           Array.isArray(result)
         ) {
@@ -1479,7 +1756,6 @@ export default {
             result;
 
         }
-
 
         else {
 
@@ -1614,7 +1890,6 @@ export default {
 
         }
 
-
         else if (
           Array.isArray(result)
         ) {
@@ -1623,7 +1898,6 @@ export default {
             result;
 
         }
-
 
         else {
 
@@ -1760,7 +2034,6 @@ export default {
         });
 
       }
-
 
       else {
 
@@ -2005,3 +2278,4 @@ export default {
 };
 
 </script>
+

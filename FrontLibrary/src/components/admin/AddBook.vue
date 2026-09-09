@@ -177,39 +177,47 @@
       <div class="form-group">
         <label>
           Language
-        </label>
-
-        <input
-          v-model="form.language"
-          type="text"
-          placeholder="e.g. English"
-        />
-      </div>
-
-
-      <!-- STATUS -->
-      <div class="form-group">
-        <label>
-          Status
           <span>*</span>
         </label>
 
         <select
-          v-model="form.status"
+          v-model="form.language"
           required
         >
-          <option value="Available">
-            Available
+          <option value="">
+            Select language
           </option>
 
-          <option value="Borrowed">
-            Borrowed
+          <option value="Khmer">
+            Khmer
           </option>
 
-          <option value="Overdue">
-            Overdue
+          <option value="French">
+            French
+          </option>
+
+          <option value="English">
+            English
           </option>
         </select>
+      </div>
+
+
+      <!-- STATUS -->
+      <!--
+        Status is NOT selectable.
+        Every new book is automatically Available.
+      -->
+      <div class="form-group">
+        <label>
+          Status
+        </label>
+
+        <div class="status-auto">
+          <i class="bi bi-check-circle-fill"></i>
+          <span>Available</span>
+          <small>Automatically set when adding a new book</small>
+        </div>
       </div>
 
 
@@ -394,6 +402,7 @@ const form = ref({
 
   description: "",
 
+  // Automatically Available
   status: "Available"
 
 });
@@ -544,7 +553,10 @@ function handleImageChange(event) {
   }
 
 
-  // Check image
+  // ===================================================
+  // CHECK IMAGE TYPE
+  // ===================================================
+
   if (!file.type.startsWith("image/")) {
 
     errorMessage.value =
@@ -557,7 +569,10 @@ function handleImageChange(event) {
   }
 
 
-  // Optional size check
+  // ===================================================
+  // CHECK IMAGE SIZE
+  // ===================================================
+
   if (file.size > 5 * 1024 * 1024) {
 
     errorMessage.value =
@@ -575,7 +590,10 @@ function handleImageChange(event) {
   imageFile.value = file;
 
 
-  // Create preview
+  // ===================================================
+  // CREATE PREVIEW
+  // ===================================================
+
   imagePreview.value =
     URL.createObjectURL(file);
 
@@ -691,7 +709,20 @@ async function submitBook() {
   }
 
 
-  // Backend currently requires image
+  if (!form.value.language) {
+
+    errorMessage.value =
+      "Please select a language.";
+
+    return;
+
+  }
+
+
+  // ===================================================
+  // IMAGE REQUIRED
+  // ===================================================
+
   if (!imageFile.value) {
 
     errorMessage.value =
@@ -743,10 +774,14 @@ async function submitBook() {
         form.value.isbn.trim(),
 
       language:
-        form.value.language.trim(),
+        form.value.language,
 
-      status:
-        form.value.status
+      // ===============================================
+      // IMPORTANT
+      // Status is ALWAYS Available for a new book
+      // ===============================================
+
+      status: "Available"
 
     };
 
@@ -795,7 +830,10 @@ async function submitBook() {
       response?.data || response;
 
 
-    // Add category information
+    // =================================================
+    // ADD CATEGORY INFORMATION
+    // =================================================
+
     const newBook = {
 
       ...createdBook,
@@ -809,7 +847,13 @@ async function submitBook() {
         selectedCategory.value?.name || "",
 
       quantity:
-        Number(form.value.qty)
+        Number(form.value.qty),
+
+      // Make sure frontend also knows status
+      status: "Available",
+
+      language:
+        form.value.language
 
     };
 
@@ -901,10 +945,17 @@ function closePage() {
 
 onMounted(() => {
 
+  // Always start a new book as Available
+  form.value.status = "Available";
+
   fetchCategories();
 
 });
 
+
+// =====================================================
+// CLEANUP
+// =====================================================
 
 onBeforeUnmount(() => {
 
@@ -1126,7 +1177,7 @@ onBeforeUnmount(() => {
 
 
 /* =====================================================
-   INPUT
+   INPUT / SELECT / TEXTAREA
 ===================================================== */
 
 .form-group input,
@@ -1172,6 +1223,59 @@ onBeforeUnmount(() => {
 .form-group textarea {
 
   resize: vertical;
+
+}
+
+
+/* =====================================================
+   AUTO STATUS
+===================================================== */
+
+.status-auto {
+
+  min-height: 43px;
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 10px 13px;
+
+  border: 1px solid #bbf7d0;
+
+  border-radius: 8px;
+
+  background: #f0fdf4;
+
+  color: #15803d;
+
+}
+
+.status-auto i {
+
+  font-size: 16px;
+
+}
+
+.status-auto span {
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+}
+
+.status-auto small {
+
+  margin-left: auto;
+
+  color: #6b7280;
+
+  font-size: 11px;
 
 }
 
@@ -1495,7 +1599,28 @@ onBeforeUnmount(() => {
 
   }
 
+  .status-auto {
+
+    align-items: flex-start;
+
+    flex-wrap: wrap;
+
+  }
+
+  .status-auto small {
+
+    width: 100%;
+
+    margin-left: 24px;
+
+  }
+
 }
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
 
 @media (max-width: 500px) {
 
