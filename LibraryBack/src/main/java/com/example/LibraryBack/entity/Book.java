@@ -1,6 +1,5 @@
 package com.example.LibraryBack.entity;
 
-import com.example.LibraryBack.enums.Role;
 import com.example.LibraryBack.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -56,5 +55,8 @@ public class Book {
     private Category category;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<Fine> fines; // Or Set<Fine>
+    private List<Fine> fines;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    private List<Favorite> favorites;
 }
