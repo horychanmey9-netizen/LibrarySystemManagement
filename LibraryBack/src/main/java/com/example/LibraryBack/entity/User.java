@@ -62,4 +62,10 @@ public class User {
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private PasswordResetToken resetToken;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Favorite> favorites;
+
+    @OneToOne( mappedBy = "user",cascade = CascadeType.ALL)
+    private TelegramAccount telegramAccount;
 }
