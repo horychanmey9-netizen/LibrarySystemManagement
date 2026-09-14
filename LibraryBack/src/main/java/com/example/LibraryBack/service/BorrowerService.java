@@ -13,6 +13,7 @@ public interface BorrowerService {
     BorrowerResponse reject(Long id);
     BorrowerResponse returnBook(Long id);
     BorrowerResponse acceptReturn(Long id);
+    BorrowerResponse rejectReturn(Long id);
     BorrowerResponse update(Long id, BorrowerRequest request);
     void delete(Long id);
 }

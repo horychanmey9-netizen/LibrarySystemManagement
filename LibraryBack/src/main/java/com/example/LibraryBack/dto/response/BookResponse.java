@@ -28,4 +28,5 @@ public class BookResponse {
     private String category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String publicationYear;
 }

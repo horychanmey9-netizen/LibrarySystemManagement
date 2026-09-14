@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -90,10 +91,26 @@ public class BorrowerServiceImpl implements BorrowerService {
         );
     }
     @Override
+    @Transactional
     public List<BorrowerResponse> getData() {
 
-        return borrowerRepository.findAll()
-                .stream()
+        LocalDate today = LocalDate.now();
+
+        List<Borrower> borrowers = borrowerRepository.findAll();
+
+        for (Borrower borrower : borrowers) {
+
+            if (borrower.getStatus() == BorrowingStatus.BORROWED
+                    && borrower.getDueDate() != null
+                    && borrower.getDueDate().isBefore(today)) {
+
+                borrower.setStatus(BorrowingStatus.OVERDUE);
+            }
+        }
+
+        borrowerRepository.saveAll(borrowers);
+
+        return borrowers.stream()
                 .map(borrowerMapper::toResponse)
                 .toList();
     }
@@ -431,6 +448,31 @@ public class BorrowerServiceImpl implements BorrowerService {
 
         return borrowerMapper.toResponse(
                 updatedBorrower
+        );
+
+    }
+    @Override
+    @Transactional
+    public BorrowerResponse rejectReturn(Long id) {
+
+        Borrower borrower = borrowerRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Borrowing not found with id: " + id)
+                );
+
+        if (borrower.getStatus() != BorrowingStatus.RETURN_REQUESTED) {
+            throw new RuntimeException(
+                    "Only RETURN_REQUESTED borrowing can be rejected"
+            );
+        }
+
+        // Return request rejected.
+        // The book is still with the user.
+        // Therefore, quantity must NOT increase.
+        borrower.setStatus(BorrowingStatus.BORROWED);
+
+        return borrowerMapper.toResponse(
+                borrowerRepository.save(borrower)
         );
     }
 }
