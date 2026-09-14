@@ -28,6 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/fine/**").hasRole("ADMIN")
                         .requestMatchers("/api/borrowing/**").permitAll()
                         .requestMatchers("/api/notification/**").permitAll()
+                        .requestMatchers("/api/favorite/**").permitAll()
+                        .requestMatchers("/api/telegram/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().authenticated()
                 )

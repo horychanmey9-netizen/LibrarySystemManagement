@@ -1,13 +1,10 @@
 package com.example.LibraryBack.dto.request;
 
 import com.example.LibraryBack.enums.Status;
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -24,6 +21,5 @@ public class BookRequest {
     private String language;
     private String image;
     private Status status;
-    private String publicationYear;
 
 }

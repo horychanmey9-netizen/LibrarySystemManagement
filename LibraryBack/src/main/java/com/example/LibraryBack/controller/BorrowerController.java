@@ -168,16 +168,4 @@ public class BorrowerController {
                 borrowerService.acceptReturn(id)
         );
     }
-
-    @PutMapping("/reject-return/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<BorrowerResponse> rejectReturn(
-            @PathVariable Long id) {
-
-        return new ApiResponse<>(
-                "Return request rejected successfully",
-                200,
-                borrowerService.rejectReturn(id)
-        );
-    }
 }

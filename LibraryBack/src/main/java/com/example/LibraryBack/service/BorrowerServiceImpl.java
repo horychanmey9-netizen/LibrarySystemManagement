@@ -11,12 +11,12 @@ import com.example.LibraryBack.mapper.BorrowerMapper;
 import com.example.LibraryBack.repository.BookRepository;
 import com.example.LibraryBack.repository.BorrowerRepository;
 import com.example.LibraryBack.repository.UserRepository;
+import com.example.LibraryBack.telegram.TelegramNotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -27,6 +27,7 @@ public class BorrowerServiceImpl implements BorrowerService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final BorrowerMapper borrowerMapper;
+    private final TelegramNotificationService telegramNotificationService;
 
 
     // =========================================================
@@ -91,26 +92,10 @@ public class BorrowerServiceImpl implements BorrowerService {
         );
     }
     @Override
-    @Transactional
     public List<BorrowerResponse> getData() {
 
-        LocalDate today = LocalDate.now();
-
-        List<Borrower> borrowers = borrowerRepository.findAll();
-
-        for (Borrower borrower : borrowers) {
-
-            if (borrower.getStatus() == BorrowingStatus.BORROWED
-                    && borrower.getDueDate() != null
-                    && borrower.getDueDate().isBefore(today)) {
-
-                borrower.setStatus(BorrowingStatus.OVERDUE);
-            }
-        }
-
-        borrowerRepository.saveAll(borrowers);
-
-        return borrowers.stream()
+        return borrowerRepository.findAll()
+                .stream()
                 .map(borrowerMapper::toResponse)
                 .toList();
     }
@@ -146,69 +131,53 @@ public class BorrowerServiceImpl implements BorrowerService {
                                 )
                         );
 
-
         // Only PENDING can be accepted
-        if (borrower.getStatus()
-                != BorrowingStatus.PENDING) {
-
+        if (borrower.getStatus() != BorrowingStatus.PENDING) {
             throw new NotException(
                     "Only PENDING requests can be accepted"
             );
         }
 
-
         Book book = borrower.getBook();
 
-
         if (book == null) {
-
             throw new NotException(
                     "Book not found"
             );
         }
 
-
         // Check quantity again
         if (book.getQty() <= 0) {
-
             throw new NotException(
                     "Book is no longer available"
             );
         }
 
-
         // Decrease quantity ONLY when admin accepts
-        book.setQty(
-                book.getQty() - 1
-        );
+        book.setQty(book.getQty() - 1);
 
         bookRepository.save(book);
 
-
         // Change status
-        borrower.setStatus(
-                BorrowingStatus.BORROWED
-        );
-
+        borrower.setStatus(BorrowingStatus.BORROWED);
 
         // Make sure fine is not null
         if (borrower.getFine() == null) {
-
-            borrower.setFine(
-                    BigDecimal.ZERO
-            );
+            borrower.setFine(BigDecimal.ZERO);
         }
 
-
+        // Save borrowing
         Borrower updatedBorrower =
-                borrowerRepository.save(
-                        borrower
-                );
+                borrowerRepository.save(borrower);
 
-
-        return borrowerMapper.toResponse(
-                updatedBorrower
+        // Send Telegram notification
+        telegramNotificationService.sendBorrowAcceptedNotification(
+                borrower.getUser().getId(),
+                book.getTitle(),
+                borrower.getDueDate()
         );
+
+        return borrowerMapper.toResponse(updatedBorrower);
     }
 
     @Override
@@ -448,31 +417,6 @@ public class BorrowerServiceImpl implements BorrowerService {
 
         return borrowerMapper.toResponse(
                 updatedBorrower
-        );
-
-    }
-    @Override
-    @Transactional
-    public BorrowerResponse rejectReturn(Long id) {
-
-        Borrower borrower = borrowerRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Borrowing not found with id: " + id)
-                );
-
-        if (borrower.getStatus() != BorrowingStatus.RETURN_REQUESTED) {
-            throw new RuntimeException(
-                    "Only RETURN_REQUESTED borrowing can be rejected"
-            );
-        }
-
-        // Return request rejected.
-        // The book is still with the user.
-        // Therefore, quantity must NOT increase.
-        borrower.setStatus(BorrowingStatus.BORROWED);
-
-        return borrowerMapper.toResponse(
-                borrowerRepository.save(borrower)
         );
     }
 }
