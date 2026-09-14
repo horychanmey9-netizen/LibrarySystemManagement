@@ -1,4 +1,3 @@
-```vue
 <template>
 
   <div class="min-h-screen bg-slate-50 p-6">
@@ -73,8 +72,10 @@
           Pending
         </p>
 
-        <p class="text-2xl font-bold
-                  text-amber-600 mt-1">
+        <p
+          class="text-2xl font-bold
+                 text-amber-600 mt-1"
+        >
           {{ pendingCount }}
         </p>
 
@@ -93,8 +94,10 @@
           Borrowed
         </p>
 
-        <p class="text-2xl font-bold
-                  text-blue-600 mt-1">
+        <p
+          class="text-2xl font-bold
+                 text-blue-600 mt-1"
+        >
           {{ borrowedCount }}
         </p>
 
@@ -113,8 +116,10 @@
           Return Requests
         </p>
 
-        <p class="text-2xl font-bold
-                  text-purple-600 mt-1">
+        <p
+          class="text-2xl font-bold
+                 text-purple-600 mt-1"
+        >
           {{ returnRequestedCount }}
         </p>
 
@@ -133,8 +138,10 @@
           Returned
         </p>
 
-        <p class="text-2xl font-bold
-                  text-green-600 mt-1">
+        <p
+          class="text-2xl font-bold
+                 text-green-600 mt-1"
+        >
           {{ returnedCount }}
         </p>
 
@@ -153,8 +160,10 @@
           Rejected
         </p>
 
-        <p class="text-2xl font-bold
-                  text-red-600 mt-1">
+        <p
+          class="text-2xl font-bold
+                 text-red-600 mt-1"
+        >
           {{ rejectedCount }}
         </p>
 
@@ -215,7 +224,7 @@
             v-for="status in statuses"
             :key="status"
             type="button"
-            @click="selectedStatus = status"
+            @click="changeStatus(status)"
             class="px-4 py-2 rounded-lg
                    text-sm font-semibold"
             :class="
@@ -263,7 +272,9 @@
              shadow-sm overflow-hidden"
     >
 
-      <!-- LOADING -->
+      <!-- ===================================================
+           LOADING
+      ==================================================== -->
 
       <div
         v-if="loading"
@@ -285,7 +296,9 @@
       </div>
 
 
-      <!-- EMPTY -->
+      <!-- ===================================================
+           EMPTY
+      ==================================================== -->
 
       <div
         v-else-if="filteredBorrowings.length === 0"
@@ -307,7 +320,9 @@
       </div>
 
 
-      <!-- TABLE -->
+      <!-- ===================================================
+           TABLE
+      ==================================================== -->
 
       <div
         v-else
@@ -316,12 +331,18 @@
 
         <table class="w-full min-w-[1100px]">
 
+          <!-- =================================================
+               TABLE HEADER
+          ================================================== -->
+
           <thead
             class="bg-slate-50
                    border-b border-slate-200"
           >
 
             <tr>
+
+              <!-- BOOK -->
 
               <th
                 class="px-6 py-4 text-left
@@ -332,6 +353,9 @@
                 Book
               </th>
 
+
+              <!-- BORROWER -->
+
               <th
                 class="px-6 py-4 text-left
                        text-xs font-bold
@@ -340,6 +364,9 @@
               >
                 Borrower
               </th>
+
+
+              <!-- BORROW DATE -->
 
               <th
                 class="px-6 py-4 text-left
@@ -350,6 +377,9 @@
                 Borrow Date
               </th>
 
+
+              <!-- DUE DATE -->
+
               <th
                 class="px-6 py-4 text-left
                        text-xs font-bold
@@ -359,6 +389,9 @@
                 Due Date
               </th>
 
+
+              <!-- STATUS -->
+
               <th
                 class="px-6 py-4 text-left
                        text-xs font-bold
@@ -367,6 +400,9 @@
               >
                 Status
               </th>
+
+
+              <!-- ACTION -->
 
               <th
                 class="px-6 py-4 text-right
@@ -382,21 +418,29 @@
           </thead>
 
 
+          <!-- =================================================
+               TABLE BODY
+          ================================================== -->
+
           <tbody
             class="divide-y divide-slate-100"
           >
 
             <tr
-              v-for="item in filteredBorrowings"
+              v-for="item in visibleBorrowings"
               :key="item.id"
               class="hover:bg-slate-50"
             >
 
-              <!-- BOOK -->
+              <!-- =================================================
+                   BOOK
+              ================================================== -->
 
               <td class="px-6 py-4">
 
-                <div class="flex items-center gap-3">
+                <div
+                  class="flex items-center gap-3"
+                >
 
                   <div
                     class="w-12 h-14
@@ -445,7 +489,9 @@
               </td>
 
 
-              <!-- USER -->
+              <!-- =================================================
+                   USER
+              ================================================== -->
 
               <td class="px-6 py-4">
 
@@ -467,7 +513,9 @@
               </td>
 
 
-              <!-- BORROW DATE -->
+              <!-- =================================================
+                   BORROW DATE
+              ================================================== -->
 
               <td
                 class="px-6 py-4
@@ -480,7 +528,9 @@
               </td>
 
 
-              <!-- DUE DATE -->
+              <!-- =================================================
+                   DUE DATE
+              ================================================== -->
 
               <td
                 class="px-6 py-4
@@ -493,7 +543,9 @@
               </td>
 
 
-              <!-- STATUS -->
+              <!-- =================================================
+                   STATUS
+              ================================================== -->
 
               <td class="px-6 py-4">
 
@@ -515,13 +567,15 @@
               </td>
 
 
-              <!-- ACTION -->
+              <!-- =================================================
+                   ACTION
+              ================================================== -->
 
               <td class="px-6 py-4">
 
-                <!-- ==============================
+                <!-- =============================================
                      PENDING
-                =============================== -->
+                ============================================== -->
 
                 <div
                   v-if="
@@ -605,9 +659,9 @@
                 </div>
 
 
-                <!-- ==============================
+                <!-- =============================================
                      RETURN REQUESTED
-                =============================== -->
+                ============================================== -->
 
                 <div
                   v-else-if="
@@ -615,8 +669,12 @@
                       .toUpperCase() ===
                     'RETURN_REQUESTED'
                   "
-                  class="flex justify-end"
+                  class="flex
+                         justify-end
+                         gap-2"
                 >
+
+                  <!-- ACCEPT RETURN -->
 
                   <button
                     type="button"
@@ -644,7 +702,43 @@
                     </span>
 
                     <span v-else>
-                      ✓ Accept Return
+                      ✓ Accept
+                    </span>
+
+                  </button>
+
+
+                  <!-- REJECT RETURN -->
+
+                  <button
+                    type="button"
+                    @click="rejectReturn(item)"
+                    :disabled="
+                      processingId === item.id
+                    "
+                    class="px-3 py-2
+                           rounded-lg
+                           bg-red-50
+                           text-red-600
+                           border
+                           border-red-200
+                           text-sm
+                           font-semibold
+                           hover:bg-red-100
+                           disabled:opacity-50"
+                  >
+
+                    <span
+                      v-if="
+                        processingId === item.id &&
+                        processingAction === 'reject-return'
+                      "
+                    >
+                      Rejecting...
+                    </span>
+
+                    <span v-else>
+                      ✕ Reject
                     </span>
 
                   </button>
@@ -652,9 +746,9 @@
                 </div>
 
 
-                <!-- ==============================
+                <!-- =============================================
                      NO ACTION
-                =============================== -->
+                ============================================== -->
 
                 <div
                   v-else
@@ -677,6 +771,62 @@
 
       </div>
 
+
+      <!-- =====================================================
+           SHOW MORE
+      ====================================================== -->
+
+      <div
+        v-if="hasMoreBorrowings"
+        class="flex justify-center
+               items-center
+               py-5
+               border-t border-slate-100"
+      >
+
+        <button
+          type="button"
+          @click="showMore"
+          class="px-5 py-2.5
+                 rounded-xl
+                 bg-white
+                 border border-slate-200
+                 text-slate-700
+                 font-semibold
+                 text-sm
+                 hover:bg-slate-50
+                 transition"
+        >
+
+          <span>
+            + Show More
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <!-- =====================================================
+           ALL LOADED
+      ====================================================== -->
+
+      <div
+        v-else-if="filteredBorrowings.length > 20"
+        class="flex justify-center
+               items-center
+               gap-2
+               py-5
+               border-t border-slate-100
+               text-sm text-slate-400"
+      >
+
+        <span>
+          ✓ All borrowing records loaded
+        </span>
+
+      </div>
+
     </div>
 
   </div>
@@ -690,7 +840,8 @@ import {
   getBorrowings,
   acceptBorrowing,
   rejectBorrowing,
-  acceptReturn
+  acceptReturn,
+  rejectReturn
 } from "../../service/borrowingService.js";
 
 
@@ -713,12 +864,20 @@ export default {
 
       selectedStatus: "ALL",
 
+      // =================================================
+      // SHOW MORE
+      // =================================================
+
+      displayLimit: 20,
+
+      loadAmount: 20,
+
       statuses: [
         "ALL",
         "PENDING",
         "BORROWED",
         "RETURN_REQUESTED",
-        "LATE",
+        "OVERDUE",
         "RETURNED",
         "REJECTED"
       ],
@@ -735,7 +894,7 @@ export default {
   computed: {
 
     // ===================================================
-    // PENDING
+    // PENDING COUNT
     // ===================================================
 
     pendingCount() {
@@ -750,7 +909,7 @@ export default {
 
 
     // ===================================================
-    // BORROWED
+    // BORROWED COUNT
     // ===================================================
 
     borrowedCount() {
@@ -765,7 +924,7 @@ export default {
 
 
     // ===================================================
-    // RETURN REQUESTED
+    // RETURN REQUESTED COUNT
     // ===================================================
 
     returnRequestedCount() {
@@ -781,7 +940,7 @@ export default {
 
 
     // ===================================================
-    // RETURNED
+    // RETURNED COUNT
     // ===================================================
 
     returnedCount() {
@@ -796,7 +955,7 @@ export default {
 
 
     // ===================================================
-    // REJECTED
+    // REJECTED COUNT
     // ===================================================
 
     rejectedCount() {
@@ -822,58 +981,123 @@ export default {
           .toLowerCase();
 
 
-      return this.borrowings.filter(
-        item => {
+      const filtered =
+        this.borrowings.filter(
+          item => {
 
-          const status =
-            String(
-              item.status || ""
-            ).toUpperCase();
+            const status =
+              String(
+                item.status || ""
+              ).toUpperCase();
 
 
-          if (
-            this.selectedStatus !== "ALL" &&
-            status !== this.selectedStatus
-          ) {
+            // STATUS FILTER
 
-            return false;
+            if (
+              this.selectedStatus !== "ALL" &&
+              status !== this.selectedStatus
+            ) {
+
+              return false;
+
+            }
+
+
+            // NO SEARCH
+
+            if (!keyword) {
+
+              return true;
+
+            }
+
+
+            // BOOK
+
+            const book =
+              this.getBookTitle(item)
+                .toLowerCase();
+
+
+            // USER
+
+            const user =
+              this.getUserName(item)
+                .toLowerCase();
+
+
+            return (
+              book.includes(keyword) ||
+              user.includes(keyword) ||
+              String(item.bookId)
+                .includes(keyword) ||
+              String(item.userId)
+                .includes(keyword)
+            );
 
           }
+        );
 
 
-          if (!keyword) {
+      // =================================================
+      // NEWEST FIRST
+      // =================================================
 
-            return true;
+      return filtered.sort(
+        (a, b) => {
 
-          }
+          const dateA =
+            new Date(
+              a.borrowDate || 0
+            ).getTime();
+
+          const dateB =
+            new Date(
+              b.borrowDate || 0
+            ).getTime();
 
 
-          const book =
-            this.getBookTitle(item)
-              .toLowerCase();
-
-
-          const user =
-            this.getUserName(item)
-              .toLowerCase();
-
-
-          return (
-            book.includes(keyword) ||
-            user.includes(keyword) ||
-            String(item.bookId)
-              .includes(keyword) ||
-            String(item.userId)
-              .includes(keyword)
-          );
+          return dateB - dateA;
 
         }
+      );
+
+    },
+
+
+    // ===================================================
+    // VISIBLE BORROWINGS
+    // ===================================================
+
+    visibleBorrowings() {
+
+      return this.filteredBorrowings.slice(
+        0,
+        this.displayLimit
+      );
+
+    },
+
+
+    // ===================================================
+    // HAS MORE
+    // ===================================================
+
+    hasMoreBorrowings() {
+
+      return (
+        this.displayLimit <
+        this.filteredBorrowings.length
       );
 
     }
 
   },
 
+
+  // =====================================================
+  // MOUNTED
+  // =====================================================
 
   mounted() {
 
@@ -885,7 +1109,7 @@ export default {
   methods: {
 
     // =================================================
-    // LOAD
+    // LOAD BORROWINGS
     // =================================================
 
     async loadBorrowings() {
@@ -928,6 +1152,11 @@ export default {
         }
 
 
+        // Reset to first 20
+
+        this.displayLimit = 20;
+
+
       } catch (error) {
 
         console.error(
@@ -946,6 +1175,34 @@ export default {
           false;
 
       }
+
+    },
+
+
+    // =================================================
+    // SHOW MORE
+    // =================================================
+
+    showMore() {
+
+      this.displayLimit +=
+        this.loadAmount;
+
+    },
+
+
+    // =================================================
+    // CHANGE STATUS
+    // =================================================
+
+    changeStatus(status) {
+
+      this.selectedStatus =
+        status;
+
+      // Reset to first 20
+
+      this.displayLimit = 20;
 
     },
 
@@ -992,9 +1249,6 @@ export default {
           item.id
         );
 
-
-        // No success alert.
-        // Reload data after successful request.
 
         await this.loadBorrowings();
 
@@ -1067,8 +1321,6 @@ export default {
         );
 
 
-        // No success alert.
-
         await this.loadBorrowings();
 
 
@@ -1140,16 +1392,6 @@ export default {
         );
 
 
-        // IMPORTANT:
-        // Do NOT show success alert.
-        // Backend should change:
-        //
-        // RETURN_REQUESTED
-        //        ↓
-        // RETURNED
-        //
-        // and increase book quantity.
-
         await this.loadBorrowings();
 
 
@@ -1164,6 +1406,77 @@ export default {
         this.error =
           error?.message ||
           "Failed to accept return.";
+
+      } finally {
+
+        this.processingId =
+          null;
+
+        this.processingAction =
+          "";
+
+      }
+
+    },
+
+
+    // =================================================
+    // REJECT RETURN
+    // =================================================
+
+    async rejectReturn(item) {
+
+      if (!item?.id) {
+
+        return;
+
+      }
+
+
+      const confirmed =
+        window.confirm(
+          `Reject return of "${this.getBookTitle(item)}"?\n\nThe borrowing will remain active.`
+        );
+
+
+      if (!confirmed) {
+
+        return;
+
+      }
+
+
+      this.processingId =
+        item.id;
+
+      this.processingAction =
+        "reject-return";
+
+      this.error =
+        "";
+
+
+      try {
+
+        await rejectReturn(
+          item.id
+        );
+
+
+        await this.loadBorrowings();
+
+
+      } catch (error) {
+
+        console.error(
+          "Reject return error:",
+          error
+        );
+
+
+        this.error =
+          error?.message ||
+          "Failed to reject return.";
 
       } finally {
 
@@ -1268,7 +1581,7 @@ export default {
 
 
     // =================================================
-    // STATUS
+    // STATUS CLASS
     // =================================================
 
     statusClass(status) {
@@ -1294,7 +1607,7 @@ export default {
           return "bg-purple-50 text-purple-700";
 
 
-        case "LATE":
+        case "OVERDUE":
 
           return "bg-orange-50 text-orange-700";
 
@@ -1322,28 +1635,3 @@ export default {
 };
 
 </script>
-```
-
-### One important thing
-
-This `Borrowing.vue` expects your service to have:
-
-```js
-acceptReturn(id)
-```
-
-So your `borrowingService.js` needs an API function for the admin to accept the return.
-
-The important statuses are now:
-
-```text
-PENDING
-   ↓ Accept
-BORROWED
-   ↓ User clicks Return Book
-RETURN_REQUESTED
-   ↓ Admin clicks Accept Return
-RETURNED
-```
-
-So **the user will not see `RETURNED` until the admin accepts the return**. This is different from your current `MyBorrowings.vue`, where `handleReturn()` directly sets `book.status = "RETURNED"`.

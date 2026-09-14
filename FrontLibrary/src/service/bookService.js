@@ -7,36 +7,51 @@ const API_URL = "http://localhost:8080/api/book";
 
 export async function getBooks() {
 
-  const token = sessionStorage.getItem("token");
+  const token =
+    sessionStorage.getItem("token");
 
-  const response = await fetch(
-    API_URL,
-    {
-      method: "GET",
 
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
+  const response =
+    await fetch(
+      API_URL,
+      {
+        method: "GET",
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`,
+
+          "Content-Type":
+            "application/json"
+        }
       }
-    }
-  );
+    );
+
 
   let result = null;
+
 
   try {
 
     const contentType =
-      response.headers.get("content-type");
+      response.headers.get(
+        "content-type"
+      );
+
 
     if (
-      contentType?.includes("application/json")
+      contentType?.includes(
+        "application/json"
+      )
     ) {
 
-      result = await response.json();
+      result =
+        await response.json();
 
     } else {
 
-      result = await response.text();
+      result =
+        await response.text();
 
     }
 
@@ -50,11 +65,15 @@ export async function getBooks() {
   if (!response.ok) {
 
     throw new Error(
+
       typeof result === "string"
+
         ? result
+
         : result?.message ||
           result?.msg ||
           `Failed to fetch books (${response.status})`
+
     );
 
   }
@@ -66,13 +85,15 @@ export async function getBooks() {
   );
 
 
-  // Backend:
+  // ===================================================
+  // BACKEND:
   //
   // {
   //   msg: "...",
   //   status: 200,
   //   data: [...]
   // }
+  // ===================================================
 
 
   if (Array.isArray(result)) {
@@ -93,6 +114,50 @@ export async function getBooks() {
 
 
   return [];
+
+}
+
+// =====================================================
+// REJECT RETURN
+// =====================================================
+
+export async function rejectReturn(id) {
+
+  const token =
+    sessionStorage.getItem("token");
+
+
+  const response =
+    await fetch(
+      `${API_URL}/reject-return/${id}`,
+      {
+        method: "PUT",
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`,
+
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  if (!response.ok) {
+
+    const message =
+      await response.text();
+
+    throw new Error(
+      message ||
+      "Failed to reject return."
+    );
+
+  }
+
+
+  return response.json();
 
 }
 
@@ -161,11 +226,15 @@ export async function getBookById(id) {
   if (!response.ok) {
 
     throw new Error(
+
       typeof result === "string"
+
         ? result
+
         : result?.message ||
           result?.msg ||
           `Failed to fetch book (${response.status})`
+
     );
 
   }
@@ -187,13 +256,6 @@ export async function getBookById(id) {
 
 // =====================================================
 // CREATE BOOK
-// IMPORTANT:
-// AddBook.vue calls:
-//
-// createBook(bookRequest, imageFile.value)
-//
-// So this function MUST accept imageFile
-// as the second parameter.
 // =====================================================
 
 export async function createBook(
@@ -251,9 +313,6 @@ export async function createBook(
 
   // ===================================================
   // CATEGORY
-  // Backend expects:
-  //
-  // private Long categoryId;
   // ===================================================
 
   if (
@@ -272,9 +331,6 @@ export async function createBook(
 
   // ===================================================
   // QUANTITY
-  // Backend expects:
-  //
-  // private Integer qty;
   // ===================================================
 
   formData.append(
@@ -300,6 +356,35 @@ export async function createBook(
     formData.append(
       "pages",
       String(book.pages)
+    );
+
+  }
+
+
+  // ===================================================
+  // PUBLICATION YEAR
+  //
+  // Date picker gives:
+  //
+  // 2026-09-10
+  //
+  // Backend String:
+  //
+  // 2026-09-10
+  //
+  // IMPORTANT:
+  // Do NOT use substring(0, 4)
+  // ===================================================
+
+  if (
+    book.publicationYear !== null &&
+    book.publicationYear !== undefined &&
+    book.publicationYear !== ""
+  ) {
+
+    formData.append(
+      "publicationYear",
+      String(book.publicationYear)
     );
 
   }
@@ -335,17 +420,6 @@ export async function createBook(
 
   // ===================================================
   // IMAGE
-  //
-  // IMPORTANT:
-  // Backend expects:
-  //
-  // @RequestParam(
-  //   value = "file",
-  //   required = false
-  // )
-  // MultipartFile file
-  //
-  // Therefore FormData key MUST be "file".
   // ===================================================
 
   if (
@@ -433,11 +507,9 @@ export async function createBook(
 
         headers: {
 
-          // DO NOT SET Content-Type HERE.
-          //
-          // Browser automatically creates:
-          // multipart/form-data; boundary=...
-          //
+          // DO NOT SET Content-Type
+          // Browser creates multipart boundary
+
           "Authorization":
             `Bearer ${token}`
 
@@ -450,7 +522,7 @@ export async function createBook(
 
 
   // ===================================================
-  // READ RESPONSE
+  // RESPONSE
   // ===================================================
 
   let result = null;
@@ -505,6 +577,15 @@ export async function createBook(
     console.error(
       "CREATE BOOK BACKEND ERROR:",
       result
+    );
+
+    console.error(
+      "CREATE BOOK BACKEND ERROR JSON:",
+      JSON.stringify(
+        result,
+        null,
+        2
+      )
     );
 
     console.error(
@@ -658,6 +739,35 @@ export async function updateBook(
 
 
   // ===================================================
+  // PUBLICATION YEAR
+  //
+  // Date picker gives:
+  //
+  // 2026-09-10
+  //
+  // Backend String:
+  //
+  // 2026-09-10
+  //
+  // IMPORTANT:
+  // Do NOT use substring(0, 4)
+  // ===================================================
+
+  if (
+    book.publicationYear !== null &&
+    book.publicationYear !== undefined &&
+    book.publicationYear !== ""
+  ) {
+
+    formData.append(
+      "publicationYear",
+      String(book.publicationYear)
+    );
+
+  }
+
+
+  // ===================================================
   // LANGUAGE
   // ===================================================
 
@@ -673,7 +783,7 @@ export async function updateBook(
 
   // ===================================================
   // STATUS
-  // ===================================================
+  // =====================================================
 
   if (book.status) {
 
@@ -688,7 +798,7 @@ export async function updateBook(
   // ===================================================
   // IMAGE
   //
-  // Only append if a NEW image is selected.
+  // Only send when user selects new image
   // ===================================================
 
   if (
@@ -753,6 +863,12 @@ export async function updateBook(
 
 
   console.log(
+    "TOKEN EXISTS:",
+    !!token
+  );
+
+
+  console.log(
     "=========================================="
   );
 
@@ -768,6 +884,9 @@ export async function updateBook(
         method: "PUT",
 
         headers: {
+
+          // DO NOT SET Content-Type
+          // Browser creates multipart boundary
 
           "Authorization":
             `Bearer ${token}`
@@ -825,14 +944,30 @@ export async function updateBook(
   if (!response.ok) {
 
     console.error(
+      "=========================================="
+    );
+
+    console.error(
       "UPDATE BOOK STATUS:",
       response.status
     );
 
-
     console.error(
       "UPDATE BOOK BACKEND ERROR:",
       result
+    );
+
+    console.error(
+      "UPDATE BOOK BACKEND ERROR JSON:",
+      JSON.stringify(
+        result,
+        null,
+        2
+      )
+    );
+
+    console.error(
+      "=========================================="
     );
 
 
@@ -856,8 +991,16 @@ export async function updateBook(
   // ===================================================
 
   console.log(
+    "=========================================="
+  );
+
+  console.log(
     "UPDATE BOOK SUCCESS:",
     result
+  );
+
+  console.log(
+    "=========================================="
   );
 
 
@@ -947,10 +1090,18 @@ export async function deleteBookById(
       response.status
     );
 
-
     console.error(
       "DELETE BOOK ERROR:",
       result
+    );
+
+    console.error(
+      "DELETE BOOK ERROR JSON:",
+      JSON.stringify(
+        result,
+        null,
+        2
+      )
     );
 
 
@@ -986,11 +1137,6 @@ export async function deleteBookById(
 
 // =====================================================
 // ALIAS
-// If another file imports:
-//
-// deleteBook()
-//
-// it will still work.
 // =====================================================
 
 export async function deleteBook(

@@ -45,13 +45,60 @@
          BOOK TABLE
     ====================================================== -->
 
-    <BookTable
+    <template
       v-else-if="currentView === 'list'"
-      :books="books"
-      @add-book="openAddBook"
-      @edit-book="openEditBook"
-      @delete-book="deleteBook"
-    />
+    >
+
+      <BookTable
+        :books="visibleBooks"
+        @add-book="openAddBook"
+        @edit-book="openEditBook"
+        @delete-book="deleteBook"
+      />
+
+
+      <!-- ===================================================
+           SHOW MORE
+      ==================================================== -->
+
+      <div
+        v-if="hasMoreBooks"
+        class="show-more-container"
+      >
+
+        <button
+          type="button"
+          class="show-more-button"
+          @click="showMore"
+        >
+
+          <i class="bi bi-plus-lg"></i>
+
+          Show More
+
+        </button>
+
+      </div>
+
+
+      <!-- ===================================================
+           ALL BOOKS LOADED
+      ==================================================== -->
+
+      <div
+        v-else-if="books.length > 20"
+        class="all-loaded"
+      >
+
+        <i class="bi bi-check-circle"></i>
+
+        <span>
+          All books loaded
+        </span>
+
+      </div>
+
+    </template>
 
 
     <!-- =====================================================
@@ -85,6 +132,7 @@
 
 import {
   ref,
+  computed,
   onMounted
 } from "vue";
 
@@ -130,6 +178,49 @@ const books = ref([]);
 
 
 // =====================================================
+// DISPLAY LIMIT
+// =====================================================
+
+// Show 20 books first
+
+const displayLimit = ref(20);
+
+
+// How many books to load each time
+
+const loadAmount = 20;
+
+
+// =====================================================
+// VISIBLE BOOKS
+// =====================================================
+
+// Only send the current visible books
+// to BookTable
+
+const visibleBooks = computed(() => {
+
+  return books.value.slice(
+    0,
+    displayLimit.value
+  );
+
+});
+
+
+// =====================================================
+// HAS MORE BOOKS
+// =====================================================
+
+const hasMoreBooks = computed(() => {
+
+  return displayLimit.value <
+    books.value.length;
+
+});
+
+
+// =====================================================
 // SELECTED BOOK
 // =====================================================
 
@@ -148,6 +239,17 @@ const loading = ref(false);
 // =====================================================
 
 const errorMessage = ref("");
+
+
+// =====================================================
+// SHOW MORE
+// =====================================================
+
+function showMore() {
+
+  displayLimit.value += loadAmount;
+
+}
 
 
 // =====================================================
@@ -171,9 +273,16 @@ async function fetchBooks() {
 
 
     // ===================================================
+    // RESET DISPLAY LIMIT
+    // ===================================================
+
+    displayLimit.value = 20;
+
+
+    // ===================================================
     // BACKEND RESPONSE
     //
-    // { 
+    // {
     //   status: 200,
     //   data: [...]
     // }
@@ -192,6 +301,7 @@ async function fetchBooks() {
     }
 
     // If backend directly returns array
+
     else if (
       Array.isArray(response)
     ) {
@@ -209,7 +319,8 @@ async function fetchBooks() {
 
       id: book.id,
 
-      title: book.title || "",
+      title:
+        book.title || "",
 
       description:
         book.description || "",
@@ -221,10 +332,12 @@ async function fetchBooks() {
         book.isbn || "",
 
       // Backend uses qty
+
       quantity:
         book.qty ?? 0,
 
       // Keep original qty too
+
       qty:
         book.qty ?? 0,
 
@@ -241,10 +354,12 @@ async function fetchBooks() {
         book.image || "",
 
       // Backend Category object
+
       category:
         book.category || null,
 
       // Useful for edit/filter
+
       categoryId:
         book.category?.id ?? null,
 
@@ -252,6 +367,43 @@ async function fetchBooks() {
         book.category?.name || ""
 
     }));
+
+
+    // ===================================================
+    // NEWEST BOOKS FIRST
+    // ===================================================
+    //
+    // If backend provides createdAt,
+    // newest books will appear first.
+    //
+    // If createdAt is not available,
+    // keep backend order.
+    // ===================================================
+
+    books.value.sort((a, b) => {
+
+      const dateA =
+        new Date(
+          a.createdAt || 0
+        ).getTime();
+
+      const dateB =
+        new Date(
+          b.createdAt || 0
+        ).getTime();
+
+      if (
+        dateA === 0 &&
+        dateB === 0
+      ) {
+
+        return 0;
+
+      }
+
+      return dateB - dateA;
+
+    });
 
 
     console.log(
@@ -360,6 +512,7 @@ function openEditBook(bookId) {
 
 
   // Copy book
+
   selectedBook.value = {
     ...book
   };
@@ -420,36 +573,57 @@ async function handleBookUpdated(updatedBook) {
 async function deleteBook(bookId) {
 
   const book = books.value.find(
-    item => Number(item.id) === Number(bookId)
+    item =>
+      Number(item.id) ===
+      Number(bookId)
   );
 
+
   if (!book) {
-    alert("Book not found.");
+
+    alert(
+      "Book not found."
+    );
+
     return;
+
   }
 
 
-  const confirmed = window.confirm(
-    `Are you sure you want to delete "${book.title}"?`
-  );
+  const confirmed =
+    window.confirm(
+      `Are you sure you want to delete "${book.title}"?`
+    );
+
 
   if (!confirmed) {
+
     return;
+
   }
 
 
   try {
 
-    await deleteBookById(bookId);
-
-
-    // Remove from frontend after backend success
-    books.value = books.value.filter(
-      item => Number(item.id) !== Number(bookId)
+    await deleteBookById(
+      bookId
     );
 
 
-    alert("Book deleted successfully.");
+    // Remove from frontend
+    // after backend success
+
+    books.value =
+      books.value.filter(
+        item =>
+          Number(item.id) !==
+          Number(bookId)
+      );
+
+
+    alert(
+      "Book deleted successfully."
+    );
 
 
   } catch (error) {
@@ -536,11 +710,17 @@ onMounted(() => {
 @keyframes spin {
 
   from {
-    transform: rotate(0deg);
+
+    transform:
+      rotate(0deg);
+
   }
 
   to {
-    transform: rotate(360deg);
+
+    transform:
+      rotate(360deg);
+
   }
 
 }
@@ -586,11 +766,113 @@ onMounted(() => {
 
   border-radius: 7px;
 
-  background: #5b3df5;
+  background:
+    #5b3df5;
 
   color: white;
 
   cursor: pointer;
+
+}
+
+
+/* =====================================================
+   SHOW MORE
+===================================================== */
+
+.show-more-container {
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 25px 0 10px;
+
+}
+
+
+.show-more-button {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  min-width: 140px;
+
+  padding: 10px 20px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 8px;
+
+  background: white;
+
+  color: #344054;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    all 0.2s ease;
+
+}
+
+
+.show-more-button:hover {
+
+  background:
+    #f9fafb;
+
+  border-color:
+    #98a2b3;
+
+}
+
+
+.show-more-button i {
+
+  font-size: 14px;
+
+}
+
+
+/* =====================================================
+   ALL LOADED
+===================================================== */
+
+.all-loaded {
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 25px 0 10px;
+
+  color: #98a2b3;
+
+  font-size: 14px;
+
+}
+
+
+.all-loaded i {
+
+  font-size: 15px;
+
+  color: #12b76a;
 
 }
 
