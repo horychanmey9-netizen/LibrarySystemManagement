@@ -12,6 +12,5 @@ public class TelegramAccountRequest {
     private Long chatId;
     private Long telegramUserId;
     private String username;
-    private String fullname;
     private Long userId;
 }

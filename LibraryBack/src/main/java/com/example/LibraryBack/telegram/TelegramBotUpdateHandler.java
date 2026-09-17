@@ -13,66 +13,90 @@ public class TelegramBotUpdateHandler {
     public void handleUpdate(
             Long chatId,
             String username,
-            String text) {
+            String text
+    ) {
 
-        if (text == null || text.isBlank()) {
+        if (chatId == null || text == null) {
             return;
         }
 
-        if (text.startsWith("/start")) {
+        System.out.println("========== TELEGRAM MESSAGE ==========");
+        System.out.println("Chat ID: " + chatId);
+        System.out.println("Username: " + username);
+        System.out.println("Text: " + text);
+        System.out.println("======================================");
 
-            handleStartCommand(
+        /*
+         * /start
+         */
+        if (text.equals("/start")) {
+
+            telegramBotService.sendMessage(
                     chatId,
-                    username,
-                    text
+                    "Welcome to My Library System Bot!\n\n"
+                            + "Please generate a connection code "
+                            + "from the Library System and send it here."
             );
 
             return;
         }
 
+        /*
+         * /start CODE
+         */
+        if (text.startsWith("/start ")) {
+
+            String code = text.substring(7).trim();
+
+            if (code.isBlank()) {
+
+                telegramBotService.sendMessage(
+                        chatId,
+                        "Please provide a valid connection code."
+                );
+
+                return;
+            }
+
+            try {
+
+                connectionService.connectTelegram(
+                        code,
+                        chatId,
+                        username
+                );
+
+                telegramBotService.sendMessage(
+                        chatId,
+                        "Your Telegram account has been connected "
+                                + "successfully to your Library account."
+                );
+
+            } catch (Exception e) {
+
+                System.out.println(
+                        "Telegram connection failed: "
+                                + e.getMessage()
+                );
+
+                telegramBotService.sendMessage(
+                        chatId,
+                        "Connection failed. "
+                                + "Please check your connection code "
+                                + "and try again."
+                );
+            }
+
+            return;
+        }
+
+        /*
+         * Unknown command
+         */
         telegramBotService.sendMessage(
                 chatId,
-                "Welcome to the Library System Bot!\n\n"
-                        + "To connect your Telegram account, "
-                        + "please use the Connect Telegram button "
-                        + "in the Library System."
+                "I don't understand that command.\n\n"
+                        + "Please use /start."
         );
-    }
-
-    private void handleStartCommand(
-            Long chatId,
-            String username,
-            String text) {
-
-        String[] parts = text.split("\\s+", 2);
-
-        // User just pressed Start without a connection code
-        if (parts.length < 2 || parts[1].isBlank()) {
-
-            telegramBotService.sendMessage(
-                    chatId,
-                    "Welcome to the Library System!\n\n"
-                            + "Please open your Library System account "
-                            + "and click \"Connect Telegram\"."
-            );
-
-            return;
-        }
-
-        String code = parts[1].trim();
-
-        try {
-            connectionService.connectTelegram(code, chatId, username);
-            telegramBotService.sendMessage(chatId,
-                    "Telegram connected successfully!\n\n"
-                            + "You will now receive library notifications "
-                            + "through Telegram."
-            );
-
-        } catch (RuntimeException e) {
-            telegramBotService.sendMessage(
-                    chatId,e.getMessage()
-            );
-        }
     }
 }

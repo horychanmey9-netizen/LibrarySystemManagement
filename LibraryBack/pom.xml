@@ -46,7 +46,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.telegram</groupId>
-			<artifactId>telegrambots-springboot-longpolling-starter</artifactId>
+			<artifactId>telegrambots-springboot-webhook-starter</artifactId>
+			<version>10.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots-client</artifactId>
 			<version>10.3.0</version>
 		</dependency>
 

@@ -1,5 +1,6 @@
 package com.example.LibraryBack.controller;
 
+import com.example.LibraryBack.config.TelegramConfig;
 import com.example.LibraryBack.dto.response.TelegramConnectionResponse;
 import com.example.LibraryBack.dto.response.TelegramStatusResponse;
 import com.example.LibraryBack.entity.TelegramAccount;
@@ -20,6 +21,7 @@ public class TelegramAccountController {
     private final TelegramConnectionService connectionService;
     private final TelegramAccountRepository telegramAccountRepository;
     private final UserRepository userRepository;
+    private final TelegramConfig telegramConfig;
 
     @PostMapping("/connect")
     public TelegramConnectionResponse generateConnectionCode(
@@ -27,9 +29,21 @@ public class TelegramAccountController {
 
         User user = getCurrentUser(authentication);
 
-        return connectionService.generateConnectionCode(
+        String connectionCode = connectionService.generateConnectionCode(
                 user.getId()
         );
+
+        String botUsername = telegramConfig.getBotUsername();
+
+        String telegramLink = "https://t.me/" + botUsername
+                + "?start=" + connectionCode;
+
+        return TelegramConnectionResponse.builder()
+                .code(connectionCode)
+                .botUsername(botUsername)
+                .telegramLink(telegramLink)
+                .message("Open Telegram and click the link to connect your account.")
+                .build();
     }
 
     @GetMapping("/status")

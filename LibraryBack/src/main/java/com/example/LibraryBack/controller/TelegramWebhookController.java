@@ -1,11 +1,10 @@
 package com.example.LibraryBack.controller;
 
-import com.example.LibraryBack.dto.telegram.TelegramMessage;
-import com.example.LibraryBack.dto.telegram.TelegramUpdate;
 import com.example.LibraryBack.telegram.TelegramBotUpdateHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.databind.JsonNode;
 
 @RestController
 @RequestMapping("/api/telegram")
@@ -16,39 +15,57 @@ public class TelegramWebhookController {
 
     @PostMapping("/webhook")
     public ResponseEntity<Void> receiveUpdate(
-            @RequestBody TelegramUpdate update) {
+            @RequestBody JsonNode update
+    ) {
 
-        if (update == null || update.getMessage() == null) {
+        System.out.println("========== TELEGRAM WEBHOOK ==========");
+
+        JsonNode message = update.get("message");
+
+        if (message == null) {
             return ResponseEntity.ok().build();
         }
 
-        TelegramMessage message = update.getMessage();
+        JsonNode from = message.get("from");
+        JsonNode chat = message.get("chat");
+        JsonNode text = message.get("text");
 
-        if (message.getChat() == null) {
+        if (chat == null || text == null) {
             return ResponseEntity.ok().build();
         }
 
-        Long chatId = message.getChat().getId();
+        Long chatId = chat.path("id").asLong();
 
         String username = null;
 
-        if (message.getFrom() != null) {
-            username = message.getFrom().getUsername();
+        if (from != null) {
+            username = from.path("username").asText(null);
         }
 
-        String text = message.getText();
+        String messageText = text.asText();
 
-        System.out.println("===== TELEGRAM WEBHOOK =====");
-        System.out.println("Chat ID: " + chatId);
+        System.out.println("Telegram User ID: "
+                + (from != null ? from.path("id").asLong() : null));
+
         System.out.println("Username: " + username);
-        System.out.println("Text: " + text);
+        System.out.println("Chat ID: " + chatId);
+        System.out.println("Message: " + messageText);
+
+        System.out.println("======================================");
 
         updateHandler.handleUpdate(
                 chatId,
                 username,
-                text
+                messageText
         );
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/webhook")
+    public ResponseEntity<String> testWebhook() {
+        return ResponseEntity.ok(
+                "Telegram webhook endpoint is working"
+        );
     }
 }

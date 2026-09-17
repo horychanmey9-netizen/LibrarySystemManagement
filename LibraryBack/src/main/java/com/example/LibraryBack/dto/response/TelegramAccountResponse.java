@@ -13,7 +13,6 @@ public class TelegramAccountResponse {
     private Long chatId;
     private Long telegramUserId;
     private String username;
-    private String fullName;
     private Boolean active;
     private Long userId;
     private LocalDateTime createdAt;

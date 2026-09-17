@@ -24,8 +24,8 @@ public class TelegramConnectionCode {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    @Column(name = "expires_at", nullable = false)
+    private LocalDateTime expiryDate;
 
     @Builder.Default
     @Column(nullable = false)

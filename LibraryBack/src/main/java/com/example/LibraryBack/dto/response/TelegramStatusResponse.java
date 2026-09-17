@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TelegramStatusResponse {
-
     private boolean connected;
     private Long chatId;
     private String username;
