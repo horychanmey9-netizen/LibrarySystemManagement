@@ -63,11 +63,14 @@ const sidebarOpen = ref(false);
 
 @media (max-width: 1023px) {
   .layout-wrapper {
-    display: block;
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
   }
 
-  .main-content {
-    padding: 1rem;
+  .main-area {
+    width: 100%;
+    min-width: 0;
   }
 
   .mobile-overlay {

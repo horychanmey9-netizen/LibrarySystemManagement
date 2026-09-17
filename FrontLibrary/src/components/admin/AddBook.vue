@@ -3,6 +3,7 @@
 
     <!-- ================= HEADER ================= -->
     <div class="page-header">
+
       <div>
         <h1>Add New Book</h1>
         <p>Add a new book to the library</p>
@@ -16,6 +17,7 @@
         <i class="bi bi-arrow-left"></i>
         Back
       </button>
+
     </div>
 
 
@@ -47,6 +49,7 @@
 
       <!-- TITLE -->
       <div class="form-group">
+
         <label>
           Book Title
           <span>*</span>
@@ -58,11 +61,13 @@
           placeholder="Enter book title"
           required
         />
+
       </div>
 
 
       <!-- AUTHOR -->
       <div class="form-group">
+
         <label>
           Author
           <span>*</span>
@@ -74,11 +79,13 @@
           placeholder="Enter author name"
           required
         />
+
       </div>
 
 
       <!-- ISBN -->
       <div class="form-group">
+
         <label>
           ISBN
           <span>*</span>
@@ -90,11 +97,13 @@
           placeholder="Enter ISBN"
           required
         />
+
       </div>
 
 
       <!-- CATEGORY -->
       <div class="form-group">
+
         <label>
           Category
           <span>*</span>
@@ -105,6 +114,7 @@
           :disabled="loadingCategories"
           required
         >
+
           <option value="">
             {{
               loadingCategories
@@ -120,7 +130,9 @@
           >
             {{ category.name }}
           </option>
+
         </select>
+
 
         <small
           v-if="loadingCategories"
@@ -128,6 +140,7 @@
         >
           Loading categories...
         </small>
+
 
         <small
           v-if="
@@ -138,11 +151,13 @@
         >
           No categories found.
         </small>
+
       </div>
 
 
       <!-- QUANTITY -->
       <div class="form-group">
+
         <label>
           Quantity
           <span>*</span>
@@ -155,11 +170,13 @@
           placeholder="Enter quantity"
           required
         />
+
       </div>
 
 
       <!-- PAGES -->
       <div class="form-group">
+
         <label>
           Pages
         </label>
@@ -170,11 +187,45 @@
           min="1"
           placeholder="Enter number of pages"
         />
+
+      </div>
+
+
+      <!-- =====================================================
+           PUBLICATION DATE
+           DATE PICKER - NOT DROPDOWN
+      ====================================================== -->
+      <div class="form-group">
+
+        <label>
+          Publication Year
+          <span>*</span>
+        </label>
+
+        <div class="date-input-wrapper">
+
+          <i class="bi bi-calendar3 date-icon"></i>
+
+          <input
+            v-model="form.publicationDate"
+            type="date"
+            :min="minPublicationDate"
+            :max="maxPublicationDate"
+            required
+          />
+
+        </div>
+
+        <small class="help-text">
+          Select the publication date from the calendar.
+        </small>
+
       </div>
 
 
       <!-- LANGUAGE -->
       <div class="form-group">
+
         <label>
           Language
           <span>*</span>
@@ -184,6 +235,7 @@
           v-model="form.language"
           required
         >
+
           <option value="">
             Select language
           </option>
@@ -199,30 +251,15 @@
           <option value="English">
             English
           </option>
+
         </select>
-      </div>
 
-
-      <!-- STATUS -->
-      <!--
-        Status is NOT selectable.
-        Every new book is automatically Available.
-      -->
-      <div class="form-group">
-        <label>
-          Status
-        </label>
-
-        <div class="status-auto">
-          <i class="bi bi-check-circle-fill"></i>
-          <span>Available</span>
-          <small>Automatically set when adding a new book</small>
-        </div>
       </div>
 
 
       <!-- DESCRIPTION -->
       <div class="form-group full-width">
+
         <label>
           Description
         </label>
@@ -232,6 +269,7 @@
           rows="5"
           placeholder="Enter book description"
         ></textarea>
+
       </div>
 
 
@@ -260,6 +298,7 @@
           v-if="imagePreview"
           class="image-preview"
         >
+
           <img
             :src="imagePreview"
             alt="Book Preview"
@@ -272,6 +311,7 @@
           >
             <i class="bi bi-x"></i>
           </button>
+
         </div>
 
       </div>
@@ -284,14 +324,17 @@
       >
 
         <div class="category-icon">
+
           {{
             getInitial(
               selectedCategory.name
             )
           }}
+
         </div>
 
         <div>
+
           <p class="preview-label">
             Selected Category
           </p>
@@ -299,6 +342,7 @@
           <p class="preview-name">
             {{ selectedCategory.name }}
           </p>
+
         </div>
 
       </div>
@@ -315,6 +359,7 @@
         >
           Cancel
         </button>
+
 
         <button
           type="submit"
@@ -381,6 +426,25 @@ const loadingCategories = ref(false);
 
 
 // =====================================================
+// DATE
+// =====================================================
+
+// Current year
+const currentYear =
+  new Date().getFullYear();
+
+
+// Minimum date
+const minPublicationDate =
+  "1900-01-01";
+
+
+// Maximum date = today
+const maxPublicationDate =
+  new Date().toISOString().split("T")[0];
+
+
+// =====================================================
 // FORM
 // =====================================================
 
@@ -398,11 +462,14 @@ const form = ref({
 
   pages: null,
 
+  // Date selected from calendar
+  publicationDate: "",
+
   language: "",
 
   description: "",
 
-  // Automatically Available
+  // New book is always Available
   status: "Available"
 
 });
@@ -542,6 +609,7 @@ function handleImageChange(event) {
   const file =
     event.target.files?.[0];
 
+
   if (!file) {
 
     imageFile.value = null;
@@ -564,6 +632,10 @@ function handleImageChange(event) {
 
     event.target.value = "";
 
+    imageFile.value = null;
+
+    imagePreview.value = "";
+
     return;
 
   }
@@ -580,6 +652,10 @@ function handleImageChange(event) {
 
     event.target.value = "";
 
+    imageFile.value = null;
+
+    imagePreview.value = "";
+
     return;
 
   }
@@ -591,7 +667,20 @@ function handleImageChange(event) {
 
 
   // ===================================================
-  // CREATE PREVIEW
+  // REMOVE OLD PREVIEW URL
+  // ===================================================
+
+  if (imagePreview.value) {
+
+    URL.revokeObjectURL(
+      imagePreview.value
+    );
+
+  }
+
+
+  // ===================================================
+  // CREATE NEW PREVIEW
   // ===================================================
 
   imagePreview.value =
@@ -623,6 +712,41 @@ function removeImage() {
   imageFile.value = null;
 
   imagePreview.value = "";
+
+}
+
+
+// =====================================================
+// GET PUBLICATION YEAR
+// =====================================================
+
+function getPublicationYear() {
+
+  if (!form.value.publicationDate) {
+    return null;
+  }
+
+
+  /*
+   * Example:
+   *
+   * publicationDate = "2026-08-02"
+   *
+   * Result:
+   *
+   * publicationYear = 2026
+   */
+
+  const year =
+    Number(
+      form.value.publicationDate.substring(
+        0,
+        4
+      )
+    );
+
+
+  return year;
 
 }
 
@@ -682,6 +806,10 @@ async function submitBook() {
   }
 
 
+  // ===================================================
+  // QUANTITY
+  // ===================================================
+
   if (
     !form.value.qty ||
     Number(form.value.qty) < 1
@@ -694,6 +822,10 @@ async function submitBook() {
 
   }
 
+
+  // ===================================================
+  // PAGES
+  // ===================================================
 
   if (
     form.value.pages !== null &&
@@ -708,6 +840,43 @@ async function submitBook() {
 
   }
 
+
+  // ===================================================
+  // PUBLICATION DATE
+  // ===================================================
+
+  if (!form.value.publicationDate) {
+
+    errorMessage.value =
+      "Please select the publication date.";
+
+    return;
+
+  }
+
+
+  // Get year from selected date
+  const publicationYear =
+    getPublicationYear();
+
+
+  if (
+    !publicationYear ||
+    publicationYear < 1900 ||
+    publicationYear > currentYear
+  ) {
+
+    errorMessage.value =
+      "Please select a valid publication date.";
+
+    return;
+
+  }
+
+
+  // ===================================================
+  // LANGUAGE
+  // ===================================================
 
   if (!form.value.language) {
 
@@ -757,7 +926,9 @@ async function submitBook() {
         form.value.title.trim(),
 
       qty:
-        Number(form.value.qty),
+        Number(
+          form.value.qty
+        ),
 
       description:
         form.value.description.trim(),
@@ -766,9 +937,17 @@ async function submitBook() {
         form.value.author.trim(),
 
       pages:
-        form.value.pages
+        form.value.pages !== null &&
+        form.value.pages !== ""
           ? Number(form.value.pages)
           : null,
+
+      // ===============================================
+      // SEND ONLY YEAR TO BACKEND
+      // ===============================================
+
+      publicationYear:
+        publicationYear,
 
       isbn:
         form.value.isbn.trim(),
@@ -776,15 +955,22 @@ async function submitBook() {
       language:
         form.value.language,
 
-      // ===============================================
-      // IMPORTANT
-      // Status is ALWAYS Available for a new book
-      // ===============================================
-
-      status: "Available"
+      // Always Available
+      status:
+        "Available"
 
     };
 
+
+    console.log(
+      "SELECTED PUBLICATION DATE:",
+      form.value.publicationDate
+    );
+
+    console.log(
+      "PUBLICATION YEAR:",
+      publicationYear
+    );
 
     console.log(
       "BOOK REQUEST TO BACKEND:",
@@ -847,10 +1033,20 @@ async function submitBook() {
         selectedCategory.value?.name || "",
 
       quantity:
-        Number(form.value.qty),
+        Number(
+          form.value.qty
+        ),
 
-      // Make sure frontend also knows status
-      status: "Available",
+      qty:
+        Number(
+          form.value.qty
+        ),
+
+      publicationYear:
+        publicationYear,
+
+      status:
+        "Available",
 
       language:
         form.value.language
@@ -907,6 +1103,7 @@ async function submitBook() {
         errorMessage.value =
           backendError.msg ||
           backendError.message ||
+          backendError.error ||
           "Failed to create book.";
 
       }
@@ -945,8 +1142,9 @@ function closePage() {
 
 onMounted(() => {
 
-  // Always start a new book as Available
-  form.value.status = "Available";
+  // New book is always Available
+  form.value.status =
+    "Available";
 
   fetchCategories();
 
@@ -976,13 +1174,17 @@ onBeforeUnmount(() => {
 
 .add-book-page {
 
-  min-height: calc(100vh - 70px);
+  min-height:
+    calc(100vh - 70px);
 
-  padding: 30px;
+  padding:
+    30px;
 
-  background: #f8fafc;
+  background:
+    #f8fafc;
 
-  box-sizing: border-box;
+  box-sizing:
+    border-box;
 
 }
 
@@ -993,35 +1195,48 @@ onBeforeUnmount(() => {
 
 .page-header {
 
-  display: flex;
+  display:
+    flex;
 
-  justify-content: space-between;
+  justify-content:
+    space-between;
 
-  align-items: center;
+  align-items:
+    center;
 
-  margin-bottom: 25px;
+  margin-bottom:
+    25px;
 
 }
+
 
 .page-header h1 {
 
-  margin: 0;
+  margin:
+    0;
 
-  font-size: 28px;
+  font-size:
+    28px;
 
-  font-weight: 700;
+  font-weight:
+    700;
 
-  color: #172033;
+  color:
+    #172033;
 
 }
 
+
 .page-header p {
 
-  margin: 6px 0 0;
+  margin:
+    6px 0 0;
 
-  color: #7b8497;
+  color:
+    #7b8497;
 
-  font-size: 14px;
+  font-size:
+    14px;
 
 }
 
@@ -1032,31 +1247,43 @@ onBeforeUnmount(() => {
 
 .back-btn {
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 8px;
+  gap:
+    8px;
 
-  padding: 10px 18px;
+  padding:
+    10px 18px;
 
-  border: 1px solid #dfe3eb;
+  border:
+    1px solid #dfe3eb;
 
-  background: white;
+  background:
+    white;
 
-  color: #374151;
+  color:
+    #374151;
 
-  border-radius: 8px;
+  border-radius:
+    8px;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
-  font-weight: 600;
+  font-weight:
+    600;
 
 }
 
+
 .back-btn:hover {
 
-  background: #f3f4f6;
+  background:
+    #f3f4f6;
 
 }
 
@@ -1067,23 +1294,32 @@ onBeforeUnmount(() => {
 
 .error-message {
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 8px;
+  gap:
+    8px;
 
-  margin-bottom: 20px;
+  margin-bottom:
+    20px;
 
-  padding: 13px 16px;
+  padding:
+    13px 16px;
 
-  background: #fef2f2;
+  background:
+    #fef2f2;
 
-  color: #dc2626;
+  color:
+    #dc2626;
 
-  border: 1px solid #fecaca;
+  border:
+    1px solid #fecaca;
 
-  border-radius: 8px;
+  border-radius:
+    8px;
 
 }
 
@@ -1094,23 +1330,32 @@ onBeforeUnmount(() => {
 
 .success-message {
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 8px;
+  gap:
+    8px;
 
-  margin-bottom: 20px;
+  margin-bottom:
+    20px;
 
-  padding: 13px 16px;
+  padding:
+    13px 16px;
 
-  background: #ecfdf5;
+  background:
+    #ecfdf5;
 
-  color: #15803d;
+  color:
+    #15803d;
 
-  border: 1px solid #bbf7d0;
+  border:
+    1px solid #bbf7d0;
 
-  border-radius: 8px;
+  border-radius:
+    8px;
 
 }
 
@@ -1121,21 +1366,26 @@ onBeforeUnmount(() => {
 
 .book-form {
 
-  display: grid;
+  display:
+    grid;
 
   grid-template-columns:
-    1fr
-    1fr;
+    1fr 1fr;
 
-  gap: 22px;
+  gap:
+    22px;
 
-  padding: 30px;
+  padding:
+    30px;
 
-  background: white;
+  background:
+    white;
 
-  border: 1px solid #e5e7eb;
+  border:
+    1px solid #e5e7eb;
 
-  border-radius: 12px;
+  border-radius:
+    12px;
 
   box-shadow:
     0 2px 8px
@@ -1143,35 +1393,47 @@ onBeforeUnmount(() => {
 
 }
 
+
 .form-group {
 
-  display: flex;
+  display:
+    flex;
 
-  flex-direction: column;
+  flex-direction:
+    column;
 
 }
+
 
 .form-group.full-width {
 
-  grid-column: 1 / -1;
+  grid-column:
+    1 / -1;
 
 }
+
 
 .form-group label {
 
-  margin-bottom: 8px;
+  margin-bottom:
+    8px;
 
-  font-size: 14px;
+  font-size:
+    14px;
 
-  font-weight: 600;
+  font-weight:
+    600;
 
-  color: #374151;
+  color:
+    #374151;
 
 }
 
+
 .form-group label span {
 
-  color: #dc2626;
+  color:
+    #dc2626;
 
 }
 
@@ -1184,35 +1446,45 @@ onBeforeUnmount(() => {
 .form-group select,
 .form-group textarea {
 
-  width: 100%;
+  width:
+    100%;
 
-  box-sizing: border-box;
+  box-sizing:
+    border-box;
 
-  padding: 11px 13px;
+  padding:
+    11px 13px;
 
   border:
-    1px solid
-    #d1d5db;
+    1px solid #d1d5db;
 
-  border-radius: 8px;
+  border-radius:
+    8px;
 
-  background: white;
+  background:
+    white;
 
-  color: #374151;
+  color:
+    #374151;
 
-  outline: none;
+  outline:
+    none;
 
-  font-size: 14px;
+  font-size:
+    14px;
 
-  transition: 0.2s;
+  transition:
+    0.2s;
 
 }
+
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
 
-  border-color: #2563eb;
+  border-color:
+    #2563eb;
 
   box-shadow:
     0 0 0 3px
@@ -1220,62 +1492,151 @@ onBeforeUnmount(() => {
 
 }
 
+
 .form-group textarea {
 
-  resize: vertical;
+  resize:
+    vertical;
 
 }
 
 
 /* =====================================================
-   AUTO STATUS
+   SELECT
 ===================================================== */
 
-.status-auto {
+.form-group select {
 
-  min-height: 43px;
+  cursor:
+    pointer;
 
-  box-sizing: border-box;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 10px 13px;
-
-  border: 1px solid #bbf7d0;
-
-  border-radius: 8px;
-
-  background: #f0fdf4;
-
-  color: #15803d;
+  appearance:
+    auto;
 
 }
 
-.status-auto i {
 
-  font-size: 16px;
+/* =====================================================
+   DATE PICKER
+===================================================== */
+
+.date-input-wrapper {
+
+  position:
+    relative;
+
+  width:
+    100%;
 
 }
 
-.status-auto span {
 
-  font-size: 14px;
+.date-input-wrapper input[type="date"] {
 
-  font-weight: 600;
+  width:
+    100%;
+
+  height:
+    44px;
+
+  padding:
+    11px 45px 11px 42px;
+
+  border:
+    1px solid #d1d5db;
+
+  border-radius:
+    8px;
+
+  background:
+    white;
+
+  color:
+    #374151;
+
+  font-size:
+    14px;
+
+  cursor:
+    pointer;
 
 }
 
-.status-auto small {
 
-  margin-left: auto;
+.date-input-wrapper input[type="date"]:focus {
 
-  color: #6b7280;
+  border-color:
+    #2563eb;
 
-  font-size: 11px;
+  box-shadow:
+    0 0 0 3px
+    rgba(37, 99, 235, 0.1);
+
+  outline:
+    none;
+
+}
+
+
+/*
+  Calendar icon
+*/
+
+.date-icon {
+
+  position:
+    absolute;
+
+  left:
+    14px;
+
+  top:
+    50%;
+
+  transform:
+    translateY(-50%);
+
+  color:
+    #6366f1;
+
+  font-size:
+    18px;
+
+  pointer-events:
+    none;
+
+  z-index:
+    2;
+
+}
+
+
+/*
+  Browser calendar button
+
+  This keeps the native calendar popup.
+*/
+
+.date-input-wrapper
+input[type="date"]::-webkit-calendar-picker-indicator {
+
+  position:
+    absolute;
+
+  right:
+    12px;
+
+  width:
+    20px;
+
+  height:
+    20px;
+
+  cursor:
+    pointer;
+
+  opacity:
+    1;
 
 }
 
@@ -1286,21 +1647,28 @@ onBeforeUnmount(() => {
 
 .help-text {
 
-  margin-top: 6px;
+  margin-top:
+    6px;
 
-  color: #6b7280;
+  color:
+    #6b7280;
 
-  font-size: 12px;
+  font-size:
+    12px;
 
 }
 
+
 .warning-text {
 
-  margin-top: 6px;
+  margin-top:
+    6px;
 
-  color: #dc2626;
+  color:
+    #dc2626;
 
-  font-size: 12px;
+  font-size:
+    12px;
 
 }
 
@@ -1311,71 +1679,98 @@ onBeforeUnmount(() => {
 
 .image-preview {
 
-  position: relative;
+  position:
+    relative;
 
-  width: 180px;
+  width:
+    180px;
 
-  height: 240px;
+  height:
+    240px;
 
-  margin-top: 15px;
+  margin-top:
+    15px;
 
   border:
-    1px solid
-    #e5e7eb;
+    1px solid #e5e7eb;
 
-  border-radius: 10px;
+  border-radius:
+    10px;
 
-  overflow: hidden;
+  overflow:
+    hidden;
 
-  background: #f8fafc;
+  background:
+    #f8fafc;
 
 }
+
 
 .image-preview img {
 
-  width: 100%;
+  width:
+    100%;
 
-  height: 100%;
+  height:
+    100%;
 
-  object-fit: cover;
+  object-fit:
+    cover;
 
 }
+
 
 .remove-image {
 
-  position: absolute;
+  position:
+    absolute;
 
-  top: 8px;
+  top:
+    8px;
 
-  right: 8px;
+  right:
+    8px;
 
-  width: 32px;
+  width:
+    32px;
 
-  height: 32px;
+  height:
+    32px;
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  justify-content: center;
+  justify-content:
+    center;
 
-  border: none;
+  border:
+    none;
 
-  border-radius: 50%;
+  border-radius:
+    50%;
 
-  background: #dc2626;
+  background:
+    #dc2626;
 
-  color: white;
+  color:
+    white;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
-  font-size: 16px;
+  font-size:
+    16px;
 
 }
 
+
 .remove-image:hover {
 
-  background: #b91c1c;
+  background:
+    #b91c1c;
 
 }
 
@@ -1386,67 +1781,92 @@ onBeforeUnmount(() => {
 
 .category-preview {
 
-  grid-column: 1 / -1;
+  grid-column:
+    1 / -1;
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 12px;
+  gap:
+    12px;
 
-  padding: 14px;
+  padding:
+    14px;
 
-  background: #eff6ff;
+  background:
+    #eff6ff;
 
   border:
-    1px solid
-    #bfdbfe;
+    1px solid #bfdbfe;
 
-  border-radius: 10px;
+  border-radius:
+    10px;
 
 }
+
 
 .category-icon {
 
-  width: 42px;
+  width:
+    42px;
 
-  height: 42px;
+  height:
+    42px;
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  justify-content: center;
+  justify-content:
+    center;
 
-  border-radius: 8px;
+  border-radius:
+    8px;
 
-  background: #2563eb;
+  background:
+    #2563eb;
 
-  color: white;
+  color:
+    white;
 
-  font-weight: 700;
+  font-weight:
+    700;
 
 }
+
 
 .preview-label {
 
-  margin: 0;
+  margin:
+    0;
 
-  font-size: 12px;
+  font-size:
+    12px;
 
-  color: #6b7280;
+  color:
+    #6b7280;
 
 }
 
+
 .preview-name {
 
-  margin: 3px 0 0;
+  margin:
+    3px 0 0;
 
-  font-size: 15px;
+  font-size:
+    15px;
 
-  font-weight: 600;
+  font-weight:
+    600;
 
-  color: #1f2937;
+  color:
+    #1f2937;
 
 }
 
@@ -1457,84 +1877,111 @@ onBeforeUnmount(() => {
 
 .form-actions {
 
-  grid-column: 1 / -1;
+  grid-column:
+    1 / -1;
 
-  display: flex;
+  display:
+    flex;
 
-  justify-content: flex-end;
+  justify-content:
+    flex-end;
 
-  gap: 12px;
+  gap:
+    12px;
 
-  padding-top: 20px;
+  padding-top:
+    20px;
 
   border-top:
-    1px solid
-    #e5e7eb;
+    1px solid #e5e7eb;
 
 }
+
 
 .cancel-btn,
 .save-btn {
 
-  padding: 11px 22px;
+  padding:
+    11px 22px;
 
-  border-radius: 8px;
+  border-radius:
+    8px;
 
-  font-weight: 600;
+  font-weight:
+    600;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
 }
+
 
 .cancel-btn {
 
   border:
-    1px solid
-    #d1d5db;
+    1px solid #d1d5db;
 
-  background: white;
+  background:
+    white;
 
-  color: #374151;
+  color:
+    #374151;
 
 }
+
 
 .cancel-btn:hover {
 
-  background: #f3f4f6;
+  background:
+    #f3f4f6;
 
 }
+
 
 .save-btn {
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  justify-content: center;
+  justify-content:
+    center;
 
-  gap: 8px;
+  gap:
+    8px;
 
-  min-width: 130px;
+  min-width:
+    130px;
 
-  border: none;
+  border:
+    none;
 
-  background: #2563eb;
+  background:
+    #2563eb;
 
-  color: white;
+  color:
+    white;
 
 }
+
 
 .save-btn:hover {
 
-  background: #1d4ed8;
+  background:
+    #1d4ed8;
 
 }
 
+
 .save-btn:disabled {
 
-  background: #93c5fd;
+  background:
+    #93c5fd;
 
-  cursor: not-allowed;
+  cursor:
+    not-allowed;
 
 }
 
@@ -1550,14 +1997,17 @@ onBeforeUnmount(() => {
 
 }
 
+
 @keyframes spin {
 
   from {
-    transform: rotate(0deg);
+    transform:
+      rotate(0deg);
   }
 
   to {
-    transform: rotate(360deg);
+    transform:
+      rotate(360deg);
   }
 
 }
@@ -1571,47 +2021,40 @@ onBeforeUnmount(() => {
 
   .add-book-page {
 
-    padding: 20px;
+    padding:
+      20px;
 
   }
+
 
   .page-header {
 
-    align-items: flex-start;
+    align-items:
+      flex-start;
 
-    gap: 15px;
+    gap:
+      15px;
 
   }
+
 
   .book-form {
 
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
 
-    padding: 20px;
+    padding:
+      20px;
 
   }
+
 
   .form-group.full-width,
   .category-preview,
   .form-actions {
 
-    grid-column: 1;
-
-  }
-
-  .status-auto {
-
-    align-items: flex-start;
-
-    flex-wrap: wrap;
-
-  }
-
-  .status-auto small {
-
-    width: 100%;
-
-    margin-left: 24px;
+    grid-column:
+      1;
 
   }
 
@@ -1626,28 +2069,36 @@ onBeforeUnmount(() => {
 
   .page-header {
 
-    flex-direction: column;
+    flex-direction:
+      column;
 
   }
+
 
   .back-btn {
 
-    width: 100%;
+    width:
+      100%;
 
-    justify-content: center;
+    justify-content:
+      center;
 
   }
+
 
   .form-actions {
 
-    flex-direction: column;
+    flex-direction:
+      column;
 
   }
+
 
   .cancel-btn,
   .save-btn {
 
-    width: 100%;
+    width:
+      100%;
 
   }
 

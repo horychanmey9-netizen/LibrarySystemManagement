@@ -1,12 +1,22 @@
+```vue
 <template>
+
+  <!-- =========================
+       Modal Overlay
+  ========================== -->
 
   <div
     v-if="borrowing"
     class="modal-overlay"
-    @click.self="closeDetails"
+    @click.self="closeModal"
   >
 
-    <div class="modal">
+    <!-- =========================
+         Modal
+    ========================== -->
+
+    <div class="details-modal">
+
 
       <!-- =========================
            Header
@@ -21,188 +31,300 @@
           </h2>
 
           <p>
-            View detailed information about this borrowing
+            View borrowing information
           </p>
 
         </div>
 
 
+        <!-- Close Button -->
+
         <button
-          class="close-icon"
-          @click="closeDetails"
+          type="button"
+          class="close-btn"
+          @click="closeModal"
         >
-          ×
+
+          <i class="bi bi-x-lg"></i>
+
         </button>
 
       </div>
 
 
       <!-- =========================
-           Details
+           Body
       ========================== -->
 
-      <div class="details-body">
-
-        <!-- ID -->
-
-        <div class="detail-row">
-
-          <span>
-            Borrowing ID
-          </span>
-
-          <strong>
-            #{{ borrowing.id }}
-          </strong>
-
-        </div>
+      <div class="modal-body">
 
 
-        <!-- User -->
+        <!-- =========================
+             Book Section
+        ========================== -->
 
-        <div class="detail-row">
-
-          <span>
-            User
-          </span>
-
-          <strong>
-            {{ borrowing.user }}
-          </strong>
-
-        </div>
+        <div class="book-section">
 
 
-        <!-- Email -->
+          <!-- Book Image -->
 
-        <div class="detail-row">
+          <div class="book-image-wrapper">
 
-          <span>
-            Email
-          </span>
-
-          <strong>
-            {{ borrowing.email }}
-          </strong>
-
-        </div>
+            <img
+              v-if="borrowing.bookImage"
+              :src="borrowing.bookImage"
+              :alt="borrowing.bookTitle"
+              class="book-image"
+            />
 
 
-        <!-- Book -->
+            <!-- No Image -->
 
-        <div class="detail-row">
+            <div
+              v-else
+              class="book-image-placeholder"
+            >
 
-          <span>
-            Book
-          </span>
+              <i class="bi bi-book"></i>
 
-          <strong>
-            {{ borrowing.book }}
-          </strong>
+            </div>
+
+          </div>
+
+
+          <!-- Book Information -->
+
+          <div class="book-info">
+
+            <span class="section-label">
+              Book
+            </span>
+
+            <h3>
+              {{ borrowing.bookTitle || "Unknown Book" }}
+            </h3>
+
+            <p>
+              Book ID:
+              <span>
+                {{ borrowing.bookId ?? "-" }}
+              </span>
+            </p>
+
+          </div>
 
         </div>
 
 
-        <!-- Borrow Date -->
+        <!-- =========================
+             Borrower Information
+        ========================== -->
 
-        <div class="detail-row">
+        <div class="section">
 
-          <span>
-            Borrow Date
-          </span>
+          <div class="section-title">
 
-          <strong>
-            {{ borrowing.borrowDate }}
-          </strong>
+            <i class="bi bi-person"></i>
+
+            <span>
+              Borrower Information
+            </span>
+
+          </div>
+
+
+          <div class="info-grid">
+
+
+            <!-- Borrowing ID -->
+
+            <div class="info-item">
+
+              <span class="label">
+                Borrowing ID
+              </span>
+
+              <span class="value">
+                #{{ borrowing.id ?? "-" }}
+              </span>
+
+            </div>
+
+
+            <!-- User ID -->
+
+            <div class="info-item">
+
+              <span class="label">
+                User ID
+              </span>
+
+              <span class="value">
+                {{ borrowing.userId ?? "-" }}
+              </span>
+
+            </div>
+
+
+            <!-- User Name -->
+
+            <div class="info-item full-width">
+
+              <span class="label">
+                User Name
+              </span>
+
+              <span class="value">
+                {{ borrowing.userName || "-" }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =========================
+             Borrowing Information
+        ========================== -->
+
+        <div class="section">
+
+          <div class="section-title">
+
+            <i class="bi bi-calendar3"></i>
+
+            <span>
+              Borrowing Information
+            </span>
+
+          </div>
+
+
+          <div class="info-grid">
+
+
+            <!-- Borrow Date -->
+
+            <div class="info-item">
+
+              <span class="label">
+                Borrow Date
+              </span>
+
+              <span class="value">
+                {{ formatDate(borrowing.borrowDate) }}
+              </span>
+
+            </div>
+
+
+            <!-- Due Date -->
+
+            <div class="info-item">
+
+              <span class="label">
+                Due Date
+              </span>
+
+              <span class="value">
+                {{ formatDate(borrowing.dueDate) }}
+              </span>
+
+            </div>
+
+
+            <!-- Return Date -->
+
+            <div class="info-item">
+
+              <span class="label">
+                Return Date
+              </span>
+
+              <span class="value">
+
+                {{
+                  borrowing.returnDate
+                    ? formatDate(borrowing.returnDate)
+                    : "Not returned"
+                }}
+
+              </span>
+
+            </div>
+
+
+            <!-- Fine -->
+
+            <div class="info-item">
+
+              <span class="label">
+                Fine
+              </span>
+
+              <span
+                class="value fine-value"
+                :class="{
+                  'has-fine':
+                    Number(borrowing.fine || 0) > 0
+                }"
+              >
+
+                ${{ formatFine(borrowing.fine) }}
+
+              </span>
+
+            </div>
+
+          </div>
 
         </div>
 
 
-        <!-- Due Date -->
+        <!-- =========================
+             Status
+        ========================== -->
 
-        <div class="detail-row">
+        <div class="section status-section">
 
-          <span>
-            Due Date
-          </span>
+          <div class="section-title">
 
-          <strong
-            :class="{
-              late:
-                borrowing.status === 'Late'
-            }"
-          >
-            {{ borrowing.dueDate }}
-          </strong>
+            <i class="bi bi-info-circle"></i>
 
-        </div>
+            <span>
+              Status
+            </span>
+
+          </div>
 
 
-        <!-- Return Date -->
+          <div>
 
-        <div class="detail-row">
+            <span
+              class="status-badge"
+              :class="getStatusClass(
+                borrowing.status
+              )"
+            >
 
-          <span>
-            Return Date
-          </span>
+              <i
+                :class="getStatusIcon(
+                  borrowing.status
+                )"
+              ></i>
 
-          <strong>
-            {{ borrowing.returnDate || "Not returned" }}
-          </strong>
+              {{ formatStatus(
+                borrowing.status
+              ) }}
 
-        </div>
+            </span>
 
-
-        <!-- Fine -->
-
-        <div class="detail-row">
-
-          <span>
-            Fine
-          </span>
-
-          <strong
-            :class="{
-              fine:
-                borrowing.fine > 0
-            }"
-          >
-            ${{ Number(borrowing.fine).toFixed(2) }}
-          </strong>
+          </div>
 
         </div>
 
-
-        <!-- Status -->
-
-        <div class="detail-row">
-
-          <span>
-            Status
-          </span>
-
-          <span
-            class="status-badge"
-            :class="
-              borrowing.status.toLowerCase()
-            "
-          >
-
-            <i
-              :class="
-                borrowing.status === 'Borrowed'
-                  ? 'bi bi-book'
-                  : borrowing.status === 'Late'
-                    ? 'bi bi-clock'
-                    : 'bi bi-check-circle'
-              "
-            ></i>
-
-            {{ borrowing.status }}
-
-          </span>
-
-        </div>
 
       </div>
 
@@ -214,13 +336,17 @@
       <div class="modal-footer">
 
         <button
-          class="close-btn"
-          @click="closeDetails"
+          type="button"
+          class="close-footer-btn"
+          @click="closeModal"
         >
+
           Close
+
         </button>
 
       </div>
+
 
     </div>
 
@@ -231,22 +357,30 @@
 
 <script setup>
 
+import {
+  computed
+} from "vue";
+
+
 /* =========================
    Props
 ========================= */
 
-defineProps({
+const props = defineProps({
 
   borrowing: {
+
     type: Object,
+
     default: null
+
   }
 
 });
 
 
 /* =========================
-   Events
+   Emits
 ========================= */
 
 const emit = defineEmits([
@@ -255,12 +389,208 @@ const emit = defineEmits([
 
 
 /* =========================
-   Close
+   Close Modal
 ========================= */
 
-function closeDetails() {
+function closeModal() {
 
   emit("close");
+
+}
+
+
+/* =========================
+   Format Date
+========================= */
+
+function formatDate(date) {
+
+  if (!date) {
+
+    return "-";
+
+  }
+
+
+  /*
+   * Backend returns:
+   *
+   * 2026-08-26
+   *
+   * We convert it to:
+   *
+   * Aug 26, 2026
+   */
+
+  const parsedDate =
+    new Date(
+      `${date}T00:00:00`
+    );
+
+
+  if (
+    Number.isNaN(
+      parsedDate.getTime()
+    )
+  ) {
+
+    return date;
+
+  }
+
+
+  return parsedDate.toLocaleDateString(
+    "en-US",
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    }
+  );
+
+}
+
+
+/* =========================
+   Format Fine
+========================= */
+
+function formatFine(fine) {
+
+  const amount =
+    Number(fine || 0);
+
+
+  return amount.toFixed(2);
+
+}
+
+
+/* =========================
+   Format Status
+========================= */
+
+function formatStatus(status) {
+
+  if (!status) {
+
+    return "Unknown";
+
+  }
+
+
+  const statusMap = {
+
+    PENDING:
+      "Pending",
+
+    BORROWED:
+      "Borrowed",
+
+    OVERDUE:
+      "Overdue",
+
+    RETURN_REQUESTED:
+      "Return Requested",
+
+    RETURNED:
+      "Returned",
+
+    REJECTED:
+      "Rejected"
+
+  };
+
+
+  return (
+    statusMap[status]
+    ||
+    status
+      .toString()
+      .replaceAll("_", " ")
+      .toLowerCase()
+      .replace(
+        /\b\w/g,
+        letter =>
+          letter.toUpperCase()
+      )
+  );
+
+}
+
+
+/* =========================
+   Status Class
+========================= */
+
+function getStatusClass(status) {
+
+  const statusClasses = {
+
+    PENDING:
+      "status-pending",
+
+    BORROWED:
+      "status-borrowed",
+
+    OVERDUE:
+      "status-overdue",
+
+    RETURN_REQUESTED:
+      "status-return-requested",
+
+    RETURNED:
+      "status-returned",
+
+    REJECTED:
+      "status-rejected"
+
+  };
+
+
+  return (
+    statusClasses[status]
+    ||
+    "status-default"
+  );
+
+}
+
+
+/* =========================
+   Status Icon
+========================= */
+
+function getStatusIcon(status) {
+
+  const statusIcons = {
+
+    PENDING:
+      "bi bi-clock",
+
+    BORROWED:
+      "bi bi-book",
+
+    OVERDUE:
+      "bi bi-exclamation-triangle",
+
+    RETURN_REQUESTED:
+      "bi bi-arrow-return-left",
+
+    RETURNED:
+      "bi bi-check-circle",
+
+    REJECTED:
+      "bi bi-x-circle"
+
+  };
+
+
+  return (
+    statusIcons[status]
+    ||
+    "bi bi-info-circle"
+  );
 
 }
 
@@ -274,6 +604,7 @@ function closeDetails() {
 ========================= */
 
 .modal-overlay {
+
   position: fixed;
 
   inset: 0;
@@ -289,7 +620,8 @@ function closeDetails() {
   padding: 20px;
 
   background:
-    rgba(0, 0, 0, 0.45);
+    rgba(15, 23, 42, 0.45);
+
 }
 
 
@@ -297,12 +629,16 @@ function closeDetails() {
    Modal
 ========================= */
 
-.modal {
+.details-modal {
+
   width: 500px;
 
   max-width: 100%;
 
-  overflow: hidden;
+  max-height:
+    calc(100vh - 40px);
+
+  overflow-y: auto;
 
   background: white;
 
@@ -310,7 +646,8 @@ function closeDetails() {
 
   box-shadow:
     0 20px 50px
-    rgba(0, 0, 0, 0.2);
+    rgba(0, 0, 0, 0.18);
+
 }
 
 
@@ -319,45 +656,58 @@ function closeDetails() {
 ========================= */
 
 .modal-header {
+
   display: flex;
 
   align-items: flex-start;
 
-  justify-content: space-between;
+  justify-content:
+    space-between;
 
-  padding: 20px;
+  gap: 15px;
+
+  padding: 20px 22px;
 
   border-bottom:
     1px solid #e5e7eb;
+
 }
 
 
 .modal-header h2 {
+
   margin: 0;
 
-  color: #111827;
+  color: #1f2937;
 
   font-size: 20px;
+
+  font-weight: 700;
+
 }
 
 
 .modal-header p {
-  margin: 5px 0 0;
+
+  margin:
+    5px 0 0;
 
   color: #6b7280;
 
   font-size: 13px;
+
 }
 
 
 /* =========================
-   Close Icon
+   Close Button
 ========================= */
 
-.close-icon {
-  width: 32px;
+.close-btn {
 
-  height: 32px;
+  width: 34px;
+
+  height: 34px;
 
   display: flex;
 
@@ -367,128 +717,433 @@ function closeDetails() {
 
   border: none;
 
-  border-radius: 6px;
+  border-radius: 7px;
 
   background: #f3f4f6;
 
-  color: #374151;
-
-  font-size: 22px;
+  color: #6b7280;
 
   cursor: pointer;
+
+  transition:
+    0.2s;
+
 }
 
 
-.close-icon:hover {
+.close-btn:hover {
+
   background: #e5e7eb;
+
+  color: #1f2937;
+
 }
 
 
 /* =========================
-   Details
+   Body
 ========================= */
 
-.details-body {
-  padding: 20px;
+.modal-body {
+
+  padding: 22px;
+
 }
 
 
-.detail-row {
-  min-height: 45px;
+/* =========================
+   Book Section
+========================= */
+
+.book-section {
 
   display: flex;
 
   align-items: center;
 
-  justify-content: space-between;
+  gap: 16px;
 
-  gap: 20px;
+  margin-bottom: 24px;
+
+  padding-bottom: 20px;
 
   border-bottom:
-    1px solid #f3f4f6;
+    1px solid #e5e7eb;
+
 }
 
 
-.detail-row:last-child {
-  border-bottom: none;
+/* =========================
+   Book Image
+========================= */
+
+.book-image-wrapper {
+
+  width: 70px;
+
+  height: 90px;
+
+  flex-shrink: 0;
+
+  overflow: hidden;
+
+  border-radius: 8px;
+
+  background: #f1f5f9;
+
 }
 
 
-.detail-row > span:first-child {
+.book-image {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+}
+
+
+.book-image-placeholder {
+
+  width: 100%;
+
+  height: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #94a3b8;
+
+  font-size: 28px;
+
+}
+
+
+/* =========================
+   Book Info
+========================= */
+
+.book-info {
+
+  min-width: 0;
+
+}
+
+
+.section-label {
+
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+}
+
+
+.book-info h3 {
+
+  margin: 0 0 7px;
+
+  overflow: hidden;
+
+  color: #1f2937;
+
+  font-size: 17px;
+
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+}
+
+
+.book-info p {
+
+  margin: 0;
+
   color: #6b7280;
 
-  font-size: 14px;
+  font-size: 12px;
+
 }
 
 
-.detail-row strong {
+.book-info p span {
+
+  color: #374151;
+
+  font-weight: 500;
+
+}
+
+
+/* =========================
+   Section
+========================= */
+
+.section {
+
+  margin-bottom: 22px;
+
+}
+
+
+.section:last-child {
+
+  margin-bottom: 0;
+
+}
+
+
+/* =========================
+   Section Title
+========================= */
+
+.section-title {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 14px;
+
   color: #374151;
 
   font-size: 14px;
 
-  text-align: right;
+  font-weight: 600;
+
+}
+
+
+.section-title i {
+
+  color: #64748b;
+
+  font-size: 15px;
+
 }
 
 
 /* =========================
-   Late
+   Info Grid
 ========================= */
 
-.detail-row .late {
-  color: #dc2626;
+.info-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 15px;
+
 }
 
 
 /* =========================
-   Fine
+   Info Item
 ========================= */
 
-.detail-row .fine {
+.info-item {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  min-width: 0;
+
+}
+
+
+.full-width {
+
+  grid-column:
+    1 / -1;
+
+}
+
+
+.label {
+
+  color: #94a3b8;
+
+  font-size: 11px;
+
+  font-weight: 500;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    0.3px;
+
+}
+
+
+.value {
+
+  overflow: hidden;
+
+  color: #374151;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+}
+
+
+.fine-value {
+
+  color: #16a34a;
+
+}
+
+
+.fine-value.has-fine {
+
   color: #dc2626;
 
-  font-size: 18px;
 }
 
 
 /* =========================
-   Status
+   Status Section
+========================= */
+
+.status-section {
+
+  padding-top: 5px;
+
+}
+
+
+/* =========================
+   Status Badge
 ========================= */
 
 .status-badge {
+
   display: inline-flex;
 
   align-items: center;
 
-  gap: 5px;
+  gap: 6px;
 
-  padding: 5px 10px;
+  padding:
+    6px 11px;
 
-  border-radius: 999px;
+  border-radius: 20px;
 
   font-size: 12px;
 
   font-weight: 600;
+
 }
 
 
-.status-badge.borrowed {
+.status-badge i {
+
+  font-size: 12px;
+
+}
+
+
+/* Pending */
+
+.status-pending {
+
+  background: #fef3c7;
+
+  color: #92400e;
+
+}
+
+
+/* Borrowed */
+
+.status-borrowed {
+
   background: #dbeafe;
 
-  color: #2563eb;
+  color: #1d4ed8;
+
 }
 
 
-.status-badge.late {
+/* Overdue */
+
+.status-overdue {
+
   background: #fee2e2;
 
-  color: #dc2626;
+  color: #b91c1c;
+
 }
 
 
-.status-badge.returned {
+/* Return Requested */
+
+.status-return-requested {
+
+  background: #ede9fe;
+
+  color: #6d28d9;
+
+}
+
+
+/* Returned */
+
+.status-returned {
+
   background: #dcfce7;
 
   color: #15803d;
+
+}
+
+
+/* Rejected */
+
+.status-rejected {
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+}
+
+
+/* Default */
+
+.status-default {
+
+  background: #f3f4f6;
+
+  color: #4b5563;
+
 }
 
 
@@ -497,45 +1152,56 @@ function closeDetails() {
 ========================= */
 
 .modal-footer {
+
   display: flex;
 
-  justify-content: flex-end;
+  justify-content:
+    flex-end;
 
-  padding: 15px 20px;
+  padding:
+    15px 22px;
 
   border-top:
     1px solid #e5e7eb;
+
 }
 
 
 /* =========================
-   Close Button
+   Footer Button
 ========================= */
 
-.close-btn {
-  height: 40px;
+.close-footer-btn {
 
-  padding: 0 16px;
+  min-width: 80px;
 
-  border:
-    1px solid #d1d5db;
+  padding:
+    9px 18px;
+
+  border: none;
 
   border-radius: 7px;
 
-  background: white;
+  background: #2563eb;
 
-  color: #374151;
-
-  font-size: 14px;
-
-  font-weight: 600;
+  color: white;
 
   cursor: pointer;
+
+  font-size: 13px;
+
+  font-weight: 500;
+
+  transition:
+    0.2s;
+
 }
 
 
-.close-btn:hover {
-  background: #f9fafb;
+.close-footer-btn:hover {
+
+  background: #1d4ed8;
+
 }
 
 
@@ -543,20 +1209,99 @@ function closeDetails() {
    Responsive
 ========================= */
 
-@media (max-width: 600px) {
+@media (max-width: 550px) {
 
-  .modal {
+  .modal-overlay {
+
+    padding: 12px;
+
+  }
+
+
+  .details-modal {
+
     width: 100%;
+
+    max-height:
+      calc(100vh - 24px);
+
   }
 
-  .detail-row {
-    gap: 15px;
+
+  .modal-header {
+
+    padding:
+      17px;
+
   }
 
-  .detail-row strong {
-    max-width: 55%;
+
+  .modal-body {
+
+    padding:
+      17px;
+
+  }
+
+
+  .modal-footer {
+
+    padding:
+      13px 17px;
+
+  }
+
+
+  .info-grid {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+
+  .full-width {
+
+    grid-column:
+      auto;
+
+  }
+
+
+  .book-section {
+
+    align-items:
+      flex-start;
+
+  }
+
+
+  .book-info h3 {
+
+    white-space:
+      normal;
+
   }
 
 }
 
 </style>
+```
+
+### Field mapping ជាមួយ Backend របស់អ្នក
+
+| Frontend               | Backend `BorrowerResponse` |
+| ---------------------- | -------------------------- |
+| `borrowing.id`         | `id`                       |
+| `borrowing.userId`     | `userId`                   |
+| `borrowing.userName`   | `userName`                 |
+| `borrowing.bookId`     | `bookId`                   |
+| `borrowing.bookImage`  | `bookImage`                |
+| `borrowing.bookTitle`  | `bookTitle`                |
+| `borrowing.borrowDate` | `borrowDate`               |
+| `borrowing.dueDate`    | `dueDate`                  |
+| `borrowing.returnDate` | `returnDate`               |
+| `borrowing.fine`       | `fine`                     |
+| `borrowing.status`     | `status`                   |
+
+**ចំណុចសំខាន់:** នៅពេលចុច **View** ក្នុង

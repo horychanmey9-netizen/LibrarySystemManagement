@@ -208,6 +208,11 @@ export default {
           path: "/user/setting",
           icon: "bi bi-gear",
         },
+        {
+          label: "MyFavorite",
+          path: "/user/myfavorite",
+          icon: "bi bi-heart",
+        },
 
       ],
 

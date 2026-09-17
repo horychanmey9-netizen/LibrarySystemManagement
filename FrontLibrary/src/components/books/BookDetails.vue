@@ -1,4 +1,3 @@
-
 <template>
   <!-- ================= OVERLAY ================= -->
   <div
@@ -18,7 +17,7 @@
     >
 
       <!-- ================= HEADER ================= -->
-      <divgit push origin main
+      <div
         class="flex items-center justify-between
                px-6 py-4
                border-b border-slate-200"
@@ -34,6 +33,8 @@
           </p>
         </div>
 
+
+        <!-- CLOSE -->
         <button
           type="button"
           @click="$emit('close')"
@@ -48,7 +49,7 @@
           ✕
         </button>
 
-      </divgit>
+      </div>
 
 
       <!-- ================= CONTENT ================= -->
@@ -95,6 +96,7 @@
             <!-- ================= STATUS ================= -->
             <div class="mt-4">
 
+              <!-- AVAILABLE -->
               <div
                 v-if="isAvailable"
                 class="flex items-center
@@ -110,6 +112,8 @@
                 Available
               </div>
 
+
+              <!-- UNAVAILABLE -->
               <div
                 v-else
                 class="flex items-center
@@ -158,17 +162,17 @@
             <div
               class="grid
                      grid-cols-2
-                     sm:grid-cols-3
                      gap-4
                      mt-7"
             >
 
-              <!-- Quantity -->
+              <!-- ================= QUANTITY ================= -->
               <div
                 class="bg-slate-50
                        rounded-xl
                        p-4"
               >
+
                 <p
                   class="text-xs
                          text-slate-400
@@ -184,17 +188,19 @@
                          font-bold
                          text-slate-800"
                 >
-                  {{ book.qty ?? 0 }}
+                  {{ book.qty ?? book.quantity ?? 0 }}
                 </p>
+
               </div>
 
 
-              <!-- Pages -->
+              <!-- ================= PAGES ================= -->
               <div
                 class="bg-slate-50
                        rounded-xl
                        p-4"
               >
+
                 <p
                   class="text-xs
                          text-slate-400
@@ -212,15 +218,45 @@
                 >
                   {{ book.pages || "-" }}
                 </p>
+
               </div>
 
 
-              <!-- Language -->
+              <!-- ================= PUBLICATION YEAR ================= -->
               <div
                 class="bg-slate-50
                        rounded-xl
                        p-4"
               >
+
+                <p
+                  class="text-xs
+                         text-slate-400
+                         font-semibold
+                         uppercase"
+                >
+                  Publication Year
+                </p>
+
+                <p
+                  class="mt-1
+                         text-lg
+                         font-bold
+                         text-slate-800"
+                >
+                  {{ book.publicationYear || "-" }}
+                </p>
+
+              </div>
+
+
+              <!-- ================= LANGUAGE ================= -->
+              <div
+                class="bg-slate-50
+                       rounded-xl
+                       p-4"
+              >
+
                 <p
                   class="text-xs
                          text-slate-400
@@ -238,17 +274,18 @@
                 >
                   {{ book.language || "-" }}
                 </p>
+
               </div>
 
 
-              <!-- ISBN -->
+              <!-- ================= ISBN ================= -->
               <div
                 class="col-span-2
-                       sm:col-span-3
                        bg-slate-50
                        rounded-xl
                        p-4"
               >
+
                 <p
                   class="text-xs
                          text-slate-400
@@ -262,10 +299,12 @@
                   class="mt-1
                          font-mono
                          text-slate-800
-                         font-medium"
+                         font-medium
+                         break-all"
                 >
                   {{ book.isbn || "-" }}
                 </p>
+
               </div>
 
             </div>
@@ -330,7 +369,11 @@
                 </span>
 
                 <span>
-                  {{ borrowing ? "Sending Request..." : "Borrow Book" }}
+                  {{
+                    borrowing
+                      ? "Sending Request..."
+                      : "Borrow Book"
+                  }}
                 </span>
 
               </button>
@@ -372,7 +415,7 @@
             </div>
 
 
-            <!-- ================= MESSAGE ================= -->
+            <!-- ================= SUCCESS MESSAGE ================= -->
             <div
               v-if="successMessage"
               class="mt-4
@@ -388,6 +431,7 @@
             </div>
 
 
+            <!-- ================= ERROR MESSAGE ================= -->
             <div
               v-if="errorMessage"
               class="mt-4
@@ -415,6 +459,7 @@
 
 
 <script>
+
 import {
   createBorrowing
 } from "../../service/borrowingService.js";
@@ -424,6 +469,10 @@ export default {
 
   name: "BookDetail",
 
+
+  // =====================================================
+  // PROPS
+  // =====================================================
 
   props: {
 
@@ -435,11 +484,19 @@ export default {
   },
 
 
+  // =====================================================
+  // EMITS
+  // =====================================================
+
   emits: [
     "close",
     "borrow"
   ],
 
+
+  // =====================================================
+  // DATA
+  // =====================================================
 
   data() {
 
@@ -456,13 +513,26 @@ export default {
   },
 
 
+  // =====================================================
+  // COMPUTED
+  // =====================================================
+
   computed: {
 
     isAvailable() {
 
+      // -----------------------------------------------
+      // If backend sends status as false
+      // -----------------------------------------------
+
       if (this.book.status === false) {
         return false;
       }
+
+
+      // -----------------------------------------------
+      // Check quantity
+      // -----------------------------------------------
 
       const quantity =
         Number(
@@ -472,6 +542,7 @@ export default {
           0
         );
 
+
       return quantity > 0;
 
     }
@@ -479,18 +550,30 @@ export default {
   },
 
 
+  // =====================================================
+  // METHODS
+  // =====================================================
+
   methods: {
 
-    // =====================================================
+    // ===================================================
     // REQUEST BORROW
-    // =====================================================
+    // ===================================================
 
     async requestBorrow() {
+
+      // -----------------------------------------------
+      // Prevent double click
+      // -----------------------------------------------
 
       if (this.borrowing) {
         return;
       }
 
+
+      // -----------------------------------------------
+      // Clear old messages
+      // -----------------------------------------------
 
       this.successMessage = "";
 
@@ -530,7 +613,7 @@ export default {
 
 
       // -----------------------------------------------
-      // USER
+      // GET USER
       // -----------------------------------------------
 
       const storedUser =
@@ -556,6 +639,10 @@ export default {
 
       }
 
+
+      // -----------------------------------------------
+      // CHECK USER ID
+      // -----------------------------------------------
 
       if (!user?.id) {
 
@@ -584,12 +671,23 @@ export default {
       // -----------------------------------------------
 
       const payload = {
-  userId: Number(user.id),
-  bookId: Number(this.book.id),
-  borrowDate: borrowDate,
-  dueDate: dueDate,
-  returnDate: null
-};
+
+        userId:
+          Number(user.id),
+
+        bookId:
+          Number(this.book.id),
+
+        borrowDate:
+          borrowDate,
+
+        dueDate:
+          dueDate,
+
+        returnDate:
+          null
+
+      };
 
 
       console.log(
@@ -597,6 +695,10 @@ export default {
         payload
       );
 
+
+      // -----------------------------------------------
+      // START REQUEST
+      // -----------------------------------------------
 
       this.borrowing = true;
 
@@ -627,7 +729,10 @@ export default {
           "Borrow request sent successfully. Please wait for admin approval.";
 
 
-        // Send event to parent
+        // ---------------------------------------------
+        // SEND EVENT TO PARENT
+        // ---------------------------------------------
+
         this.$emit(
           "borrow",
           {
@@ -645,9 +750,14 @@ export default {
         );
 
 
+        // ---------------------------------------------
+        // ERROR MESSAGE
+        // ---------------------------------------------
+
         this.errorMessage =
           error?.response?.data?.message ||
           error?.response?.data?.msg ||
+          error?.response?.data?.error ||
           error?.message ||
           "Failed to send borrow request.";
 
@@ -660,9 +770,9 @@ export default {
     },
 
 
-    // =====================================================
-    // TODAY
-    // =====================================================
+    // ===================================================
+    // GET TODAY
+    // ===================================================
 
     getToday() {
 
@@ -691,9 +801,9 @@ export default {
     },
 
 
-    // =====================================================
-    // DUE DATE
-    // =====================================================
+    // ===================================================
+    // GET DUE DATE
+    // ===================================================
 
     getDueDate(days) {
 
@@ -729,5 +839,5 @@ export default {
   }
 
 };
+
 </script>
-```

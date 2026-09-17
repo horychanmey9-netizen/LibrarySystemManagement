@@ -1,5 +1,6 @@
 
 <template>
+
   <div
     class="min-h-screen w-full bg-slate-50 p-4 sm:p-6 lg:p-8"
   >
@@ -21,6 +22,7 @@
     >
 
       <!-- HEADER -->
+
       <div class="mb-6">
 
         <h1
@@ -51,6 +53,7 @@
       >
 
         <!-- SEARCH -->
+
         <div
           class="flex h-[58px] items-center gap-3
                  rounded-[14px]
@@ -78,6 +81,7 @@
 
 
         <!-- CATEGORY -->
+
         <div class="relative h-[58px]">
 
           <select
@@ -125,6 +129,7 @@
 
 
         <!-- AVAILABILITY -->
+
         <div class="relative h-[58px]">
 
           <select
@@ -168,6 +173,7 @@
 
 
         <!-- SORT -->
+
         <div class="relative h-[58px]">
 
           <select
@@ -734,6 +740,60 @@
 
               </label>
 
+
+              <!-- FRENCH -->
+
+              <label
+                class="relative
+                       flex
+                       min-h-5
+                       cursor-pointer
+                       items-center
+                       gap-2.5"
+              >
+
+                <input
+                  type="checkbox"
+                  value="French"
+                  v-model="selectedLanguages"
+                  class="peer
+                         absolute
+                         h-0
+                         w-0
+                         opacity-0"
+                />
+
+                <span
+                  class="h-[15px]
+                         w-[15px]
+                         shrink-0
+                         rounded-[3px]
+                         border-[1.5px]
+                         border-slate-400
+                         bg-white
+                         transition
+                         peer-checked:border-blue-600
+                         peer-checked:bg-blue-600
+                         peer-checked:shadow-[inset_0_0_0_3px_white]"
+                ></span>
+
+                <span
+                  class="flex-1
+                         text-sm
+                         text-slate-700"
+                >
+                  French
+                </span>
+
+                <span
+                  class="text-xs
+                         text-slate-400"
+                >
+                  {{ getLanguageCount("French") }}
+                </span>
+
+              </label>
+
             </div>
 
           </div>
@@ -777,7 +837,7 @@
               class="font-semibold
                      text-slate-600"
             >
-              {{ filteredBooks.length }}
+              {{ visibleBooks.length }}
             </strong>
 
             of
@@ -786,7 +846,7 @@
               class="font-semibold
                      text-slate-600"
             >
-              {{ books.length }}
+              {{ filteredBooks.length }}
             </strong>
 
             books
@@ -952,7 +1012,7 @@
         <div
           v-else-if="
             viewMode === 'grid' &&
-            filteredBooks.length > 0
+            visibleBooks.length > 0
           "
           class="grid
                  grid-cols-1
@@ -962,7 +1022,7 @@
         >
 
           <BookCard
-            v-for="book in filteredBooks"
+            v-for="book in visibleBooks"
             :key="book.id"
             :book="book"
             @bookmark="toggleBookmark"
@@ -979,7 +1039,7 @@
         <div
           v-else-if="
             viewMode === 'list' &&
-            filteredBooks.length > 0
+            visibleBooks.length > 0
           "
           class="flex
                  flex-col
@@ -987,7 +1047,7 @@
         >
 
           <div
-            v-for="book in filteredBooks"
+            v-for="book in visibleBooks"
             :key="book.id"
             class="flex
                    items-center
@@ -1149,11 +1209,52 @@
 
 
         <!-- =================================================
+             LOAD MORE
+        ================================================== -->
+
+        <div
+          v-if="
+            !loadingBooks &&
+            !bookError &&
+            hasMoreBooks
+          "
+          class="mt-8 flex justify-center"
+        >
+
+          <button
+            type="button"
+            @click="loadMore"
+            class="rounded-[10px]
+                   border
+                   border-blue-600
+                   bg-white
+                   px-10
+                   py-3
+                   text-sm
+                   font-medium
+                   text-blue-600
+                   transition
+                   hover:bg-blue-600
+                   hover:text-white"
+          >
+
+            Load More
+
+          </button>
+
+        </div>
+
+
+        <!-- =================================================
              EMPTY STATE
         ================================================== -->
 
         <div
-          v-else
+          v-if="
+            !loadingBooks &&
+            !bookError &&
+            filteredBooks.length === 0
+          "
           class="rounded-[14px]
                  border
                  border-slate-200
@@ -1223,6 +1324,7 @@
     />
 
   </div>
+
 </template>
 
 
@@ -1327,6 +1429,15 @@ export default {
       loadingBooks: false,
 
       bookError: null,
+
+
+      // ==================================================
+      // LOAD MORE
+      // ==================================================
+
+      displayLimit: 16,
+
+      loadMoreAmount: 16,
 
 
       // ==================================================
@@ -1660,6 +1771,34 @@ export default {
 
 
     // ==================================================
+    // VISIBLE BOOKS
+    // ==================================================
+
+    visibleBooks() {
+
+      return this.filteredBooks.slice(
+        0,
+        this.displayLimit
+      );
+
+    },
+
+
+    // ==================================================
+    // HAS MORE BOOKS
+    // ==================================================
+
+    hasMoreBooks() {
+
+      return (
+        this.displayLimit <
+        this.filteredBooks.length
+      );
+
+    },
+
+
+    // ==================================================
     // AVAILABLE COUNT
     // ==================================================
 
@@ -1815,7 +1954,10 @@ export default {
                 book.image ||
                 book.imageUrl ||
                 book.coverImage ||
-                null
+                null,
+
+              publicationYear:
+                book.publicationYear || null
 
             };
 
@@ -1828,6 +1970,7 @@ export default {
         );
 
       }
+
 
       catch (error) {
 
@@ -1845,6 +1988,7 @@ export default {
         this.books = [];
 
       }
+
 
       finally {
 
@@ -1914,6 +2058,7 @@ export default {
 
       }
 
+
       catch (error) {
 
         console.error(
@@ -1931,6 +2076,7 @@ export default {
           [];
 
       }
+
 
       finally {
 
@@ -1987,6 +2133,9 @@ export default {
 
     syncCategoryFromCheckbox() {
 
+      this.displayLimit = 16;
+
+
       if (
         this.selectedCategories.length === 0
       ) {
@@ -2001,6 +2150,7 @@ export default {
             "BrowseBooks"
 
         });
+
 
         return;
 
@@ -2035,6 +2185,7 @@ export default {
 
       }
 
+
       else {
 
         this.selectedCategory =
@@ -2059,6 +2210,9 @@ export default {
 
     syncAvailability() {
 
+      this.displayLimit = 16;
+
+
       if (
         this.selectedAvailabilityFilters.length === 0
       ) {
@@ -2080,12 +2234,25 @@ export default {
 
       }
 
+
       else {
 
         this.selectedAvailability =
           "All";
 
       }
+
+    },
+
+
+    // ==================================================
+    // LOAD MORE
+    // ==================================================
+
+    loadMore() {
+
+      this.displayLimit +=
+        this.loadMoreAmount;
 
     },
 
@@ -2175,6 +2342,10 @@ export default {
         "default";
 
 
+      this.displayLimit =
+        16;
+
+
       this.$router.push({
 
         name:
@@ -2250,7 +2421,7 @@ export default {
 
 
   // =====================================================
-  // WATCH ROUTE
+  // WATCH ROUTE + FILTER
   // =====================================================
 
   watch: {
@@ -2258,6 +2429,75 @@ export default {
     "$route.query.category"() {
 
       this.readCategoryFromURL();
+
+      this.displayLimit = 15;
+
+    },
+
+
+    searchQuery() {
+
+      this.displayLimit = 15;
+
+    },
+
+
+    selectedCategory() {
+
+      this.displayLimit = 15;
+
+    },
+
+
+    selectedAvailability() {
+
+      this.displayLimit = 15;
+
+    },
+
+
+    selectedCategories: {
+
+      handler() {
+
+        this.displayLimit = 15;
+
+      },
+
+      deep: true
+
+    },
+
+
+    selectedAvailabilityFilters: {
+
+      handler() {
+
+        this.displayLimit = 15;
+
+      },
+
+      deep: true
+
+    },
+
+
+    selectedLanguages: {
+
+      handler() {
+
+        this.displayLimit = 15;
+
+      },
+
+      deep: true
+
+    },
+
+
+    selectedSort() {
+
+      this.displayLimit = 15;
 
     }
 

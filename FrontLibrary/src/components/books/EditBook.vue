@@ -1,3 +1,4 @@
+
 <template>
 
   <div class="edit-book-page">
@@ -241,66 +242,92 @@
 
 
         <!-- =================================================
-             ROW 3
+     ROW 3
+================================================== -->
+
+<div class="form-row">
+
+  <!-- QUANTITY -->
+
+  <div class="form-group">
+
+    <label>
+      Quantity
+      <span class="required">*</span>
+    </label>
+
+    <input
+      v-model.number="form.quantity"
+      type="number"
+      min="0"
+      placeholder="Enter quantity"
+      required
+    />
+
+    <small class="helper-text">
+      Current quantity:
+      {{ form.quantity }}
+    </small>
+
+  </div>
+
+
+  <!-- PUBLICATION DATE -->
+
+  <div class="form-group">
+
+    <label>
+      Publication Date
+    </label>
+
+    <input
+      v-model="form.publicationYear"
+      type="date"
+    />
+
+  </div>
+
+</div>
+
+
+        <!-- =================================================
+             ROW 4
         ================================================== -->
 
         <div class="form-row">
 
 
-          <!-- QUANTITY -->
+          <!-- LANGUAGE -->
 
           <div class="form-group">
 
             <label>
-              Quantity
-              <span class="required">*</span>
+              Language
             </label>
 
             <input
-              v-model.number="form.quantity"
-              type="number"
-              min="0"
-              placeholder="Enter quantity"
-              required
+              v-model.trim="form.language"
+              type="text"
+              placeholder="Enter language"
             />
-
-            <small class="helper-text">
-
-              Current quantity:
-              {{ form.quantity }}
-
-            </small>
 
           </div>
 
 
-          <!-- STATUS -->
+          <!-- PAGES -->
 
           <div class="form-group">
 
             <label>
-              Status
-              <span class="required">*</span>
+              Pages
             </label>
 
-            <select
-              v-model="form.status"
-              required
-            >
-
-              <option value="Available">
-                Available
-              </option>
-
-              <option value="Borrowed">
-                Borrowed
-              </option>
-
-              <option value="Overdue">
-                Overdue
-              </option>
-
-            </select>
+            <input
+              v-model.number="form.pages"
+              type="number"
+              min="0"
+              placeholder="Enter number of pages"
+            />
 
           </div>
 
@@ -419,7 +446,7 @@
 
 
         <!-- =================================================
-             BOOK ID
+             BOOK INFO
         ================================================== -->
 
         <div
@@ -461,6 +488,32 @@
 
             <strong>
               {{ form.quantity }}
+            </strong>
+
+          </div>
+
+
+          <div class="info-item">
+
+            <span class="info-label">
+              Language
+            </span>
+
+            <strong>
+              {{ form.language || "-" }}
+            </strong>
+
+          </div>
+
+
+          <div class="info-item">
+
+            <span class="info-label">
+              Pages
+            </span>
+
+            <strong>
+              {{ form.pages ?? "-" }}
             </strong>
 
           </div>
@@ -610,6 +663,14 @@ const successMessage =
 
 
 // =====================================================
+// ORIGINAL BOOK
+// =====================================================
+
+const originalBook =
+  ref(null);
+
+
+// =====================================================
 // NEW IMAGE
 // =====================================================
 
@@ -650,7 +711,13 @@ const form =
 
     quantity: 0,
 
-    status: "Available"
+    status: "Available",
+
+    language: "",
+
+    pages: null,
+
+    publicationYear: ""
 
   });
 
@@ -677,17 +744,26 @@ function resetForm() {
 
     quantity: 0,
 
-    status: "Available"
+    status: "Available",
+
+    language: "",
+
+    pages: null,
+
+    publicationYear: ""
 
   };
+
+
+  originalBook.value =
+    null;
 
 
   newImage.value =
     null;
 
 
-  newImagePreview.value =
-    "";
+  clearNewImagePreview();
 
 
   currentImage.value =
@@ -715,6 +791,91 @@ function clearNewImagePreview() {
 
   newImagePreview.value =
     "";
+
+}
+
+
+// =====================================================
+// GET CATEGORY ID
+// =====================================================
+
+function getBookCategoryId(book) {
+
+  if (!book) {
+
+    return "";
+
+  }
+
+
+  // ===================================================
+  // FIRST: categoryId
+  // ===================================================
+
+  if (
+    book.categoryId !== undefined &&
+    book.categoryId !== null &&
+    book.categoryId !== ""
+  ) {
+
+    return String(
+      book.categoryId
+    );
+
+  }
+
+
+  // ===================================================
+  // SECOND: category.id
+  // ===================================================
+
+  if (
+    book.category &&
+    typeof book.category === "object" &&
+    book.category.id !== undefined &&
+    book.category.id !== null
+  ) {
+
+    return String(
+      book.category.id
+    );
+
+  }
+
+
+  // ===================================================
+  // THIRD: category name
+  // ===================================================
+
+  if (
+    typeof book.category === "string" &&
+    categories.value.length > 0
+  ) {
+
+    const category =
+      categories.value.find(
+        item =>
+          String(item.name)
+            .trim()
+            .toLowerCase() ===
+          String(book.category)
+            .trim()
+            .toLowerCase()
+      );
+
+
+    if (category) {
+
+      return String(
+        category.id
+      );
+
+    }
+
+  }
+
+
+  return "";
 
 }
 
@@ -749,45 +910,34 @@ function loadBook(book) {
 
 
   // ===================================================
+  // KEEP ORIGINAL BOOK
+  // ===================================================
+
+  originalBook.value = {
+
+    ...book
+
+  };
+
+
+  // ===================================================
   // CATEGORY
   // ===================================================
 
-  let categoryId = "";
+  const categoryId =
+    getBookCategoryId(
+      book
+    );
 
 
-  if (
-    book.categoryId !==
-      undefined &&
-    book.categoryId !== null &&
-    book.categoryId !== ""
-  ) {
-
-    categoryId =
-      String(
-        book.categoryId
-      );
-
-  }
-
-  else if (
-    book.category &&
-    book.category.id !==
-      undefined &&
-    book.category.id !== null
-  ) {
-
-    categoryId =
-      String(
-        book.category.id
-      );
-
-  }
+  console.log(
+    "OLD CATEGORY ID:",
+    categoryId
+  );
 
 
   // ===================================================
   // QUANTITY
-  // Backend uses qty
-  // Frontend form uses quantity
   // ===================================================
 
   let quantity = 0;
@@ -799,18 +949,21 @@ function loadBook(book) {
   ) {
 
     quantity =
-      Number(book.qty);
+      Number(
+        book.qty
+      );
 
   }
 
   else if (
-    book.quantity !==
-      undefined &&
+    book.quantity !== undefined &&
     book.quantity !== null
   ) {
 
     quantity =
-      Number(book.quantity);
+      Number(
+        book.quantity
+      );
 
   }
 
@@ -868,13 +1021,26 @@ function loadBook(book) {
 
     status:
       book.status ??
-      "Available"
+      "Available",
+
+    language:
+      book.language ??
+      "",
+
+    pages:
+      book.pages ??
+      null,
+
+    publicationYear:
+    book.publicationYear
+    ? String(book.publicationYear).substring(0, 10)
+    : ""
 
   };
 
 
   // ===================================================
-  // SET CURRENT IMAGE
+  // CURRENT IMAGE
   // ===================================================
 
   currentImage.value =
@@ -896,23 +1062,18 @@ function loadBook(book) {
   // ===================================================
 
   console.log(
-    "EDIT FORM:",
-    form.value
-  );
-
-  console.log(
-    "OLD IMAGE:",
-    currentImage.value
-  );
-
-  console.log(
-    "OLD CATEGORY:",
+    "FORM CATEGORY ID:",
     form.value.categoryId
   );
 
   console.log(
-    "OLD QUANTITY:",
-    form.value.quantity
+    "CATEGORIES:",
+    categories.value
+  );
+
+  console.log(
+    "FORM:",
+    form.value
   );
 
 }
@@ -945,7 +1106,9 @@ function handleImageChange(event) {
   // ===================================================
 
   if (
-    !file.type.startsWith("image/")
+    !file.type.startsWith(
+      "image/"
+    )
   ) {
 
     errorMessage.value =
@@ -1059,8 +1222,10 @@ async function fetchCategories() {
     let data = [];
 
 
-    // Backend:
-    // [...]
+    // =================================================
+    // RESPONSE ARRAY
+    // =================================================
+
     if (
       Array.isArray(response)
     ) {
@@ -1071,8 +1236,10 @@ async function fetchCategories() {
     }
 
 
-    // Backend:
-    // { data: [...] }
+    // =================================================
+    // RESPONSE { data: [] }
+    // =================================================
+
     else if (
       Array.isArray(
         response?.data
@@ -1085,8 +1252,10 @@ async function fetchCategories() {
     }
 
 
-    // Backend:
-    // { data: { data: [...] } }
+    // =================================================
+    // RESPONSE { data: { data: [] } }
+    // =================================================
+
     else if (
       Array.isArray(
         response?.data?.data
@@ -1099,21 +1268,37 @@ async function fetchCategories() {
     }
 
 
+    // =================================================
+    // NORMALIZE CATEGORY
+    // =================================================
+
     categories.value =
-      data;
+      data
+        .filter(
+          category =>
+            category &&
+            category.id !== undefined &&
+            category.id !== null
+        )
+        .map(
+          category => ({
+
+            ...category,
+
+            id:
+              String(
+                category.id
+              )
+
+          })
+        );
 
 
     console.log(
-      "CATEGORIES:",
+      "NORMALIZED CATEGORIES:",
       categories.value
     );
 
-
-    // =================================================
-    // IMPORTANT:
-    // Do NOT change categoryId here.
-    // loadBook() already loaded old category.
-    // =================================================
 
   }
   catch (error) {
@@ -1205,16 +1390,41 @@ async function updateBook() {
 
 
   if (
-    form.value.quantity ===
-      null ||
-    form.value.quantity ===
-      undefined ||
-    Number(form.value.quantity) <
-      0
+    form.value.quantity === null ||
+    form.value.quantity === undefined ||
+    Number(form.value.quantity) < 0
   ) {
 
     errorMessage.value =
       "Quantity cannot be negative.";
+
+    return;
+
+  }
+
+
+  if (
+    form.value.pages !== null &&
+    form.value.pages !== undefined &&
+    Number(form.value.pages) < 0
+  ) {
+
+    errorMessage.value =
+      "Pages cannot be negative.";
+
+    return;
+
+  }
+
+
+  if (
+    form.value.publicationYear !== null &&
+    form.value.publicationYear !== undefined &&
+    Number(form.value.publicationYear) < 0
+  ) {
+
+    errorMessage.value =
+      "Publication year cannot be negative.";
 
     return;
 
@@ -1233,13 +1443,6 @@ async function updateBook() {
 
     // =================================================
     // PAYLOAD
-    //
-    // IMPORTANT:
-    // Backend BookRequest uses:
-    //
-    // qty
-    //
-    // NOT quantity
     // =================================================
 
     const payload = {
@@ -1273,11 +1476,24 @@ async function updateBook() {
       status:
         form.value.status,
 
-      // Only new image.
-      // If null -> old image remains.
+      language:
+        form.value.language || null,
+
+      pages:
+        form.value.pages !== null &&
+        form.value.pages !== undefined
+          ? Number(form.value.pages)
+          : null,
+
+      publicationYear:
+  form.value.publicationYear !== null &&
+  form.value.publicationYear !== undefined &&
+  form.value.publicationYear !== ""
+    ? form.value.publicationYear
+    : null,
+
       file:
-        newImage.value ||
-        null
+        newImage.value || null
 
     };
 
@@ -1296,28 +1512,13 @@ async function updateBook() {
     );
 
     console.log(
-      "TITLE:",
-      payload.title
-    );
-
-    console.log(
-      "AUTHOR:",
-      payload.author
+      "UPDATE PAYLOAD:",
+      payload
     );
 
     console.log(
       "CATEGORY ID:",
       payload.categoryId
-    );
-
-    console.log(
-      "QUANTITY:",
-      payload.qty
-    );
-
-    console.log(
-      "STATUS:",
-      payload.status
     );
 
     console.log(
@@ -1353,6 +1554,46 @@ async function updateBook() {
 
 
     // =================================================
+    // GET UPDATED BOOK
+    // =================================================
+
+    const responseBook =
+      response?.data ||
+      response;
+
+
+    // =================================================
+    // UPDATED BOOK
+    // =================================================
+
+    const updatedBook = {
+
+      ...(originalBook.value || {}),
+
+      ...form.value,
+
+      qty:
+        form.value.quantity,
+
+      categoryId:
+        Number(
+          form.value.categoryId
+        ),
+
+      image:
+        responseBook?.image ||
+        originalBook.value?.image ||
+        currentImage.value,
+
+      imageUrl:
+        responseBook?.image ||
+        originalBook.value?.image ||
+        currentImage.value
+
+    };
+
+
+    // =================================================
     // SUCCESS
     // =================================================
 
@@ -1360,18 +1601,9 @@ async function updateBook() {
       "Book updated successfully!";
 
 
-    // Backend:
-    //
-    // {
-    //   msg: "...",
-    //   status: 200,
-    //   data: {...}
-    // }
-
-    const updatedBook =
-      response?.data ||
-      response;
-
+    // =================================================
+    // SEND UPDATED BOOK TO PARENT
+    // =================================================
 
     emit(
       "updated",
@@ -1390,6 +1622,7 @@ async function updateBook() {
       );
 
     }, 800);
+
 
   }
   catch (error) {
@@ -1484,8 +1717,16 @@ onMounted(
 
     try {
 
+      // =================================================
+      // FIRST LOAD CATEGORIES
+      // =================================================
+
       await fetchCategories();
 
+
+      // =================================================
+      // THEN LOAD BOOK
+      // =================================================
 
       if (
         props.book
@@ -1510,6 +1751,7 @@ onMounted(
         "EDIT BOOK LOAD ERROR:",
         error
       );
+
 
       errorMessage.value =
         error?.message ||
