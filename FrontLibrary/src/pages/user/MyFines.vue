@@ -322,9 +322,7 @@ export default {
   width: 100%;
   min-height: 100%;
 
-  padding:
-    1.5rem
-    2rem;
+  padding:15px 80px;
 
   box-sizing: border-box;
 

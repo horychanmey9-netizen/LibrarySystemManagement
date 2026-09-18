@@ -715,14 +715,10 @@ async function renewBook(item) {
 
 .borrowings-page {
 
-  min-height:
-    calc(100vh - 70px);
-
-  padding: 30px;
-
-  background: #f8fafc;
-
-  box-sizing: border-box;
+ min-height: calc(100vh - 70px); 
+ padding: 60px; 
+ background: #f8fafc; 
+ box-sizing: border-box; 
 
 }
 

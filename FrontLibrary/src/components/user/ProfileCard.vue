@@ -153,7 +153,7 @@
             </div>
 
             <span>
-              Login &amp; Password
+              Chang password
             </span>
 
           </div>
@@ -169,17 +169,6 @@
             @click="handleLogout"
           >
 
-            <div
-              class="w-9 h-9 rounded-lg
-                     bg-indigo-50
-                     flex items-center justify-center"
-            >
-              <i class="bi bi-box-arrow-right"></i>
-            </div>
-
-            <span>
-              Log Out
-            </span>
 
           </div>
 
@@ -189,43 +178,7 @@
         <!-- =====================================================
              SECURITY CARD
         ====================================================== -->
-        <div class="mt-auto pt-8">
-
-          <div
-            class="rounded-2xl
-                   border border-pink-100
-                   bg-gradient-to-br
-                   from-white to-pink-50
-                   p-5"
-          >
-
-            <div
-              class="w-10 h-10 rounded-xl
-                     bg-indigo-100
-                     flex items-center justify-center
-                     text-indigo-600 mb-4"
-            >
-              <i class="bi bi-shield-lock-fill"></i>
-            </div>
-
-
-            <h3
-              class="font-semibold text-slate-700"
-            >
-              {{ securityTitle }}
-            </h3>
-
-
-            <p
-              class="text-sm text-slate-400
-                     leading-6 mt-2"
-            >
-              {{ securityDescription }}
-            </p>
-
-          </div>
-
-        </div>
+       
 
       </aside>
 
@@ -238,7 +191,7 @@
         <!-- ===================================================
              HEADER
         ==================================================== -->
-        <div class="mb-8">
+        <div class="mb-6">
 
           <h1
             class="text-2xl md:text-3xl
@@ -264,7 +217,7 @@
 
           <label
             class="block text-sm font-medium
-                   text-slate-600 mb-3"
+                   text-slate-600 mb-2"
           >
             Gender
           </label>
@@ -321,7 +274,7 @@
         ==================================================== -->
         <div
           class="grid grid-cols-1 md:grid-cols-2
-                 gap-5 mb-6"
+                 gap-5 mb-3"
         >
 
           <!-- FULL NAME -->
@@ -415,7 +368,7 @@
         <!-- ===================================================
              EMAIL
         ==================================================== -->
-        <div class="mb-6">
+        <div class="mb-3">
 
           <label
             class="block text-sm font-medium
@@ -474,7 +427,7 @@
         <!-- ===================================================
              ADDRESS
         ==================================================== -->
-        <div class="mb-6">
+        <div class="mb-3">
 
           <label
             class="block text-sm font-medium
@@ -567,8 +520,8 @@
         <div
           class="flex flex-col-reverse sm:flex-row
                  justify-end gap-3
-                 mt-10 pt-6
-                 border-t border-slate-100"
+                 mt-6 pt-3
+                "
         >
 
           <!-- DISCARD -->

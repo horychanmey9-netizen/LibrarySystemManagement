@@ -1,6 +1,6 @@
 <template>
     <div
-        class="min-h-screen bg-slate-100 flex items-center justify-center px-4 py-10"
+        class="min-h-screen bg-slate-100 flex items-center justify-center px-4 py-10" 
     >
         <div class="w-full max-w-md">
 
@@ -9,14 +9,10 @@
 
             <!-- TITLE -->
             <h2
-            class="text-2xl text-center font-bold text-slate-800 mb-2"
+            class="text-2xl text-center font-bold text-slate-800 mb-8"
             >
             Reset Password
             </h2>
-
-            <p class="text-center text-slate-500 text-sm mb-6">
-            Enter your new password below.
-            </p>
 
             <!-- SUCCESS MESSAGE -->
             <div
@@ -111,7 +107,7 @@
             <button
                 type="submit"
                 :disabled="loading"
-                class="w-full bg-slate-800 hover:bg-slate-900
+                class="w-full  bg-indigo-600 hover:bg-indigo-700
                     disabled:bg-slate-400 disabled:cursor-not-allowed
                     text-white font-semibold py-3 rounded-lg
                     transition duration-200"
@@ -127,7 +123,7 @@
             <button
                 type="button"
                 @click="goToLogin"
-                class="text-sm text-slate-600 hover:text-slate-900 font-medium"
+                class="text-sm text-indigo-600 font-semibold hover:underline"
             >
                 ← Back to Login
             </button>

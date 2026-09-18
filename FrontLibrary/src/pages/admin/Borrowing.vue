@@ -1,7 +1,6 @@
 <template>
 
-  <div class="min-h-screen bg-slate-50 p-6">
-
+  <div class="min-h-screen bg-slate-50 p-[60px] box-border max-md:p-5 max-[550px]:p-[15px]">
     <!-- =====================================================
          HEADER
     ====================================================== -->
@@ -192,7 +191,7 @@
 
         <!-- SEARCH -->
 
-        <div class="relative w-full lg:max-w-md">
+        <div class="relative w-full lg:w-80">
 
           <span
             class="absolute left-4 top-1/2

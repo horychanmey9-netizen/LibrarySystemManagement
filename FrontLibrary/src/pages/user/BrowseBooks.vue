@@ -265,7 +265,6 @@
 
         <div class="p-5">
 
-
           <!-- FILTER HEADER -->
 
           <div
@@ -321,8 +320,6 @@
             </h3>
 
 
-            <!-- LOADING -->
-
             <div
               v-if="loadingCategories"
               class="py-1
@@ -333,8 +330,6 @@
             </div>
 
 
-            <!-- ERROR -->
-
             <div
               v-else-if="categoryError"
               class="text-xs
@@ -344,8 +339,6 @@
               {{ categoryError }}
             </div>
 
-
-            <!-- CATEGORY LIST -->
 
             <div
               v-else
@@ -1344,6 +1337,12 @@ import {
   getCategories
 } from "../../service/categoryService.js";
 
+import {
+  getFavorites,
+  addFavorite,
+  deleteFavorite
+} from "../../service/favoriteService.js";
+
 
 export default {
 
@@ -1429,6 +1428,15 @@ export default {
       loadingBooks: false,
 
       bookError: null,
+
+
+      // ==================================================
+      // FAVORITES
+      // ==================================================
+
+      favoriteIds: [],
+
+      loadingFavorites: false,
 
 
       // ==================================================
@@ -1567,8 +1575,6 @@ export default {
         result =
           result.filter(book => {
 
-            // OTHER
-
             if (
               this.selectedCategories.includes(
                 "Other"
@@ -1591,8 +1597,6 @@ export default {
 
             }
 
-
-            // NORMAL CATEGORY
 
             return this.selectedCategories.includes(
               book.category
@@ -1836,7 +1840,8 @@ export default {
 
     await Promise.all([
       this.fetchCategories(),
-      this.fetchBooks()
+      this.fetchBooks(),
+      this.fetchFavorites()
     ]);
 
 
@@ -1929,7 +1934,9 @@ export default {
                 book.status === "AVAILABLE",
 
               bookmarked:
-                false,
+                this.favoriteIds.includes(
+                  book.id
+                ),
 
               qty:
                 Number(
@@ -1993,6 +2000,116 @@ export default {
       finally {
 
         this.loadingBooks = false;
+
+      }
+
+    },
+
+
+    // ==================================================
+    // FETCH FAVORITES
+    // ==================================================
+
+    async fetchFavorites() {
+
+      this.loadingFavorites = true;
+
+
+      try {
+
+        const result =
+          await getFavorites();
+
+
+        console.log(
+          "FAVORITE API RESPONSE:",
+          result
+        );
+
+
+        let favoriteData = [];
+
+
+        if (
+          result &&
+          Array.isArray(result.data)
+        ) {
+
+          favoriteData =
+            result.data;
+
+        }
+
+        else if (
+          Array.isArray(result)
+        ) {
+
+          favoriteData =
+            result;
+
+        }
+
+
+        this.favoriteIds =
+          favoriteData
+            .map(favorite =>
+              Number(favorite.bookId)
+            )
+            .filter(id =>
+              !Number.isNaN(id)
+            );
+
+
+        /*
+         * Update books if books
+         * have already loaded.
+         */
+
+        this.books =
+          this.books.map(book => {
+
+            return {
+
+              ...book,
+
+              bookmarked:
+                this.favoriteIds.includes(
+                  Number(book.id)
+                )
+
+            };
+
+          });
+
+
+        console.log(
+          "FAVORITE BOOK IDS:",
+          this.favoriteIds
+        );
+
+      }
+
+
+      catch (error) {
+
+        console.error(
+          "Fetch favorites error:",
+          error
+        );
+
+        /*
+         * If favorite API fails,
+         * keep books available.
+         */
+
+        this.favoriteIds = [];
+
+      }
+
+
+      finally {
+
+        this.loadingFavorites = false;
 
       }
 
@@ -2357,13 +2474,111 @@ export default {
 
 
     // ==================================================
-    // BOOKMARK
+    // BOOKMARK / FAVORITE
     // ==================================================
 
-    toggleBookmark(book) {
+    async toggleBookmark(book) {
 
-      book.bookmarked =
-        !book.bookmarked;
+      /*
+       * ADD FAVORITE
+       */
+
+      if (!book.bookmarked) {
+
+        try {
+
+          const favorite =
+            await addFavorite(book.id);
+
+
+          console.log(
+            "Favorite added:",
+            favorite
+          );
+
+
+          book.bookmarked =
+            true;
+
+
+          if (
+            !this.favoriteIds.includes(
+              Number(book.id)
+            )
+          ) {
+
+            this.favoriteIds.push(
+              Number(book.id)
+            );
+
+          }
+
+        }
+
+
+        catch (error) {
+
+          console.error(
+            "Add favorite error:",
+            error
+          );
+
+
+          alert(
+            error.message ||
+            "Failed to add favorite"
+          );
+
+        }
+
+        return;
+
+      }
+
+
+      /*
+       * REMOVE FAVORITE
+       */
+
+      try {
+
+        await deleteFavorite(book.id);
+
+
+        console.log(
+          "Favorite removed:",
+          book.id
+        );
+
+
+        book.bookmarked =
+          false;
+
+
+        this.favoriteIds =
+          this.favoriteIds.filter(
+            id =>
+              Number(id) !==
+              Number(book.id)
+          );
+
+      }
+
+
+      catch (error) {
+
+        console.error(
+          "Remove favorite error:",
+          error
+        );
+
+
+        alert(
+          error.message ||
+          "Failed to remove favorite"
+        );
+
+      }
 
     },
 

@@ -1,19 +1,6 @@
 <template>
   <div class="profile-page">
 
-    <!-- ================= HEADER ================= -->
-    <div class="page-header">
-      <div>
-        <h1>My Profile</h1>
-
-        <p>
-          Manage your personal account information
-        </p>
-      </div>
-    </div>
-
-
-    <!-- ================= LOADING ================= -->
     <div
       v-if="loading"
       class="flex items-center justify-center py-20"
@@ -29,7 +16,6 @@
         <p class="text-gray-500 mt-4">
           Loading profile...
         </p>
-
       </div>
     </div>
 
@@ -442,6 +428,7 @@ onMounted(() => {
 </script>
 
 
+
 <style scoped>
 
 /* ========================================
@@ -449,18 +436,14 @@ onMounted(() => {
 ======================================== */
 
 .profile-page {
-
   width: 100%;
+  min-height: calc(100vh - 70px);
 
-  min-height:
-    calc(100vh - 70px);
-
-  padding: 30px;
+  /* បន្ថយគម្លាត */
+  padding: 16px;
 
   box-sizing: border-box;
-
   background: #f8fafc;
-
 }
 
 
@@ -469,39 +452,27 @@ onMounted(() => {
 ======================================== */
 
 .page-header {
-
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
 
-  margin-bottom: 24px;
-
+  /* បន្ថយ margin */
+  margin-bottom: 16px;
 }
-
 
 .page-header h1 {
-
   margin: 0;
 
-  font-size: 28px;
-
+  font-size: 26px;
   font-weight: 700;
-
   color: #1e293b;
-
 }
 
-
 .page-header p {
-
-  margin: 6px 0 0;
+  margin: 4px 0 0;
 
   font-size: 14px;
-
   color: #94a3b8;
-
 }
 
 
@@ -512,18 +483,17 @@ onMounted(() => {
 @media (max-width: 768px) {
 
   .profile-page {
-
-    padding: 20px;
-
+    padding: 12px;
   }
 
+  .page-header {
+    margin-bottom: 12px;
+  }
 
   .page-header h1 {
-
-    font-size: 24px;
-
+    font-size: 22px;
   }
 
 }
-
 </style>
+
