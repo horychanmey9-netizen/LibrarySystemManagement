@@ -1,5 +1,6 @@
 package com.example.LibraryBack.controller;
 
+import com.example.LibraryBack.dto.request.FavoriteRequest;
 import com.example.LibraryBack.dto.response.ApiResponse;
 import com.example.LibraryBack.dto.response.FavoriteResponse;
 import com.example.LibraryBack.service.FavoriteService;
@@ -16,13 +17,13 @@ public class FavoriteController {
     private final FavoriteService favoriteService;
 
 
-    @PostMapping("/{bookId}")
+    @PostMapping
     public ApiResponse<FavoriteResponse> create(
-            @PathVariable Long bookId
+            @RequestBody FavoriteRequest request
     ) {
 
         FavoriteResponse favoriteResponse =
-                favoriteService.create(bookId);
+                favoriteService.create(request.getBookId());
 
         return ApiResponse.<FavoriteResponse>builder()
                 .status(201)
@@ -46,9 +47,13 @@ public class FavoriteController {
     }
 
 
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteFavorite(@PathVariable Long id) {
-        favoriteService.deleteFavorite(id);
+    @DeleteMapping("/{bookId}")
+    public ApiResponse<Void> deleteFavorite(
+            @PathVariable Long bookId
+    ) {
+
+        favoriteService.deleteFavorite(bookId);
+
         return ApiResponse.<Void>builder()
                 .status(200)
                 .msg("Favorite deleted successfully")

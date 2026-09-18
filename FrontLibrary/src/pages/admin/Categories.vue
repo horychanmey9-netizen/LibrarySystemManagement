@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-4 sm:p-6">
+  <div class="min-h-screen bg-slate-50 p-[60px] box-border max-md:p-5 max-[550px]:p-[15px]">
 
     <!-- =====================================================
          HEADER

@@ -9,10 +9,10 @@
     ></div>
 
     <!-- Sidebar -->
-    <Usersidebar
+    <!-- <Usersidebar
       :sidebar-open="sidebarOpen"
       @close-sidebar="sidebarOpen = false"
-    />
+    /> -->
 
     <!-- Main -->
     <div class="main-area">
@@ -28,6 +28,8 @@
 
     </div>
 
+    <BottomNavbar/>
+
   </div>
 </template>
 
@@ -36,6 +38,7 @@ import { ref } from "vue";
 
 import Usersidebar from "@/components/common/Usersidebar.vue";
 import UserNavbar from "@/components/common/UserNavbar.vue";
+import BottomNavbar from "../components/common/BottomNavbar.vue";
 
 const sidebarOpen = ref(false);
 </script>

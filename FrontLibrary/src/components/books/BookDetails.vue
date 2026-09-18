@@ -1,36 +1,40 @@
+```vue
 <template>
+
   <!-- ================= OVERLAY ================= -->
   <div
     class="fixed inset-0 z-50
            bg-black/50 backdrop-blur-sm
            flex items-center justify-center
-           px-4 py-6"
+           px-3 py-4"
     @click.self="$emit('close')"
   >
 
     <!-- ================= MODAL ================= -->
     <div
-      class="w-full max-w-5xl
-             max-h-[92vh]
-             bg-white rounded-2xl
+      class="w-full max-w-3xl
+             max-h-[88vh]
+             bg-white rounded-xl
              shadow-2xl overflow-hidden"
     >
 
       <!-- ================= HEADER ================= -->
       <div
         class="flex items-center justify-between
-               px-6 py-4
+               px-5 py-3
                border-b border-slate-200"
       >
 
         <div>
-          <h2 class="text-xl font-bold text-slate-800">
+
+          <h2 class="text-lg font-bold text-slate-800">
             Book Details
           </h2>
 
-          <p class="text-xs text-slate-400 mt-1">
+          <p class="text-[11px] text-slate-400 mt-0.5">
             View complete information about this book
           </p>
+
         </div>
 
 
@@ -38,9 +42,9 @@
         <button
           type="button"
           @click="$emit('close')"
-          class="w-10 h-10
+          class="w-8 h-8
                  flex items-center justify-center
-                 rounded-xl
+                 rounded-lg
                  text-slate-500
                  hover:bg-slate-100
                  hover:text-slate-800
@@ -54,47 +58,65 @@
 
       <!-- ================= CONTENT ================= -->
       <div
-        class="p-6 overflow-y-auto
-               max-h-[calc(92vh-80px)]"
+        class="p-5 overflow-y-auto
+               max-h-[calc(88vh-65px)]"
       >
 
         <div
           class="grid grid-cols-1
                  md:grid-cols-5
-                 gap-8"
+                 gap-5"
         >
 
           <!-- ================= IMAGE ================= -->
           <div class="md:col-span-2">
 
             <div
-              class="h-[450px]
+              class="h-[400px]
                      bg-slate-100
-                     rounded-2xl
+                     rounded-xl
                      overflow-hidden
                      flex items-center
                      justify-center"
             >
 
+              <!-- BOOK IMAGE -->
               <img
-                v-if="book.image"
-                :src="book.image"
+                v-if="imageUrl"
+                :src="imageUrl"
                 :alt="book.title"
-                class="w-full h-full object-contain"
+                class="w-full h-full object-cover"
+                @error="handleImageError"
               />
 
+              <!-- NO IMAGE -->
               <div
                 v-else
-                class="text-6xl text-slate-300"
+                class="flex flex-col
+                       items-center
+                       justify-center
+                       text-slate-300"
               >
-                📚
+
+                <span class="text-5xl">
+                  📚
+                </span>
+
+                <span
+                  class="mt-2
+                         text-xs
+                         text-slate-400"
+                >
+                  No Image
+                </span>
+
               </div>
 
             </div>
 
 
             <!-- ================= STATUS ================= -->
-            <div class="mt-4">
+            <div class="mt-3">
 
               <!-- AVAILABLE -->
               <div
@@ -102,14 +124,20 @@
                 class="flex items-center
                        justify-center gap-2
                        w-full
-                       px-4 py-3
-                       rounded-xl
+                       px-3 py-2
+                       rounded-lg
                        bg-emerald-50
                        text-emerald-600
+                       text-sm
                        font-semibold"
               >
-                <span>✓</span>
+
+                <span>
+                  ✓
+                </span>
+
                 Available
+
               </div>
 
 
@@ -119,14 +147,20 @@
                 class="flex items-center
                        justify-center gap-2
                        w-full
-                       px-4 py-3
-                       rounded-xl
+                       px-3 py-2
+                       rounded-lg
                        bg-red-50
                        text-red-500
+                       text-sm
                        font-semibold"
               >
-                <span>×</span>
+
+                <span>
+                  ×
+                </span>
+
                 Unavailable
+
               </div>
 
             </div>
@@ -139,7 +173,7 @@
 
             <!-- TITLE -->
             <h1
-              class="text-3xl
+              class="text-2xl
                      font-bold
                      text-slate-900
                      leading-tight"
@@ -149,12 +183,14 @@
 
 
             <!-- AUTHOR -->
-            <p class="mt-2 text-slate-500">
+            <p class="mt-1 text-sm text-slate-500">
+
               Written by
 
               <span class="font-semibold text-slate-700">
                 {{ book.author || "Unknown Author" }}
               </span>
+
             </p>
 
 
@@ -162,19 +198,19 @@
             <div
               class="grid
                      grid-cols-2
-                     gap-4
-                     mt-7"
+                     gap-3
+                     mt-5"
             >
 
-              <!-- ================= QUANTITY ================= -->
+              <!-- QUANTITY -->
               <div
                 class="bg-slate-50
-                       rounded-xl
-                       p-4"
+                       rounded-lg
+                       p-3"
               >
 
                 <p
-                  class="text-xs
+                  class="text-[10px]
                          text-slate-400
                          font-semibold
                          uppercase"
@@ -183,8 +219,8 @@
                 </p>
 
                 <p
-                  class="mt-1
-                         text-lg
+                  class="mt-0.5
+                         text-base
                          font-bold
                          text-slate-800"
                 >
@@ -194,15 +230,15 @@
               </div>
 
 
-              <!-- ================= PAGES ================= -->
+              <!-- PAGES -->
               <div
                 class="bg-slate-50
-                       rounded-xl
-                       p-4"
+                       rounded-lg
+                       p-3"
               >
 
                 <p
-                  class="text-xs
+                  class="text-[10px]
                          text-slate-400
                          font-semibold
                          uppercase"
@@ -211,8 +247,8 @@
                 </p>
 
                 <p
-                  class="mt-1
-                         text-lg
+                  class="mt-0.5
+                         text-base
                          font-bold
                          text-slate-800"
                 >
@@ -222,15 +258,15 @@
               </div>
 
 
-              <!-- ================= PUBLICATION YEAR ================= -->
+              <!-- PUBLICATION YEAR -->
               <div
                 class="bg-slate-50
-                       rounded-xl
-                       p-4"
+                       rounded-lg
+                       p-3"
               >
 
                 <p
-                  class="text-xs
+                  class="text-[10px]
                          text-slate-400
                          font-semibold
                          uppercase"
@@ -239,8 +275,8 @@
                 </p>
 
                 <p
-                  class="mt-1
-                         text-lg
+                  class="mt-0.5
+                         text-base
                          font-bold
                          text-slate-800"
                 >
@@ -250,15 +286,15 @@
               </div>
 
 
-              <!-- ================= LANGUAGE ================= -->
+              <!-- LANGUAGE -->
               <div
                 class="bg-slate-50
-                       rounded-xl
-                       p-4"
+                       rounded-lg
+                       p-3"
               >
 
                 <p
-                  class="text-xs
+                  class="text-[10px]
                          text-slate-400
                          font-semibold
                          uppercase"
@@ -267,8 +303,8 @@
                 </p>
 
                 <p
-                  class="mt-1
-                         text-lg
+                  class="mt-0.5
+                         text-base
                          font-bold
                          text-slate-800"
                 >
@@ -278,16 +314,16 @@
               </div>
 
 
-              <!-- ================= ISBN ================= -->
+              <!-- ISBN -->
               <div
                 class="col-span-2
                        bg-slate-50
-                       rounded-xl
-                       p-4"
+                       rounded-lg
+                       p-3"
               >
 
                 <p
-                  class="text-xs
+                  class="text-[10px]
                          text-slate-400
                          font-semibold
                          uppercase"
@@ -296,7 +332,8 @@
                 </p>
 
                 <p
-                  class="mt-1
+                  class="mt-0.5
+                         text-sm
                          font-mono
                          text-slate-800
                          font-medium
@@ -311,10 +348,10 @@
 
 
             <!-- ================= DESCRIPTION ================= -->
-            <div class="mt-7">
+            <div class="mt-5">
 
               <h3
-                class="text-sm
+                class="text-xs
                        font-bold
                        text-slate-800
                        uppercase
@@ -324,10 +361,11 @@
               </h3>
 
               <p
-                class="mt-3
-                       text-sm
+                class="mt-2
+                       text-xs
                        text-slate-600
-                       leading-7"
+                       leading-6
+                       line-clamp-4"
               >
                 {{ book.description || "No description available." }}
               </p>
@@ -336,9 +374,9 @@
 
 
             <!-- ================= ACTION ================= -->
-            <div class="mt-8 flex gap-3">
+            <div class="mt-5 flex gap-2">
 
-              <!-- ================= BORROW ================= -->
+              <!-- BORROW -->
               <button
                 v-if="isAvailable"
                 type="button"
@@ -351,8 +389,9 @@
                        disabled:bg-blue-300
                        disabled:cursor-not-allowed
                        text-white
-                       py-3
-                       rounded-xl
+                       py-2.5
+                       rounded-lg
+                       text-sm
                        font-semibold
                        transition
                        flex items-center
@@ -379,7 +418,7 @@
               </button>
 
 
-              <!-- ================= UNAVAILABLE ================= -->
+              <!-- UNAVAILABLE -->
               <button
                 v-else
                 type="button"
@@ -387,8 +426,9 @@
                 class="w-full
                        bg-slate-200
                        text-slate-400
-                       py-3
-                       rounded-xl
+                       py-2.5
+                       rounded-lg
+                       text-sm
                        font-semibold
                        cursor-not-allowed"
               >
@@ -396,7 +436,7 @@
               </button>
 
 
-              <!-- ================= CLOSE ================= -->
+              <!-- CLOSE -->
               <button
                 type="button"
                 @click="$emit('close')"
@@ -404,8 +444,9 @@
                        border border-slate-200
                        hover:bg-slate-50
                        text-slate-700
-                       py-3
-                       rounded-xl
+                       py-2.5
+                       rounded-lg
+                       text-sm
                        font-medium
                        transition"
               >
@@ -418,32 +459,36 @@
             <!-- ================= SUCCESS MESSAGE ================= -->
             <div
               v-if="successMessage"
-              class="mt-4
-                     p-4
-                     rounded-xl
+              class="mt-3
+                     p-3
+                     rounded-lg
                      bg-emerald-50
                      border border-emerald-100
                      text-emerald-700
-                     text-sm
+                     text-xs
                      font-medium"
             >
+
               ✓ {{ successMessage }}
+
             </div>
 
 
             <!-- ================= ERROR MESSAGE ================= -->
             <div
               v-if="errorMessage"
-              class="mt-4
-                     p-4
-                     rounded-xl
+              class="mt-3
+                     p-3
+                     rounded-lg
                      bg-red-50
                      border border-red-100
                      text-red-600
-                     text-sm
+                     text-xs
                      font-medium"
             >
+
               {{ errorMessage }}
+
             </div>
 
           </div>
@@ -506,7 +551,9 @@ export default {
 
       successMessage: "",
 
-      errorMessage: ""
+      errorMessage: "",
+
+      imageError: false
 
     };
 
@@ -519,20 +566,88 @@ export default {
 
   computed: {
 
+    // ===================================================
+    // BOOK IMAGE URL
+    // ===================================================
+
+    imageUrl() {
+
+      /*
+       * If image has already failed,
+       * show fallback instead.
+       */
+
+      if (this.imageError) {
+        return "";
+      }
+
+
+      /*
+       * No image
+       */
+
+      if (!this.book?.image) {
+        return "";
+      }
+
+
+      const image =
+        String(this.book.image).trim();
+
+
+      if (!image) {
+        return "";
+      }
+
+
+      /*
+       * Image is already a complete URL
+       */
+
+      if (
+        image.startsWith("http://") ||
+        image.startsWith("https://")
+      ) {
+
+        return image;
+
+      }
+
+
+      /*
+       * Backend image path
+       *
+       * Example:
+       * /uploads/books/book.jpg
+       *
+       * becomes:
+       * http://localhost:8080/uploads/books/book.jpg
+       */
+
+      return `http://localhost:8080${
+        image.startsWith("/")
+          ? ""
+          : "/"
+      }${image}`;
+
+    },
+
+
+    // ===================================================
+    // AVAILABLE
+    // ===================================================
+
     isAvailable() {
 
-      // -----------------------------------------------
-      // If backend sends status as false
-      // -----------------------------------------------
+      /*
+       * If backend sends status = false
+       * book is unavailable.
+       */
 
       if (this.book.status === false) {
         return false;
       }
 
-
-      // -----------------------------------------------
-      // Check quantity
-      // -----------------------------------------------
 
       const quantity =
         Number(
@@ -557,33 +672,39 @@ export default {
   methods: {
 
     // ===================================================
+    // IMAGE ERROR
+    // ===================================================
+
+    handleImageError() {
+
+      console.error(
+        "Book image failed to load:",
+        this.imageUrl
+      );
+
+
+      this.imageError = true;
+
+    },
+
+
+    // ===================================================
     // REQUEST BORROW
     // ===================================================
 
     async requestBorrow() {
-
-      // -----------------------------------------------
-      // Prevent double click
-      // -----------------------------------------------
 
       if (this.borrowing) {
         return;
       }
 
 
-      // -----------------------------------------------
-      // Clear old messages
-      // -----------------------------------------------
-
       this.successMessage = "";
 
       this.errorMessage = "";
 
 
-      // -----------------------------------------------
       // CHECK BOOK
-      // -----------------------------------------------
-
       if (!this.book?.id) {
 
         this.errorMessage =
@@ -594,10 +715,7 @@ export default {
       }
 
 
-      // -----------------------------------------------
       // CHECK LOGIN
-      // -----------------------------------------------
-
       const token =
         sessionStorage.getItem("token");
 
@@ -612,10 +730,7 @@ export default {
       }
 
 
-      // -----------------------------------------------
       // GET USER
-      // -----------------------------------------------
-
       const storedUser =
         sessionStorage.getItem("user");
 
@@ -640,10 +755,7 @@ export default {
       }
 
 
-      // -----------------------------------------------
       // CHECK USER ID
-      // -----------------------------------------------
-
       if (!user?.id) {
 
         this.errorMessage =
@@ -654,10 +766,7 @@ export default {
       }
 
 
-      // -----------------------------------------------
       // DATES
-      // -----------------------------------------------
-
       const borrowDate =
         this.getToday();
 
@@ -666,10 +775,7 @@ export default {
         this.getDueDate(7);
 
 
-      // -----------------------------------------------
       // PAYLOAD
-      // -----------------------------------------------
-
       const payload = {
 
         userId:
@@ -696,18 +802,11 @@ export default {
       );
 
 
-      // -----------------------------------------------
       // START REQUEST
-      // -----------------------------------------------
-
       this.borrowing = true;
 
 
       try {
-
-        // ---------------------------------------------
-        // CREATE BORROW REQUEST
-        // ---------------------------------------------
 
         const response =
           await createBorrowing(
@@ -721,18 +820,12 @@ export default {
         );
 
 
-        // ---------------------------------------------
         // SUCCESS
-        // ---------------------------------------------
-
         this.successMessage =
           "Borrow request sent successfully. Please wait for admin approval.";
 
 
-        // ---------------------------------------------
-        // SEND EVENT TO PARENT
-        // ---------------------------------------------
-
+        // SEND EVENT
         this.$emit(
           "borrow",
           {
@@ -749,10 +842,6 @@ export default {
           error
         );
 
-
-        // ---------------------------------------------
-        // ERROR MESSAGE
-        // ---------------------------------------------
 
         this.errorMessage =
           error?.response?.data?.message ||
@@ -841,3 +930,34 @@ export default {
 };
 
 </script>
+```
+
+### ចំណុចដែលបានកែ
+
+Image ឥឡូវប្រើ៖
+
+```vue
+:src="imageUrl"
+```
+
+ហើយ `imageUrl()` នឹង handle៖
+
+```text
+https://example.com/book.jpg
+```
+
+ឬ
+
+```text
+/uploads/books/book.jpg
+```
+
+ដោយបម្លែង path ទីពីរទៅជា៖
+
+```text
+http://localhost:8080/uploads/books/book.jpg
+```
+
+ហើយ `object-cover` ធ្វើឱ្យ **រូបពេញប្រអប់** មិនសល់ space ដូចដែលអ្នកចង់បាន។
+
+**ចំណាំ:** បើ `BookCard.vue` របស់អ្នកមាន image URL ជាក់លាក់ផ្សេងពី `http://localhost:8080/...` សូមផ្ញើ `BookCard.vue` មក។ ខ្ញុំនឹងធ្វើ `BookDetail` ឱ្យប្រើ image logic ដូចគ្នា 100%។

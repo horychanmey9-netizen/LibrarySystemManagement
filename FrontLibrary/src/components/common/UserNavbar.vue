@@ -1,59 +1,132 @@
+```vue
 <template>
 
   <header class="navbar">
 
-    <div class="navbar-inner">
+    <div class="navbar-inner container">
 
-      <!-- ========================================
+      <!-- =====================================================
            LEFT
-      ======================================== -->
+      ====================================================== -->
 
       <div class="navbar-left">
 
-        <!-- Mobile Menu Button -->
+        <div class="logo-section">
 
-        <button
-          type="button"
-          class="mobile-menu-btn"
-          @click="toggleSidebar"
-          aria-label="Open menu"
-        >
+          <div class="logo-icon">
 
-          <i class="bi bi-list"></i>
+            <img
+              src="/logo1.png"
+              alt="Library Logo"
+              class="logo-image"
+            />
 
-        </button>
+          </div>
 
+          <div class="logo-text">
 
-        <!-- Welcome -->
+            <h1>
+              Library
+            </h1>
 
-        <div class="welcome-section">
+            <span>
+              Management System
+            </span>
 
-          <h1>
-            Welcome, {{ userName }}
-          </h1>
-
-          <p>
-            Find and manage your favorite books
-          </p>
+          </div>
 
         </div>
 
       </div>
 
 
-      <!-- ========================================
+      <!-- =====================================================
+           NAVIGATION MENU
+           FAVORITE REMOVED
+      ====================================================== -->
+
+      <nav class="navbar-menu">
+
+        <router-link
+          to="/user/home"
+          class="nav-link"
+          active-class="active"
+        >
+
+          <i class="bi bi-house"></i>
+
+          <span>
+            Home
+          </span>
+
+        </router-link>
+
+
+        <router-link
+          to="/user/my-borrowings"
+          class="nav-link"
+          active-class="active"
+        >
+
+          <i class="bi bi-book"></i>
+
+          <span>
+            My Borrowings
+          </span>
+
+        </router-link>
+
+
+        <router-link
+          to="/user/my-fines"
+          class="nav-link"
+          active-class="active"
+        >
+
+          <i class="bi bi-cash-stack"></i>
+
+          <span>
+            My Fines
+          </span>
+
+        </router-link>
+
+      </nav>
+
+
+      <!-- =====================================================
            RIGHT
-      ======================================== -->
+           FAVORITE + PROFILE
+      ====================================================== -->
 
       <div class="navbar-right">
+
+
+        <!-- =================================================
+             FAVORITE BUTTON
+        ================================================== -->
+
+        <button
+          type="button"
+          class="favorite-button"
+          @click="goToFavorite"
+          title="My Favorite"
+        >
+
+          <i class="bi bi-heart"></i>
+
+        </button>
+
+
+        <!-- =================================================
+             PROFILE BUTTON
+        ================================================== -->
 
         <button
           type="button"
           class="user-button"
           @click="goToProfile"
         >
-
-          <!-- Avatar -->
 
           <div class="navbar-avatar">
 
@@ -72,10 +145,10 @@
           </div>
 
 
-          <!-- Name -->
-
           <span class="navbar-user-name">
+
             {{ userName }}
+
           </span>
 
         </button>
@@ -98,44 +171,38 @@ import {
   onUnmounted
 } from "vue";
 
-import { useRouter } from "vue-router";
+
+import {
+  useRouter
+} from "vue-router";
+
 
 import {
   getProfile
 } from "@/service/profileservice";
 
 
-// ========================================
-// ROUTER
-// ========================================
-
 const router = useRouter();
 
-
-// ========================================
-// EMIT
-// ========================================
 
 const emit = defineEmits([
   "toggle-sidebar"
 ]);
 
 
-// ========================================
-// PROFILE IMAGE
-// ========================================
-
 const profileImage = ref("");
 
 
-// ========================================
-// USER
-// ========================================
+/* =====================================================
+   GET USER FROM SESSION STORAGE
+===================================================== */
 
 const storedUser =
   sessionStorage.getItem("user");
 
+
 let user = null;
+
 
 try {
 
@@ -155,45 +222,24 @@ try {
 }
 
 
-// ========================================
-// USER NAME
-// ========================================
+/* =====================================================
+   USER NAME
+===================================================== */
 
 const userName = computed(() => {
 
   return (
-
     user?.name ||
-
     user?.fullName ||
-
     "User"
-
   );
 
 });
 
 
-// ========================================
-// USER EMAIL
-// ========================================
-
-const userEmail = computed(() => {
-
-  return (
-
-    user?.email ||
-
-    ""
-
-  );
-
-});
-
-
-// ========================================
-// LOAD PROFILE
-// ========================================
+/* =====================================================
+   LOAD PROFILE
+===================================================== */
 
 const loadProfile = async () => {
 
@@ -220,9 +266,9 @@ const loadProfile = async () => {
     }
 
 
-    // ====================================
-    // IMAGE
-    // ====================================
+    /* =================================================
+       PROFILE IMAGE
+    ================================================== */
 
     if (data.image) {
 
@@ -260,15 +306,13 @@ const loadProfile = async () => {
 };
 
 
-// ========================================
-// USER AVATAR
-// ========================================
+/* =====================================================
+   USER AVATAR
+===================================================== */
 
 const userAvatar = computed(() => {
 
-  if (
-    profileImage.value
-  ) {
+  if (profileImage.value) {
 
     return profileImage.value;
 
@@ -276,21 +320,17 @@ const userAvatar = computed(() => {
 
 
   return (
-
     user?.avatar ||
-
     user?.image ||
-
     ""
-
   );
 
 });
 
 
-// ========================================
-// USER INITIALS
-// ========================================
+/* =====================================================
+   USER INITIALS
+===================================================== */
 
 const userInitials = computed(() => {
 
@@ -314,6 +354,10 @@ const userInitials = computed(() => {
       .split(/\s+/);
 
 
+  /* =================================================
+     ONE NAME
+  ================================================== */
+
   if (
     names.length === 1
   ) {
@@ -324,6 +368,10 @@ const userInitials = computed(() => {
 
   }
 
+
+  /* =================================================
+     FIRST + LAST NAME
+  ================================================== */
 
   return (
 
@@ -338,20 +386,35 @@ const userInitials = computed(() => {
 });
 
 
-// ========================================
-// GO TO PROFILE
-// ========================================
+/* =====================================================
+   GO TO PROFILE
+===================================================== */
 
 function goToProfile() {
 
-  router.push("/user/profile");
+  router.push(
+    "/user/profile"
+  );
 
 }
 
 
-// ========================================
-// TOGGLE SIDEBAR
-// ========================================
+/* =====================================================
+   GO TO FAVORITE
+===================================================== */
+
+function goToFavorite() {
+
+  router.push(
+    "/user/myfavorite"
+  );
+
+}
+
+
+/* =====================================================
+   TOGGLE SIDEBAR
+===================================================== */
 
 function toggleSidebar() {
 
@@ -362,9 +425,9 @@ function toggleSidebar() {
 }
 
 
-// ========================================
-// AVATAR ERROR
-// ========================================
+/* =====================================================
+   AVATAR ERROR
+===================================================== */
 
 function handleAvatarError(event) {
 
@@ -373,29 +436,26 @@ function handleAvatarError(event) {
     event.target.src
   );
 
+
   profileImage.value = "";
 
 }
 
 
-// ========================================
-// PROFILE UPDATED
-// ========================================
+/* =====================================================
+   PROFILE UPDATED EVENT
+===================================================== */
 
 const handleProfileUpdated = () => {
-
-  console.log(
-    "Profile updated → Reload Navbar"
-  );
 
   loadProfile();
 
 };
 
 
-// ========================================
-// MOUNTED
-// ========================================
+/* =====================================================
+   MOUNT
+===================================================== */
 
 onMounted(() => {
 
@@ -410,9 +470,9 @@ onMounted(() => {
 });
 
 
-// ========================================
-// UNMOUNTED
-// ========================================
+/* =====================================================
+   UNMOUNT
+===================================================== */
 
 onUnmounted(() => {
 
@@ -426,6 +486,7 @@ onUnmounted(() => {
 </script>
 
 
+```css
 <style scoped>
 
 /* =====================================================
@@ -437,12 +498,12 @@ onUnmounted(() => {
   width: 100%;
 
   height: 75px;
-
   min-height: 75px;
 
   background: #ffffff;
 
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom:
+    1px solid #e5e7eb;
 
   box-sizing: border-box;
 
@@ -456,22 +517,26 @@ onUnmounted(() => {
 
 
 /* =====================================================
-   NAVBAR INNER
+   CENTERED CONTAINER
 ===================================================== */
 
 .navbar-inner {
 
   width: 100%;
 
+  max-width: 1280px;
+
   height: 100%;
 
-  padding: 0 24px;
+  margin-left: auto;
+  margin-right: auto;
+
+  padding-left: 24px;
+  padding-right: 24px;
 
   display: flex;
 
   align-items: center;
-
-  justify-content: space-between;
 
   box-sizing: border-box;
 
@@ -484,97 +549,171 @@ onUnmounted(() => {
 
 .navbar-left {
 
-  min-width: 0;
-
   display: flex;
 
   align-items: center;
 
   gap: 14px;
 
+  min-width: 0;
+
+  flex-shrink: 0;
+
 }
 
 
 /* =====================================================
-   WELCOME
+   LOGO
 ===================================================== */
 
-.welcome-section {
+.logo-section {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
 
   min-width: 0;
 
 }
 
 
-.welcome-section h1 {
+.logo-icon {
 
-  margin: 0;
+  width: 42px;
 
-  padding: 0;
+  height: 42px;
 
-  color: #172033;
+  flex-shrink: 0;
 
-  font-size: 20px;
-
-  line-height: 26px;
-
-  font-weight: 700;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-}
-
-
-.welcome-section p {
-
-  margin: 2px 0 0;
-
-  color: #8a92a3;
-
-  font-size: 13px;
-
-  line-height: 18px;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-}
-
-
-/* =====================================================
-   MOBILE MENU
-===================================================== */
-
-.mobile-menu-btn {
-
-  display: none;
-
-  width: 40px;
-
-  height: 40px;
-
-  border: none;
-
-  border-radius: 9px;
-
-  background: transparent;
-
-  color: #667085;
-
-  font-size: 22px;
+  display: flex;
 
   align-items: center;
 
   justify-content: center;
 
-  cursor: pointer;
+  overflow: hidden;
+
+  border-radius: 10px;
+
+}
+
+
+.logo-image {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: contain;
+
+  display: block;
+
+}
+
+
+/* =====================================================
+   LOGO TEXT
+===================================================== */
+
+.logo-text {
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  min-width: 0;
+
+}
+
+
+.logo-text h1 {
+
+  margin: 0;
+
+  color: #172033;
+
+  font-size: 20px;
+
+  line-height: 24px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+
+}
+
+
+.logo-text span {
+
+  margin-top: 2px;
+
+  color: #8a92a3;
+
+  font-size: 13px;
+
+  line-height: 17px;
+
+  white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.navbar-menu {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  margin-left: auto;
+
+  margin-right: auto;
+
+  height: 100%;
+
+  min-width: 0;
+
+}
+
+
+/* =====================================================
+   NAV LINK
+===================================================== */
+
+.nav-link {
+
+  height: 42px;
+
+  padding: 0 14px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  border-radius: 10px;
+
+  color: #667085;
+
+  text-decoration: none;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  white-space: nowrap;
 
   transition:
     background 0.2s ease,
@@ -583,9 +722,37 @@ onUnmounted(() => {
 }
 
 
-.mobile-menu-btn:hover {
+/* =====================================================
+   NAV ICON
+===================================================== */
+
+.nav-link i {
+
+  font-size: 18px;
+
+}
+
+
+/* =====================================================
+   NAV HOVER
+===================================================== */
+
+.nav-link:hover {
 
   background: #f5f3ff;
+
+  color: #5b3df5;
+
+}
+
+
+/* =====================================================
+   NAV ACTIVE
+===================================================== */
+
+.nav-link.active {
+
+  background: #eeeaff;
 
   color: #5b3df5;
 
@@ -602,9 +769,71 @@ onUnmounted(() => {
 
   align-items: center;
 
-  gap: 12px;
-
   flex-shrink: 0;
+
+}
+
+
+/* =====================================================
+   FAVORITE BUTTON
+===================================================== */
+
+.favorite-button {
+
+  width: 42px;
+
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-right: 8px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: transparent;
+
+  color: #667085;
+
+  cursor: pointer;
+
+  font-size: 22px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+
+}
+
+
+/* =====================================================
+   FAVORITE HOVER
+===================================================== */
+
+.favorite-button:hover {
+
+  background: #fff1f2;
+
+  color: #e11d48;
+
+  transform: scale(1.05);
+
+}
+
+
+/* =====================================================
+   FAVORITE ACTIVE
+===================================================== */
+
+.favorite-button:active {
+
+  transform: scale(0.95);
 
 }
 
@@ -639,6 +868,10 @@ onUnmounted(() => {
 }
 
 
+/* =====================================================
+   USER BUTTON HOVER
+===================================================== */
+
 .user-button:hover {
 
   background: #f8f9fc;
@@ -647,7 +880,30 @@ onUnmounted(() => {
 
 
 /* =====================================================
-   NAVBAR AVATAR
+   USER NAME
+===================================================== */
+
+.navbar-user-name {
+
+  max-width: 150px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: #172033;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+}
+
+
+/* =====================================================
+   AVATAR
 ===================================================== */
 
 .navbar-avatar {
@@ -672,11 +928,12 @@ onUnmounted(() => {
 
   color: #5b3df5;
 
-  font-size: 13px;
+  font-size: 14px;
 
   font-weight: 700;
 
-  border: 1px solid #e6e1ff;
+  border:
+    1px solid #e6e1ff;
 
 }
 
@@ -699,60 +956,43 @@ onUnmounted(() => {
 
 
 /* =====================================================
-   USER NAME
-===================================================== */
-
-.navbar-user-name {
-
-  max-width: 150px;
-
-  color: #172033;
-
-  font-size: 14px;
-
-  font-weight: 600;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-}
-
-
-/* =====================================================
-   ARROW
-===================================================== */
-
-.user-button > i {
-
-  color: #8a92a3;
-
-  font-size: 11px;
-
-  transition:
-    transform 0.2s ease;
-
-}
-
-
-.user-button:hover > i {
-
-  color: #5b3df5;
-
-}
-
-
-/* =====================================================
    TABLET
 ===================================================== */
 
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
 
   .navbar-inner {
 
-    padding: 0 18px;
+    padding-left: 16px;
+
+    padding-right: 16px;
+
+  }
+
+
+  .navbar-menu {
+
+    gap: 3px;
+
+  }
+
+
+  .nav-link {
+
+    padding-left: 11px;
+
+    padding-right: 11px;
+
+    font-size: 14px;
+
+    gap: 6px;
+
+  }
+
+
+  .nav-link i {
+
+    font-size: 17px;
 
   }
 
@@ -760,6 +1000,19 @@ onUnmounted(() => {
   .navbar-user-name {
 
     max-width: 120px;
+
+    font-size: 14px;
+
+  }
+
+
+  .favorite-button {
+
+    width: 40px;
+
+    height: 40px;
+
+    font-size: 21px;
 
   }
 
@@ -770,48 +1023,136 @@ onUnmounted(() => {
    MOBILE
 ===================================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 
   .navbar {
 
-    height: 70px;
+    height: 64px;
 
-    min-height: 70px;
+    min-height: 64px;
 
   }
 
 
   .navbar-inner {
 
-    padding: 0 15px;
+    width: 100%;
+
+    max-width: none;
+
+    padding-left: 8px;
+
+    padding-right: 8px;
 
   }
 
 
-  .mobile-menu-btn {
+  .navbar-left {
 
-    display: flex;
+    flex: 1;
+
+    min-width: 0;
 
   }
 
 
-  .welcome-section h1 {
+  /* =================================================
+     LOGO MOBILE
+  ================================================== */
+
+  .logo-section {
+
+    gap: 8px;
+
+  }
+
+
+  .logo-icon {
+
+    width: 36px;
+
+    height: 36px;
+
+    border-radius: 9px;
+
+  }
+
+
+  .logo-text h1 {
 
     font-size: 17px;
 
-    line-height: 22px;
+    line-height: 20px;
 
   }
 
 
-  .welcome-section p {
+  /* Hide subtitle */
 
-    font-size: 11px;
+  .logo-text span {
 
-    line-height: 16px;
+    display: none;
 
   }
 
+
+  /* =================================================
+     HIDE NAVIGATION
+  ================================================== */
+
+  .navbar-menu {
+
+    display: none;
+
+  }
+
+
+  /* =================================================
+     RIGHT MOBILE
+  ================================================== */
+
+  .navbar-right {
+
+    margin-left: auto;
+
+    flex-shrink: 0;
+
+  }
+
+
+  /* =================================================
+     FAVORITE MOBILE
+  ================================================== */
+
+  .favorite-button {
+
+    width: 40px;
+
+    height: 40px;
+
+    margin-right: 5px;
+
+    font-size: 21px;
+
+  }
+
+
+  /* =================================================
+     PROFILE MOBILE
+  ================================================== */
+
+  .user-button {
+
+    height: 44px;
+
+    padding: 3px;
+
+    gap: 0;
+
+  }
+
+
+  /* Hide username */
 
   .navbar-user-name {
 
@@ -820,66 +1161,9 @@ onUnmounted(() => {
   }
 
 
-  .user-button {
-
-    padding-right: 4px;
-
-  }
-
-
-  .user-button > i {
-
-    display: none;
-
-  }
-
-
-  .navbar-right {
-
-    gap: 6px;
-
-  }
-
-}
-
-
-/* =====================================================
-   SMALL MOBILE
-===================================================== */
-
-@media (max-width: 480px) {
-
-  .navbar-inner {
-
-    padding: 0 10px;
-
-  }
-
-
-  .navbar-left {
-
-    gap: 8px;
-
-  }
-
-
-  .welcome-section h1 {
-
-    max-width: 180px;
-
-    font-size: 15px;
-
-  }
-
-
-  .welcome-section p {
-
-    max-width: 180px;
-
-    font-size: 10px;
-
-  }
-
+  /* =================================================
+     AVATAR MOBILE
+  ================================================== */
 
   .navbar-avatar {
 
@@ -889,8 +1173,82 @@ onUnmounted(() => {
 
     min-width: 36px;
 
+    font-size: 13px;
+
+  }
+
+}
+
+
+/* =====================================================
+   SMALL PHONE
+===================================================== */
+
+@media (max-width: 379px) {
+
+  .navbar-inner {
+
+    padding-left: 6px;
+
+    padding-right: 6px;
+
+  }
+
+
+  .logo-icon {
+
+    width: 34px;
+
+    height: 34px;
+
+  }
+
+
+  .logo-text h1 {
+
+    font-size: 16px;
+
+    line-height: 19px;
+
+  }
+
+
+  /* =================================================
+     FAVORITE SMALL PHONE
+  ================================================== */
+
+  .favorite-button {
+
+    width: 36px;
+
+    height: 36px;
+
+    margin-right: 3px;
+
+    font-size: 19px;
+
+  }
+
+
+  /* =================================================
+     AVATAR SMALL PHONE
+  ================================================== */
+
+  .navbar-avatar {
+
+    width: 34px;
+
+    height: 34px;
+
+    min-width: 34px;
+
+    font-size: 12px;
+
   }
 
 }
 
 </style>
+```
+
+នេះនឹងធ្វើឲ្យ **Font Navbar ធំជាង version មុន** ហើយនៅ Desktop នឹងមើលឃើញច្បាស់ជាងមុន៖ **Home / My Borrowings / My Fines = 15px** និង Username = **15px**។

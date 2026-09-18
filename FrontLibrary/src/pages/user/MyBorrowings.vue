@@ -1,3 +1,4 @@
+
 <script setup>
 
 import {
@@ -208,6 +209,7 @@ function getBorrowingTime(borrowing) {
 
   }
 
+
   const time =
     new Date(date).getTime();
 
@@ -384,28 +386,6 @@ const hasMoreBorrowings = computed(() => {
 function showMore() {
 
   displayLimit.value += loadAmount;
-
-}
-
-
-// =====================================================
-// MENU COUNT
-// =====================================================
-
-function getMenuCount(menu) {
-
-  if (menu.value === "ALL") {
-
-    return borrowings.value.length;
-
-  }
-
-
-  return borrowings.value.filter(
-    borrowing =>
-      borrowing.status?.toUpperCase() ===
-      menu.value
-  ).length;
 
 }
 
@@ -798,12 +778,6 @@ onMounted(() => {
 
           </span>
 
-          <span class="menu-count">
-
-            {{ getMenuCount(menu) }}
-
-          </span>
-
         </button>
 
       </div>
@@ -1116,21 +1090,15 @@ onMounted(() => {
 
 <style scoped>
 
-
 /* =====================================================
    PAGE
 ===================================================== */
 
 .my-borrowings-page {
-
   min-height: 100vh;
-
-  padding: 1.5rem 2rem;
-
+  padding: 15px 80px;
   background: #f8faff;
-
 }
-
 
 
 /* =====================================================
@@ -1214,7 +1182,6 @@ onMounted(() => {
 }
 
 
-
 /* =====================================================
    BUTTON
 ===================================================== */
@@ -1273,7 +1240,6 @@ onMounted(() => {
   cursor: not-allowed;
 
 }
-
 
 
 /* =====================================================
@@ -1398,7 +1364,6 @@ onMounted(() => {
 }
 
 
-
 /* =====================================================
    MENU FILTER
 ===================================================== */
@@ -1476,9 +1441,7 @@ onMounted(() => {
 
   justify-content: center;
 
-  gap: 10px;
-
-  padding: 11px 18px;
+  padding: 11px 20px;
 
   border: 1px solid #e5e7eb;
 
@@ -1523,43 +1486,6 @@ onMounted(() => {
     rgba(37, 99, 235, 0.2);
 
 }
-
-
-.menu-count {
-
-  min-width: 24px;
-
-  height: 24px;
-
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 0 6px;
-
-  border-radius: 20px;
-
-  background: #e5e7eb;
-
-  color: #4b5563;
-
-  font-size: 12px;
-
-  font-weight: 700;
-
-}
-
-
-.menu-btn.active .menu-count {
-
-  background: rgba(255, 255, 255, 0.2);
-
-  color: white;
-
-}
-
 
 
 /* =====================================================
@@ -1639,7 +1565,6 @@ onMounted(() => {
     rgba(0, 0, 0, 0.07);
 
 }
-
 
 
 /* =====================================================
@@ -1759,7 +1684,6 @@ onMounted(() => {
 }
 
 
-
 /* =====================================================
    STATES
 ===================================================== */
@@ -1819,7 +1743,6 @@ onMounted(() => {
   line-height: 1.6;
 
 }
-
 
 
 /* =====================================================
@@ -1882,7 +1805,6 @@ onMounted(() => {
 }
 
 
-
 /* =====================================================
    ANIMATION
 ===================================================== */
@@ -1912,7 +1834,6 @@ onMounted(() => {
 }
 
 
-
 /* =====================================================
    ERROR BUTTON
 ===================================================== */
@@ -1935,7 +1856,6 @@ onMounted(() => {
   background: #dc2626;
 
 }
-
 
 
 /* =====================================================
@@ -1964,7 +1884,6 @@ onMounted(() => {
   transform: translateY(-1px);
 
 }
-
 
 
 /* =====================================================
@@ -2077,3 +1996,4 @@ onMounted(() => {
 }
 
 </style>
+

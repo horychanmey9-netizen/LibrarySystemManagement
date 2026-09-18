@@ -94,21 +94,12 @@ import OverdueBooks from "@/components/admin/OverdueBooks.vue";
    DASHBOARD PAGE
 ================================================= */
 
-.dashboard-page {
+.dashboard-page { 
+  min-height: calc(100vh - 70px); 
+  padding: 57px; 
+  background: #f8fafc; 
+  box-sizing: border-box; }
 
-  width: 100%;
-
-  padding: 30px;
-
-  box-sizing: border-box;
-
-  background: #f8f9fc;
-
-  font-family: Arial, sans-serif;
-
-  color: #172033;
-
-}
 
 
 /* =================================================
