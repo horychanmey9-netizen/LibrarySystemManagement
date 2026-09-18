@@ -20,4 +20,6 @@ public class UserResponse {
     private String phone;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private boolean active;
 }

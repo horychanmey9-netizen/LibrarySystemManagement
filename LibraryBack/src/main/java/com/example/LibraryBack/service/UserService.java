@@ -6,4 +6,7 @@ import java.util.List;
 
 public interface UserService {
     List<UserResponse> getData();
+//    void deleteUser(Long id);
+void deactivateUser(Long id);
+    void activateUser(Long id);
 }

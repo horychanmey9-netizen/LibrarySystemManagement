@@ -1,3 +1,258 @@
+//package com.example.LibraryBack.service;
+//
+//import com.example.LibraryBack.dto.request.ForgotPasswordRequest;
+//import com.example.LibraryBack.dto.request.LoginRequest;
+//import com.example.LibraryBack.dto.request.RegisterRequest;
+//import com.example.LibraryBack.dto.request.ResetPasswordRequest;
+//import com.example.LibraryBack.dto.request.VerifyOtpRequest;
+//import com.example.LibraryBack.dto.response.LoginResponse;
+//import com.example.LibraryBack.dto.response.RegisterResponse;
+//import com.example.LibraryBack.dto.response.VerifyOtpResponse;
+//import com.example.LibraryBack.entity.Otp;
+//import com.example.LibraryBack.entity.PasswordResetToken;
+//import com.example.LibraryBack.entity.User;
+//import com.example.LibraryBack.enums.Role;
+//import com.example.LibraryBack.exception.EmailAlreadyExists;
+//import com.example.LibraryBack.exception.EmailAndPasswordAreNotMatch;
+//import com.example.LibraryBack.exception.NotException;
+//import com.example.LibraryBack.mapper.UserMapper;
+//import com.example.LibraryBack.repository.OtpRepository;
+//import com.example.LibraryBack.repository.PasswordResetTokenRepository;
+//import com.example.LibraryBack.repository.UserRepository;
+//import com.example.LibraryBack.security.JwtService;
+//import lombok.RequiredArgsConstructor;
+//import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.stereotype.Service;
+//import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.transaction.annotation.Transactional;
+//
+//import java.time.LocalDateTime;
+//import java.util.Optional;
+//import java.util.UUID;
+//
+//@Service
+//@RequiredArgsConstructor
+//public class AuthServiceImpl implements AuthService {
+//
+//    private final UserRepository userRepository;
+//    private final PasswordEncoder passwordEncoder;
+//    private final JwtService jwtService;
+//    private final OtpService otpService;
+//    private final OtpRepository otpRepository;
+//    private final UserMapper userMapper;
+//
+//    private final PasswordResetTokenRepository passwordResetTokenRepository;
+//    private final EmailService emailService;
+//
+//    @Value("${app.frontend.url}")
+//    private String frontendUrl;
+//
+//
+//    @Override
+//    public RegisterResponse register(RegisterRequest registerRequest) {
+//
+//        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+//            throw new EmailAlreadyExists("Email already exists");
+//        }
+//
+//        User user = userMapper.toRegister(registerRequest);
+//
+//        user.setPassword(
+//                passwordEncoder.encode(registerRequest.getPassword())
+//        );
+//
+//        user.setRole(Role.USER);
+//        user.setActive(false);
+//
+//        user = userRepository.save(user);
+//
+//        otpService.createOtp(user);
+//
+//        return userMapper.registerResponse(user);
+//    }
+//
+//
+//    @Override
+//    public VerifyOtpResponse verifyOtp(VerifyOtpRequest request) {
+//
+//        User user = userRepository.findByEmail(request.getEmail())
+//                .orElseThrow(() ->
+//                        new NotException("Email not found")
+//                );
+//
+//        Otp otp = otpRepository.findByUser(user)
+//                .orElseThrow(() ->
+//                        new RuntimeException("OTP not found")
+//                );
+//
+//        if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
+//            throw new RuntimeException("OTP has expired");
+//        }
+//
+//        if (!otp.getOtp().equals(request.getOtp())) {
+//            throw new RuntimeException("Invalid OTP");
+//        }
+//
+//        user.setActive(true);
+//
+//        userRepository.save(user);
+//
+//        otpRepository.delete(otp);
+//
+//        return VerifyOtpResponse.builder()
+//                .message("Email verified successfully")
+//                .build();
+//    }
+//
+//
+////    @Override
+////    public LoginResponse login(LoginRequest loginRequest) {
+////
+////        User user = userRepository.findByEmail(loginRequest.getEmail())
+////                .orElseThrow(() ->
+////                        new NotException("Email not found")
+////                );
+////
+////        if (!user.isActive()) {
+////            throw new RuntimeException(
+////                    "Please verify your email first."
+////            );
+////        }
+////
+////        if (!passwordEncoder.matches(
+////                loginRequest.getPassword(),
+////                user.getPassword()
+////        )) {
+////            throw new EmailAndPasswordAreNotMatch(
+////                    "Email and password do not match"
+////            );
+////        }
+////
+////        String token = jwtService.generateToken(user);
+////
+////        LoginResponse response =
+////                userMapper.loginResponse(user);
+////
+////        response.setToken(token);
+////
+////        return response;
+////    }
+//@Override
+//public LoginResponse login(LoginRequest loginRequest) {
+//
+//    User user = userRepository.findByEmail(loginRequest.getEmail())
+//            .orElseThrow(() ->
+//                    new NotException("Email not found")
+//            );
+//
+//    if (!user.isActive()) {
+//        throw new NotException(
+//                "This account has been deactivated."
+//        );
+//    }
+//
+//    if (!passwordEncoder.matches(
+//            loginRequest.getPassword(),
+//            user.getPassword()
+//    )) {
+//        throw new EmailAndPasswordAreNotMatch(
+//                "Email and password do not match"
+//        );
+//    }
+//
+//    String token = jwtService.generateToken(user);
+//
+//    LoginResponse response =
+//            userMapper.loginResponse(user);
+//
+//    response.setToken(token);
+//
+//    return response;
+//}
+//
+//    @Override
+//    @Transactional
+//    public String forgotPassword(ForgotPasswordRequest request) {
+//
+//        User user = userRepository.findByEmail(request.getEmail())
+//                .orElseThrow(() ->
+//                        new NotException("Email not found")
+//                );
+//
+//        PasswordResetToken resetToken =
+//                passwordResetTokenRepository.findByUser(user)
+//                        .orElseGet(() ->
+//                                PasswordResetToken.builder()
+//                                        .user(user)
+//                                        .build()
+//                        );
+//
+//        String token = UUID.randomUUID().toString();
+//
+//        resetToken.setToken(token);
+//        resetToken.setExpiryDate(
+//                LocalDateTime.now().plusMinutes(15)
+//        );
+//        resetToken.setUsed(false);
+//
+//        passwordResetTokenRepository.save(resetToken);
+//        String resetLink = frontendUrl + "/reset-password?token=" + token;
+//        emailService.sendPasswordResetEmail(
+//                user.getEmail(),
+//                resetLink
+//        );
+//
+//        return "Password reset link has been sent to your email";
+//    }
+//    @Override
+//    @Transactional
+//    public String resetPassword(ResetPasswordRequest request) {
+//
+//        PasswordResetToken passwordResetToken =
+//                passwordResetTokenRepository
+//                        .findByToken(request.getToken())
+//                        .orElseThrow(() ->
+//                                new NotException("Invalid reset token")
+//                        );
+//
+//        if (passwordResetToken.getExpiryDate()
+//                .isBefore(LocalDateTime.now())) {
+//
+//            passwordResetTokenRepository.delete(passwordResetToken);
+//            throw new NotException(
+//                    "This reset link has expired"
+//            );
+//        }
+//
+//        if (!request.getNewPassword()
+//                .equals(request.getConfirmPassword())) {
+//
+//            throw new NotException(
+//                    "New password and confirm password do not match"
+//            );
+//        }
+//        if (passwordResetToken.isUsed()) {
+//            throw new NotException(
+//                    "This reset link has already been used"
+//            );
+//        }
+//        User user = passwordResetToken.getUser();
+//
+//        user.setPassword(
+//                passwordEncoder.encode(
+//                        request.getNewPassword()
+//                )
+//        );
+//
+//        userRepository.save(user);
+//
+//        passwordResetTokenRepository.delete(passwordResetToken);
+//
+//        return "Password has been changed successfully";
+//    }
+//}
+
+
 package com.example.LibraryBack.service;
 
 import com.example.LibraryBack.dto.request.ForgotPasswordRequest;
@@ -5,29 +260,37 @@ import com.example.LibraryBack.dto.request.LoginRequest;
 import com.example.LibraryBack.dto.request.RegisterRequest;
 import com.example.LibraryBack.dto.request.ResetPasswordRequest;
 import com.example.LibraryBack.dto.request.VerifyOtpRequest;
+
 import com.example.LibraryBack.dto.response.LoginResponse;
 import com.example.LibraryBack.dto.response.RegisterResponse;
 import com.example.LibraryBack.dto.response.VerifyOtpResponse;
+
 import com.example.LibraryBack.entity.Otp;
 import com.example.LibraryBack.entity.PasswordResetToken;
 import com.example.LibraryBack.entity.User;
+
 import com.example.LibraryBack.enums.Role;
+
 import com.example.LibraryBack.exception.EmailAlreadyExists;
 import com.example.LibraryBack.exception.EmailAndPasswordAreNotMatch;
 import com.example.LibraryBack.exception.NotException;
+
 import com.example.LibraryBack.mapper.UserMapper;
+
 import com.example.LibraryBack.repository.OtpRepository;
 import com.example.LibraryBack.repository.PasswordResetTokenRepository;
 import com.example.LibraryBack.repository.UserRepository;
+
 import com.example.LibraryBack.security.JwtService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -35,186 +298,377 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final JwtService jwtService;
+
     private final OtpService otpService;
+
     private final OtpRepository otpRepository;
+
     private final UserMapper userMapper;
 
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+
     private final EmailService emailService;
 
     @Value("${app.frontend.url}")
     private String frontendUrl;
 
 
+    /* =========================================================
+       REGISTER
+    ========================================================= */
+
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
 
+        // Check email already exists
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new EmailAlreadyExists("Email already exists");
+
+            throw new EmailAlreadyExists(
+                    "Email already exists"
+            );
         }
 
+
+        // Convert request -> User
         User user = userMapper.toRegister(registerRequest);
 
+
+        // Encode password
         user.setPassword(
-                passwordEncoder.encode(registerRequest.getPassword())
+                passwordEncoder.encode(
+                        registerRequest.getPassword()
+                )
         );
 
+
+        // Default role
         user.setRole(Role.USER);
+
+
+        /*
+         * New account is inactive
+         *
+         * User must verify OTP first
+         */
         user.setActive(false);
 
+
+        // Save user
         user = userRepository.save(user);
 
+
+        // Create OTP
         otpService.createOtp(user);
+
 
         return userMapper.registerResponse(user);
     }
 
 
+    /* =========================================================
+       VERIFY OTP
+    ========================================================= */
+
     @Override
-    public VerifyOtpResponse verifyOtp(VerifyOtpRequest request) {
+    public VerifyOtpResponse verifyOtp(
+            VerifyOtpRequest request
+    ) {
 
-        User user = userRepository.findByEmail(request.getEmail())
+        // Find user by email
+        User user = userRepository
+                .findByEmail(request.getEmail())
                 .orElseThrow(() ->
-                        new NotException("Email not found")
+                        new NotException(
+                                "Email not found"
+                        )
                 );
 
-        Otp otp = otpRepository.findByUser(user)
+
+        // Find OTP
+        Otp otp = otpRepository
+                .findByUser(user)
                 .orElseThrow(() ->
-                        new RuntimeException("OTP not found")
+                        new RuntimeException(
+                                "OTP not found"
+                        )
                 );
 
-        if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP has expired");
+
+        // Check OTP expiry
+        if (otp.getExpiryTime()
+                .isBefore(LocalDateTime.now())) {
+
+            throw new RuntimeException(
+                    "OTP has expired"
+            );
         }
 
-        if (!otp.getOtp().equals(request.getOtp())) {
-            throw new RuntimeException("Invalid OTP");
+
+        // Check OTP
+        if (!otp.getOtp()
+                .equals(request.getOtp())) {
+
+            throw new RuntimeException(
+                    "Invalid OTP"
+            );
         }
 
+
+        /*
+         * OTP is correct
+         *
+         * Activate account
+         */
         user.setActive(true);
 
+
+        // Save active user
         userRepository.save(user);
 
+
+        // Delete used OTP
         otpRepository.delete(otp);
 
+
         return VerifyOtpResponse.builder()
-                .message("Email verified successfully")
+                .message(
+                        "Email verified successfully"
+                )
                 .build();
     }
 
 
-    @Override
-    public LoginResponse login(LoginRequest loginRequest) {
+    /* =========================================================
+       LOGIN
+    ========================================================= */
 
-        User user = userRepository.findByEmail(loginRequest.getEmail())
+    @Override
+    public LoginResponse login(
+            LoginRequest loginRequest
+    ) {
+
+        // Find user by email
+        User user = userRepository
+                .findByEmail(loginRequest.getEmail())
                 .orElseThrow(() ->
-                        new NotException("Email not found")
+                        new NotException(
+                                "Email not found"
+                        )
                 );
 
+
+        /*
+         * Check account status
+         *
+         * active = false
+         *     -> Cannot login
+         *
+         * active = true
+         *     -> Can continue login
+         */
         if (!user.isActive()) {
-            throw new RuntimeException(
-                    "Please verify your email first."
+
+            throw new NotException(
+                    "This account has been deactivated."
             );
         }
 
+
+        // Check password
         if (!passwordEncoder.matches(
                 loginRequest.getPassword(),
                 user.getPassword()
         )) {
+
             throw new EmailAndPasswordAreNotMatch(
                     "Email and password do not match"
             );
         }
 
-        String token = jwtService.generateToken(user);
 
+        // Generate JWT
+        String token =
+                jwtService.generateToken(user);
+
+
+        // Create login response
         LoginResponse response =
                 userMapper.loginResponse(user);
 
+
+        // Set JWT token
         response.setToken(token);
+
 
         return response;
     }
 
+
+    /* =========================================================
+       FORGOT PASSWORD
+    ========================================================= */
+
     @Override
     @Transactional
-    public String forgotPassword(ForgotPasswordRequest request) {
+    public String forgotPassword(
+            ForgotPasswordRequest request
+    ) {
 
-        User user = userRepository.findByEmail(request.getEmail())
+        // Find user
+        User user = userRepository
+                .findByEmail(request.getEmail())
                 .orElseThrow(() ->
-                        new NotException("Email not found")
+                        new NotException(
+                                "Email not found"
+                        )
                 );
 
+
+        /*
+         * Find existing reset token
+         * or create new one
+         */
         PasswordResetToken resetToken =
-                passwordResetTokenRepository.findByUser(user)
+                passwordResetTokenRepository
+                        .findByUser(user)
                         .orElseGet(() ->
                                 PasswordResetToken.builder()
                                         .user(user)
                                         .build()
                         );
 
-        String token = UUID.randomUUID().toString();
 
+        // Generate token
+        String token =
+                UUID.randomUUID().toString();
+
+
+        // Set token
         resetToken.setToken(token);
+
+
+        // Token expires after 15 minutes
         resetToken.setExpiryDate(
-                LocalDateTime.now().plusMinutes(15)
+                LocalDateTime.now()
+                        .plusMinutes(15)
         );
+
+
+        // Mark token as unused
         resetToken.setUsed(false);
 
-        passwordResetTokenRepository.save(resetToken);
-        String resetLink = frontendUrl + "/reset-password?token=" + token;
+
+        // Save token
+        passwordResetTokenRepository.save(
+                resetToken
+        );
+
+
+        // Create reset link
+        String resetLink =
+                frontendUrl
+                        + "/reset-password?token="
+                        + token;
+
+
+        // Send email
         emailService.sendPasswordResetEmail(
                 user.getEmail(),
                 resetLink
         );
 
+
         return "Password reset link has been sent to your email";
     }
+
+
+    /* =========================================================
+       RESET PASSWORD
+    ========================================================= */
+
     @Override
     @Transactional
-    public String resetPassword(ResetPasswordRequest request) {
+    public String resetPassword(
+            ResetPasswordRequest request
+    ) {
 
+        // Find reset token
         PasswordResetToken passwordResetToken =
                 passwordResetTokenRepository
-                        .findByToken(request.getToken())
+                        .findByToken(
+                                request.getToken()
+                        )
                         .orElseThrow(() ->
-                                new NotException("Invalid reset token")
+                                new NotException(
+                                        "Invalid reset token"
+                                )
                         );
 
-        if (passwordResetToken.getExpiryDate()
-                .isBefore(LocalDateTime.now())) {
 
-            passwordResetTokenRepository.delete(passwordResetToken);
+        // Check expiry
+        if (passwordResetToken
+                .getExpiryDate()
+                .isBefore(
+                        LocalDateTime.now()
+                )) {
+
+            passwordResetTokenRepository.delete(
+                    passwordResetToken
+            );
+
             throw new NotException(
                     "This reset link has expired"
             );
         }
 
+
+        // Check password confirmation
         if (!request.getNewPassword()
-                .equals(request.getConfirmPassword())) {
+                .equals(
+                        request.getConfirmPassword()
+                )) {
 
             throw new NotException(
                     "New password and confirm password do not match"
             );
         }
+
+
+        // Check token already used
         if (passwordResetToken.isUsed()) {
+
             throw new NotException(
                     "This reset link has already been used"
             );
         }
-        User user = passwordResetToken.getUser();
 
+
+        // Get user
+        User user =
+                passwordResetToken.getUser();
+
+
+        // Encode new password
         user.setPassword(
                 passwordEncoder.encode(
                         request.getNewPassword()
                 )
         );
 
+
+        // Save user
         userRepository.save(user);
 
-        passwordResetTokenRepository.delete(passwordResetToken);
+
+        // Delete reset token
+        passwordResetTokenRepository.delete(
+                passwordResetToken
+        );
+
 
         return "Password has been changed successfully";
     }
