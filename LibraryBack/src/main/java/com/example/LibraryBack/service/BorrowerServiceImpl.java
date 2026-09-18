@@ -11,6 +11,7 @@ import com.example.LibraryBack.mapper.BorrowerMapper;
 import com.example.LibraryBack.repository.BookRepository;
 import com.example.LibraryBack.repository.BorrowerRepository;
 import com.example.LibraryBack.repository.UserRepository;
+import com.example.LibraryBack.telegram.TelegramNotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class BorrowerServiceImpl implements BorrowerService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final BorrowerMapper borrowerMapper;
+    private final TelegramNotificationService telegramNotificationService;
 
 
     // =========================================================
@@ -129,69 +131,53 @@ public class BorrowerServiceImpl implements BorrowerService {
                                 )
                         );
 
-
         // Only PENDING can be accepted
-        if (borrower.getStatus()
-                != BorrowingStatus.PENDING) {
-
+        if (borrower.getStatus() != BorrowingStatus.PENDING) {
             throw new NotException(
                     "Only PENDING requests can be accepted"
             );
         }
 
-
         Book book = borrower.getBook();
 
-
         if (book == null) {
-
             throw new NotException(
                     "Book not found"
             );
         }
 
-
         // Check quantity again
         if (book.getQty() <= 0) {
-
             throw new NotException(
                     "Book is no longer available"
             );
         }
 
-
         // Decrease quantity ONLY when admin accepts
-        book.setQty(
-                book.getQty() - 1
-        );
+        book.setQty(book.getQty() - 1);
 
         bookRepository.save(book);
 
-
         // Change status
-        borrower.setStatus(
-                BorrowingStatus.BORROWED
-        );
-
+        borrower.setStatus(BorrowingStatus.BORROWED);
 
         // Make sure fine is not null
         if (borrower.getFine() == null) {
-
-            borrower.setFine(
-                    BigDecimal.ZERO
-            );
+            borrower.setFine(BigDecimal.ZERO);
         }
 
-
+        // Save borrowing
         Borrower updatedBorrower =
-                borrowerRepository.save(
-                        borrower
-                );
+                borrowerRepository.save(borrower);
 
-
-        return borrowerMapper.toResponse(
-                updatedBorrower
+        // Send Telegram notification
+        telegramNotificationService.sendBorrowAcceptedNotification(
+                borrower.getUser().getId(),
+                book.getTitle(),
+                borrower.getDueDate()
         );
+
+        return borrowerMapper.toResponse(updatedBorrower);
     }
 
     @Override

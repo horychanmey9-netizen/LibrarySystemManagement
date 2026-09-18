@@ -1,7 +1,6 @@
 package com.example.LibraryBack.dto.response;
 
 import com.example.LibraryBack.enums.Status;
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

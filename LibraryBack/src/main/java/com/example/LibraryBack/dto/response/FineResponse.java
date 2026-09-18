@@ -19,6 +19,7 @@ public class FineResponse {
     private String userName;
     private Long bookId;
     private String bookTitle;
+    private String image;
     private LocalDate dueDate;
     private LocalDate returnedDate;
     private Integer daysLate;

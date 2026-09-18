@@ -17,6 +17,7 @@ import MyBorrowings from "../pages/user/MyBorrowings.vue";
 import MyFines from "../pages/user/MyFines.vue";
 import SettingUser from "../pages/user/SettingUser.vue";
 import UserProfile from "../pages/user/UserProfile.vue";
+import MyFavorite from "../pages/user/MyFavorite.vue";
 
 // =====================================================
 // ADMIN PAGES
@@ -153,6 +154,11 @@ const routes = [
         path: "profile",
         name: "UserProfile",
         component: UserProfile,
+      },
+      {
+        path: "myfavorite",
+        name: "MyFavorite",
+        component: MyFavorite,
       },
     ],
   },

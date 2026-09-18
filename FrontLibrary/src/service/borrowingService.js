@@ -257,6 +257,50 @@ export async function acceptReturn(id) {
   return result?.data ?? result;
 }
 
+// =====================================================
+// REJECT RETURN
+// =====================================================
+
+export async function rejectReturn(id) {
+
+  const token =
+    sessionStorage.getItem("token");
+
+
+  const response =
+    await fetch(
+      `${API_URL}/reject-return/${id}`,
+      {
+        method: "PUT",
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`,
+
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  if (!response.ok) {
+
+    const message =
+      await response.text();
+
+    throw new Error(
+      message ||
+      "Failed to reject return."
+    );
+
+  }
+
+
+  return response.json();
+
+}
+
 // ================================
 // UPDATE BORROWING
 // ================================

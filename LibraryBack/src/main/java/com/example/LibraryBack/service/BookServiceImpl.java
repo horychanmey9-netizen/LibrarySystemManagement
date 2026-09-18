@@ -89,7 +89,7 @@ public class BookServiceImpl implements BookService {
 
             book.setImage(imageUrl);
         }
-        Book updatedBook = bookRepository.save(book);
+        Book updatedBook = bookRepository.save(book);   
 
         return bookMapper.bookResponse(updatedBook);
     }

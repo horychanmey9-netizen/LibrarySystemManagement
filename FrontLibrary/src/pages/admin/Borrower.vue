@@ -1,29 +1,41 @@
 <template>
+
   <div class="borrowings-page">
 
     <!-- =========================
          Header
     ========================== -->
+
     <div class="page-header">
+
       <div>
-        <h1>Borrowing Management</h1>
+
+        <h1>
+          Borrowing Management
+        </h1>
 
         <p>
           Manage borrowed books
         </p>
+
       </div>
+
     </div>
 
 
     <!-- =========================
-         Search & Filter
+         Search
     ========================== -->
+
     <div class="toolbar">
 
       <!-- Search -->
+
       <div class="search-box">
 
-        <i class="bi bi-search search-icon"></i>
+        <i
+          class="bi bi-search search-icon"
+        ></i>
 
         <input
           v-model="search"
@@ -33,69 +45,53 @@
 
       </div>
 
-
-      <!-- Status Filter -->
-      <select
-        v-model="statusFilter"
-        class="status-filter"
-      >
-
-        <option value="All">
-          All Status
-        </option>
-
-        <option value="Borrowed">
-          Borrowed
-        </option>
-
-        <option value="Late">
-          Late
-        </option>
-
-        <option value="Returned">
-          Returned
-        </option>
-
-      </select>
-
     </div>
 
 
     <!-- =========================
          Loading
     ========================== -->
+
     <div
       v-if="loading"
       class="loading-message"
     >
+
       Loading borrowings...
+
     </div>
 
 
     <!-- =========================
          Error
     ========================== -->
+
     <div
       v-else-if="error"
       class="error-message"
     >
+
       {{ error }}
 
       <button
         class="retry-btn"
         @click="fetchBorrowings"
       >
+
         Try Again
+
       </button>
+
     </div>
 
 
     <!-- =========================
          Borrowing Table
     ========================== -->
+
     <BorrowingTable
       v-else
-      :borrowings="filteredBorrowings"
+      :borrowings="visibleBorrowings"
       @view="viewBorrowing"
       @return="returnBook"
       @renew="renewBook"
@@ -103,14 +99,59 @@
 
 
     <!-- =========================
+         Show More
+    ========================== -->
+
+    <div
+      v-if="
+        !loading &&
+        !error &&
+        hasMoreBorrowings
+      "
+      class="show-more-container"
+    >
+
+      <button
+        class="show-more-btn"
+        @click="showMore"
+      >
+
+        Show More
+
+      </button>
+
+    </div>
+
+
+    <!-- =========================
+         All Loaded
+    ========================== -->
+
+    <div
+      v-else-if="
+        !loading &&
+        !error &&
+        filteredBorrowings.length > 20
+      "
+      class="all-loaded"
+    >
+
+      All borrowings loaded
+
+    </div>
+
+
+    <!-- =========================
          Borrowing Details
     ========================== -->
+
     <BorrowingDetails
       :borrowing="selectedBorrowing"
       @close="closeDetails"
     />
 
   </div>
+
 </template>
 
 
@@ -119,7 +160,8 @@
 import {
   ref,
   computed,
-  onMounted
+  onMounted,
+  watch
 } from "vue";
 
 
@@ -137,19 +179,26 @@ import {
 } from "@/service/borrowingService.js";
 
 
+
 /* =========================
    Search
 ========================= */
 
-const search = ref("");
+const search =
+  ref("");
 
 
 
 /* =========================
-   Status Filter
+   Show More
 ========================= */
 
-const statusFilter = ref("All");
+const displayLimit =
+  ref(20);
+
+
+const loadAmount =
+  20;
 
 
 
@@ -157,7 +206,8 @@ const statusFilter = ref("All");
    Selected Borrowing
 ========================= */
 
-const selectedBorrowing = ref(null);
+const selectedBorrowing =
+  ref(null);
 
 
 
@@ -165,7 +215,8 @@ const selectedBorrowing = ref(null);
    Borrowing Data
 ========================= */
 
-const borrowings = ref([]);
+const borrowings =
+  ref([]);
 
 
 
@@ -173,7 +224,8 @@ const borrowings = ref([]);
    Loading
 ========================= */
 
-const loading = ref(false);
+const loading =
+  ref(false);
 
 
 
@@ -181,7 +233,8 @@ const loading = ref(false);
    Error
 ========================= */
 
-const error = ref("");
+const error =
+  ref("");
 
 
 
@@ -191,9 +244,11 @@ const error = ref("");
 
 async function fetchBorrowings() {
 
-  loading.value = true;
+  loading.value =
+    true;
 
-  error.value = "";
+  error.value =
+    "";
 
 
   try {
@@ -230,6 +285,37 @@ async function fetchBorrowings() {
         : [];
 
 
+    /*
+     * Newest borrowing first
+     */
+
+    borrowings.value.sort(
+      (a, b) => {
+
+        const dateA =
+          new Date(
+            a.borrowDate ||
+            a.createdAt ||
+            0
+          );
+
+
+        const dateB =
+          new Date(
+            b.borrowDate ||
+            b.createdAt ||
+            0
+          );
+
+
+        return (
+          dateB - dateA
+        );
+
+      }
+    );
+
+
   } catch (err) {
 
     console.error(
@@ -243,7 +329,8 @@ async function fetchBorrowings() {
 
   } finally {
 
-    loading.value = false;
+    loading.value =
+      false;
 
   }
 
@@ -264,77 +351,125 @@ onMounted(() => {
 
 
 /* =========================
-   Search + Filter
+   Search
 ========================= */
 
-const filteredBorrowings = computed(() => {
+const filteredBorrowings =
+  computed(() => {
 
-  const keyword =
-    search.value
-      .toLowerCase()
-      .trim();
-
-
-  return borrowings.value.filter(
-    item => {
-
-      const userName =
-        item.userName || "";
+    const keyword =
+      search.value
+        .toLowerCase()
+        .trim();
 
 
-      const bookTitle =
-        item.bookTitle || "";
+    return borrowings.value.filter(
+      item => {
+
+        const userName =
+          item.userName || "";
 
 
-      /*
-       * Search User
-       */
-
-      const matchesUser =
-        userName
-          .toLowerCase()
-          .includes(keyword);
+        const bookTitle =
+          item.bookTitle || "";
 
 
-      /*
-       * Search Book
-       */
+        /*
+         * Search User
+         */
 
-      const matchesBook =
-        bookTitle
-          .toLowerCase()
-          .includes(keyword);
-
-
-      /*
-       * Search Result
-       */
-
-      const matchesSearch =
-        matchesUser ||
-        matchesBook;
+        const matchesUser =
+          userName
+            .toLowerCase()
+            .includes(keyword);
 
 
-      /*
-       * Status Filter
-       */
+        /*
+         * Search Book
+         */
 
-      const matchesStatus =
-        statusFilter.value === "All"
-        ||
-        item.status ===
-          statusFilter.value;
+        const matchesBook =
+          bookTitle
+            .toLowerCase()
+            .includes(keyword);
 
 
-      return (
-        matchesSearch &&
-        matchesStatus
+        /*
+         * Search Result
+         */
+
+        return (
+          matchesUser ||
+          matchesBook
+        );
+
+      }
+    );
+
+  });
+
+
+
+/* =========================
+   Visible Borrowings
+========================= */
+
+const visibleBorrowings =
+  computed(() => {
+
+    return filteredBorrowings.value
+      .slice(
+        0,
+        displayLimit.value
       );
 
-    }
-  );
+  });
 
-});
+
+
+/* =========================
+   Has More
+========================= */
+
+const hasMoreBorrowings =
+  computed(() => {
+
+    return (
+      displayLimit.value <
+      filteredBorrowings.value.length
+    );
+
+  });
+
+
+
+/* =========================
+   Show More
+========================= */
+
+function showMore() {
+
+  displayLimit.value +=
+    loadAmount;
+
+}
+
+
+
+/* =========================
+   Reset Limit When Search
+   Changes
+========================= */
+
+watch(
+  search,
+  () => {
+
+    displayLimit.value =
+      loadAmount;
+
+  }
+);
 
 
 
@@ -375,7 +510,8 @@ async function returnBook(item) {
    */
 
   if (
-    item.status === "Returned"
+    item.status ===
+    "Returned"
   ) {
 
     return;
@@ -427,7 +563,7 @@ async function returnBook(item) {
 
 
     /*
-     * Close details if opened
+     * Close details
      */
 
     selectedBorrowing.value =
@@ -479,7 +615,8 @@ async function renewBook(item) {
    */
 
   if (
-    item.status === "Returned"
+    item.status ===
+    "Returned"
   ) {
 
     return;
@@ -711,37 +848,67 @@ async function renewBook(item) {
 
 
 /* =========================
-   Status Filter
+   Show More
 ========================= */
 
-.status-filter {
+.show-more-container {
 
-  width: 160px;
+  display: flex;
 
-  height: 44px;
+  justify-content: center;
 
-  padding:
-    0 12px;
-
-  border:
-    1px solid #d1d5db;
-
-  border-radius: 8px;
-
-  outline: none;
-
-  background: white;
-
-  color: #374151;
-
-  cursor: pointer;
+  margin-top: 25px;
 
 }
 
 
-.status-filter:focus {
+.show-more-btn {
 
-  border-color: #2563eb;
+  min-width: 130px;
+
+  padding:
+    10px 24px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease;
+
+}
+
+
+.show-more-btn:hover {
+
+  background: #1d4ed8;
+
+}
+
+
+/* =========================
+   All Loaded
+========================= */
+
+.all-loaded {
+
+  margin-top: 25px;
+
+  text-align: center;
+
+  color: #6b7280;
+
+  font-size: 14px;
 
 }
 
@@ -852,13 +1019,6 @@ async function renewBook(item) {
 
 
   .search-box {
-
-    width: 100%;
-
-  }
-
-
-  .status-filter {
 
     width: 100%;
 

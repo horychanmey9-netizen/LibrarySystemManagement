@@ -46,8 +46,6 @@
 
           <tr>
 
-            <th>ID</th>
-
             <th>User</th>
 
             <th>Book</th>
@@ -83,21 +81,6 @@
             v-for="item in borrowings"
             :key="item.id"
           >
-
-            <!-- =================================================
-                 ID
-            ================================================== -->
-
-            <td>
-
-              <span class="id-number">
-
-                #{{ item.id }}
-
-              </span>
-
-            </td>
-
 
             <!-- =================================================
                  USER
@@ -336,7 +319,7 @@
           >
 
             <td
-              colspan="9"
+              colspan="8"
               class="empty-state"
             >
 
@@ -347,11 +330,15 @@
               </div>
 
               <h3>
+
                 No borrowing records found
+
               </h3>
 
               <p>
+
                 There are currently no borrowing records.
+
               </p>
 
             </td>
@@ -451,10 +438,16 @@ function formatDate(date) {
   try {
 
     const value =
-      new Date(date + "T00:00:00");
+      new Date(
+        date + "T00:00:00"
+      );
 
 
-    if (Number.isNaN(value.getTime())) {
+    if (
+      Number.isNaN(
+        value.getTime()
+      )
+    ) {
 
       return date;
 
@@ -696,6 +689,7 @@ function isLate(item) {
   const today =
     new Date();
 
+
   today.setHours(
     0,
     0,
@@ -729,7 +723,8 @@ function isLate(item) {
 
   background: white;
 
-  border: 1px solid #e5e7eb;
+  border:
+    1px solid #e5e7eb;
 
   border-radius: 10px;
 
@@ -818,7 +813,7 @@ table {
 
   width: 100%;
 
-  min-width: 1200px;
+  min-width: 1100px;
 
   border-collapse: collapse;
 
@@ -869,7 +864,8 @@ td {
 
 tbody tr {
 
-  transition: background 0.2s ease;
+  transition:
+    background 0.2s ease;
 
 }
 
@@ -877,19 +873,6 @@ tbody tr {
 tbody tr:hover {
 
   background: #fafafa;
-
-}
-
-
-/* =========================================================
-   ID
-========================================================= */
-
-.id-number {
-
-  color: #6b7280;
-
-  font-weight: 600;
 
 }
 
@@ -1220,7 +1203,8 @@ tbody tr:hover {
 
 .empty-state {
 
-  padding: 60px 20px !important;
+  padding:
+    60px 20px !important;
 
   text-align: center;
 
