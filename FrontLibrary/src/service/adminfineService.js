@@ -31,11 +31,17 @@ async function request(url, options = {}) {
     }
   });
 
+
+  /* =========================
+     Handle Error
+  ========================= */
+
   if (!response.ok) {
 
     let message = `Request failed: ${response.status}`;
 
     try {
+
       const errorData = await response.json();
 
       message =
@@ -50,12 +56,19 @@ async function request(url, options = {}) {
     throw new Error(message);
   }
 
-  /*
-   * DELETE / update endpoint may not return JSON.
-   */
+
+  /* =========================
+     No Content
+  ========================= */
+
   if (response.status === 204) {
     return null;
   }
+
+
+  /* =========================
+     Read Response
+  ========================= */
 
   const text = await response.text();
 
@@ -65,11 +78,13 @@ async function request(url, options = {}) {
 
 /* =========================
    Get All Fines
+   Backend:
+   GET /api/fine/getAllFine
 ========================= */
 
 export async function getFines() {
 
-  return await request(`${API_URL}/getData`, {
+  return await request(`${API_URL}/getAllFine`, {
     method: "GET"
   });
 
@@ -78,11 +93,13 @@ export async function getFines() {
 
 /* =========================
    Get Fine By ID
+   Backend:
+   GET /api/fine/getFinebyId/{id}
 ========================= */
 
 export async function getFineById(id) {
 
-  return await request(`${API_URL}/getById/${id}`, {
+  return await request(`${API_URL}/getFinebyId/${id}`, {
     method: "GET"
   });
 
@@ -90,12 +107,46 @@ export async function getFineById(id) {
 
 
 /* =========================
+   Create Fine
+   Backend:
+   POST /api/fine/createFine
+========================= */
+
+export async function createFine(data) {
+
+  return await request(`${API_URL}/createFine`, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+
+}
+
+
+/* =========================
+   Update Fine
+   Backend:
+   PUT /api/fine/updateFine/{id}
+========================= */
+
+export async function updateFine(id, data) {
+
+  return await request(`${API_URL}/updateFine/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data)
+  });
+
+}
+
+
+/* =========================
    Mark Fine As Paid
+   Backend:
+   PUT /api/fine/payFine/{id}/pay
 ========================= */
 
 export async function markFineAsPaid(id) {
 
-  return await request(`${API_URL}/mark-paid/${id}`, {
+  return await request(`${API_URL}/payFine/${id}/pay`, {
     method: "PUT"
   });
 
@@ -104,12 +155,29 @@ export async function markFineAsPaid(id) {
 
 /* =========================
    Delete Fine
+   Backend:
+   DELETE /api/fine/deleteFine/{id}
 ========================= */
 
 export async function deleteFine(id) {
 
-  return await request(`${API_URL}/delete/${id}`, {
+  return await request(`${API_URL}/deleteFine/${id}`, {
     method: "DELETE"
+  });
+
+}
+
+
+/* =========================
+   Get Fine Summary
+   Backend:
+   GET /api/fine/getsummary
+========================= */
+
+export async function getFineSummary() {
+
+  return await request(`${API_URL}/getsummary`, {
+    method: "GET"
   });
 
 }

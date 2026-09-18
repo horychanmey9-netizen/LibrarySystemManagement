@@ -104,11 +104,11 @@
 
           <!-- ================= 6. LIBRARY INFORMATION ================= -->
 
-          <div class="lg:col-span-2 w-full">
+          <!-- <div class="lg:col-span-2 w-full">
 
             <LibraryInformation />
 
-          </div>
+          </div> -->
 
         </div>
 
@@ -202,8 +202,8 @@ import UserSettings
 import NotificationSettings
   from "@/components/admin/NotificationSettings.vue";
 
-import LibraryInformation
-  from "@/components/admin/LibraryInformation.vue";
+// import LibraryInformation
+//   from "@/components/admin/LibraryInformation.vue";
 
 
 // ========================================

@@ -1,4 +1,5 @@
 <template>
+
   <div class="table-card">
 
     <div class="table-wrapper">
@@ -8,22 +9,36 @@
         <!-- =========================
              TABLE HEADER
         ========================== -->
+
         <thead>
+
           <tr>
+
             <th>ID</th>
+
             <th>Name</th>
+
             <th>Email</th>
+
             <th>Phone</th>
+
             <th>Role</th>
+
+            <th>Status</th>
+
             <th>Created Date</th>
+
             <th>Action</th>
+
           </tr>
+
         </thead>
 
 
         <!-- =========================
              TABLE BODY
         ========================== -->
+
         <tbody>
 
           <tr
@@ -32,12 +47,16 @@
           >
 
             <!-- ID -->
-            <td>
-              {{ user.id }}
+
+            <td class="user-id">
+
+              #{{ user.id }}
+
             </td>
 
 
             <!-- NAME -->
+
             <td>
 
               <div class="user-name">
@@ -46,12 +65,18 @@
                   class="avatar"
                   :class="getAvatarClass(user.role)"
                 >
+
                   {{ getInitial(user.name) }}
+
                 </div>
 
-                <span>
-                  {{ user.name }}
-                </span>
+                <div class="name-info">
+
+                  <span class="name">
+                    {{ user.name }}
+                  </span>
+
+                </div>
 
               </div>
 
@@ -59,60 +84,136 @@
 
 
             <!-- EMAIL -->
+
             <td>
-              {{ user.email }}
+
+              <span class="email">
+                {{ user.email }}
+              </span>
+
             </td>
 
 
             <!-- PHONE -->
+
             <td>
+
               {{ user.phone || "-" }}
+
             </td>
 
 
             <!-- ROLE -->
+
             <td>
 
               <span
                 class="role-badge"
                 :class="getRoleClass(user.role)"
               >
+
+                <i
+                  :class="
+                    String(user.role).toUpperCase() === 'ADMIN'
+                      ? 'bi bi-shield-fill'
+                      : 'bi bi-person-fill'
+                  "
+                ></i>
+
                 {{ user.role }}
+
+              </span>
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+              <span
+                class="status-badge"
+                :class="
+                  user.active
+                    ? 'active'
+                    : 'inactive'
+                "
+              >
+
+                <span class="status-dot"></span>
+
+                {{ user.active ? "Active" : "Inactive" }}
+
               </span>
 
             </td>
 
 
             <!-- CREATED DATE -->
-            <td>
-              {{ user.createdDate }}
+
+            <td class="created-date">
+
+              {{ formatDate(user.createdAt) }}
+
             </td>
 
 
             <!-- ACTION -->
+
             <td>
 
               <div class="action-buttons">
 
                 <!-- VIEW -->
+
                 <button
                   type="button"
                   class="action-btn view"
-                  title="View"
                   @click="$emit('view', user)"
                 >
+
                   <i class="bi bi-eye"></i>
+
+                  <span>
+                    View
+                  </span>
+
                 </button>
 
 
-                <!-- DELETE -->
+                <!-- DEACTIVATE -->
+
                 <button
+                  v-if="user.active"
                   type="button"
-                  class="action-btn delete"
-                  title="Delete"
+                  class="action-btn deactivate"
                   @click="$emit('delete', user)"
                 >
-                  <i class="bi bi-trash"></i>
+
+                  <i class="bi bi-person-x"></i>
+
+                  <span>
+                    Deactivate
+                  </span>
+
+                </button>
+
+
+                <!-- ACTIVATE -->
+
+                <button
+                  v-else
+                  type="button"
+                  class="action-btn activate"
+                  @click="$emit('activate', user)"
+                >
+
+                  <i class="bi bi-person-check"></i>
+
+                  <span>
+                    Activate
+                  </span>
+
                 </button>
 
               </div>
@@ -125,21 +226,32 @@
           <!-- =========================
                EMPTY
           ========================== -->
+
           <tr v-if="users.length === 0">
 
             <td
-              colspan="7"
+              colspan="8"
               class="empty"
             >
+
               <div class="empty-content">
 
-                <i class="bi bi-people"></i>
+                <div class="empty-icon">
+
+                  <i class="bi bi-people"></i>
+
+                </div>
+
+                <strong>
+                  No users found
+                </strong>
 
                 <p>
-                  No users found.
+                  Try changing your search.
                 </p>
 
               </div>
+
             </td>
 
           </tr>
@@ -151,6 +263,7 @@
     </div>
 
   </div>
+
 </template>
 
 
@@ -159,8 +272,11 @@
 defineProps({
 
   users: {
+
     type: Array,
+
     default: () => []
+
   }
 
 });
@@ -168,18 +284,22 @@ defineProps({
 
 defineEmits([
   "view",
-  "delete"
+  "delete",
+  "activate"
 ]);
 
 
+
 /* =========================
-   GET INITIAL
+   INITIAL
 ========================= */
 
 function getInitial(name) {
 
   if (!name) {
+
     return "?";
+
   }
 
   return name
@@ -187,6 +307,7 @@ function getInitial(name) {
     .toUpperCase();
 
 }
+
 
 
 /* =========================
@@ -199,6 +320,7 @@ function getRoleClass(role) {
     .toLowerCase();
 
 }
+
 
 
 /* =========================
@@ -220,6 +342,25 @@ function getAvatarClass(role) {
 
 }
 
+
+
+/* =========================
+   FORMAT DATE
+========================= */
+
+function formatDate(date) {
+
+  if (!date) {
+
+    return "-";
+
+  }
+
+  return String(date)
+    .split("T")[0];
+
+}
+
 </script>
 
 
@@ -238,6 +379,10 @@ function getAvatarClass(role) {
   border-radius: 12px;
 
   overflow: hidden;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, 0.03);
 
 }
 
@@ -263,7 +408,7 @@ table {
 
   width: 100%;
 
-  min-width: 900px;
+  min-width: 1100px;
 
   border-collapse: collapse;
 
@@ -285,17 +430,22 @@ th {
 
   text-align: left;
 
-  padding: 15px 18px;
+  padding: 14px 18px;
 
-  font-size: 13px;
+  font-size: 12px;
 
-  font-weight: 600;
+  font-weight: 700;
 
   color: #64748b;
 
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom:
+    1px solid #e5e7eb;
 
   white-space: nowrap;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.02em;
 
 }
 
@@ -306,13 +456,14 @@ th {
 
 td {
 
-  padding: 15px 18px;
+  padding: 14px 18px;
 
   font-size: 14px;
 
   color: #475569;
 
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom:
+    1px solid #f1f5f9;
 
   white-space: nowrap;
 
@@ -328,7 +479,7 @@ tbody tr {
 
 tbody tr:hover {
 
-  background: #f8fafc;
+  background: #fafbff;
 
 }
 
@@ -336,6 +487,21 @@ tbody tr:hover {
 tbody tr:last-child td {
 
   border-bottom: none;
+
+}
+
+
+/* =========================
+   USER ID
+========================= */
+
+.user-id {
+
+  color: #64748b;
+
+  font-size: 13px;
+
+  font-weight: 600;
 
 }
 
@@ -351,6 +517,11 @@ tbody tr:last-child td {
   align-items: center;
 
   gap: 10px;
+
+}
+
+
+.name {
 
   color: #1e293b;
 
@@ -369,6 +540,8 @@ tbody tr:last-child td {
 
   height: 36px;
 
+  flex-shrink: 0;
+
   border-radius: 50%;
 
   display: flex;
@@ -384,8 +557,6 @@ tbody tr:last-child td {
 }
 
 
-/* USER */
-
 .user-avatar {
 
   background: #e0e7ff;
@@ -395,13 +566,22 @@ tbody tr:last-child td {
 }
 
 
-/* ADMIN */
-
 .admin-avatar {
 
   background: #ede9fe;
 
   color: #7c3aed;
+
+}
+
+
+/* =========================
+   EMAIL
+========================= */
+
+.email {
+
+  color: #475569;
 
 }
 
@@ -416,7 +596,9 @@ tbody tr:last-child td {
 
   align-items: center;
 
-  padding: 5px 11px;
+  gap: 5px;
+
+  padding: 5px 10px;
 
   border-radius: 999px;
 
@@ -427,8 +609,6 @@ tbody tr:last-child td {
 }
 
 
-/* ADMIN */
-
 .role-badge.admin {
 
   background: #ede9fe;
@@ -438,13 +618,78 @@ tbody tr:last-child td {
 }
 
 
-/* USER */
-
 .role-badge.user {
 
   background: #e0f2fe;
 
   color: #0369a1;
+
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status-badge {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+}
+
+
+.status-badge.active {
+
+  background: #ecfdf5;
+
+  color: #15803d;
+
+}
+
+
+.status-badge.inactive {
+
+  background: #fef2f2;
+
+  color: #dc2626;
+
+}
+
+
+.status-dot {
+
+  width: 6px;
+
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+
+}
+
+
+/* =========================
+   CREATED DATE
+========================= */
+
+.created-date {
+
+  color: #334155;
+
+  font-weight: 600;
 
 }
 
@@ -464,11 +709,19 @@ tbody tr:last-child td {
 }
 
 
+/* =========================
+   ACTION BUTTON
+========================= */
+
 .action-btn {
 
-  width: 34px;
+  height: 32px;
 
-  height: 34px;
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
 
   border: 1px solid #e5e7eb;
 
@@ -476,27 +729,31 @@ tbody tr:last-child td {
 
   background: white;
 
-  display: flex;
+  padding: 0 10px;
 
-  align-items: center;
+  font-size: 12px;
 
-  justify-content: center;
+  font-weight: 600;
 
   cursor: pointer;
 
   transition: 0.2s;
+
+  white-space: nowrap;
 
 }
 
 
 .action-btn i {
 
-  font-size: 14px;
+  font-size: 13px;
 
 }
 
 
-/* VIEW */
+/* =========================
+   VIEW
+========================= */
 
 .action-btn.view {
 
@@ -514,20 +771,42 @@ tbody tr:last-child td {
 }
 
 
-/* DELETE */
+/* =========================
+   DEACTIVATE
+========================= */
 
-.action-btn.delete {
+.action-btn.deactivate {
 
   color: #dc2626;
 
 }
 
 
-.action-btn.delete:hover {
+.action-btn.deactivate:hover {
 
   background: #fef2f2;
 
   border-color: #fecaca;
+
+}
+
+
+/* =========================
+   ACTIVATE
+========================= */
+
+.action-btn.activate {
+
+  color: #16a34a;
+
+}
+
+
+.action-btn.activate:hover {
+
+  background: #f0fdf4;
+
+  border-color: #bbf7d0;
 
 }
 
@@ -538,7 +817,7 @@ tbody tr:last-child td {
 
 .empty {
 
-  padding: 50px 20px !important;
+  padding: 65px 20px !important;
 
   text-align: center;
 
@@ -553,16 +832,43 @@ tbody tr:last-child td {
 
   align-items: center;
 
-  gap: 8px;
+  gap: 7px;
 
   color: #94a3b8;
 
 }
 
 
-.empty-content i {
+.empty-icon {
 
-  font-size: 32px;
+  width: 52px;
+
+  height: 52px;
+
+  margin-bottom: 5px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #f1f5f9;
+
+  color: #94a3b8;
+
+  font-size: 21px;
+
+}
+
+
+.empty-content strong {
+
+  color: #475569;
+
+  font-size: 14px;
 
 }
 
@@ -571,7 +877,24 @@ tbody tr:last-child td {
 
   margin: 0;
 
-  font-size: 14px;
+  color: #94a3b8;
+
+  font-size: 13px;
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+  .table-card {
+
+    border-radius: 10px;
+
+  }
 
 }
 

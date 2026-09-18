@@ -8,41 +8,29 @@
 
     <div class="modal">
 
-      <!-- =========================
-           HEADER
-      ========================== -->
+      <!-- HEADER -->
 
       <div class="modal-header">
-
         <div>
-
           <h2>
             User Details
           </h2>
-
           <p>
             View user information
           </p>
-
         </div>
-
 
         <button
           type="button"
           class="close-btn"
           @click="$emit('close')"
         >
-
           <i class="bi bi-x-lg"></i>
-
         </button>
 
       </div>
 
-
-      <!-- =========================
-           PROFILE
-      ========================== -->
+      <!-- PROFILE -->
 
       <div class="profile-section">
 
@@ -153,19 +141,11 @@
 
         </div>
 
-
-        <!-- CREATED -->
-
         <div class="detail-item">
-
-          <span>
-            Created Date
-          </span>
-
+          <span>Created Date</span>
           <strong>
-            {{ user.createdDate }}
+            {{ formatDate(user.createdAt) }}
           </strong>
-
         </div>
 
       </div>
@@ -226,6 +206,15 @@ function getInitial(name) {
     .toUpperCase();
 
 }
+
+function formatDate(date) {
+  if (!date) {
+    return "-";
+  }
+
+  return String(date).split("T")[0];
+}
+
 
 </script>
 

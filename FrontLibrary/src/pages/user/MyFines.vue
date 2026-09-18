@@ -92,9 +92,54 @@
       </div>
 
 
+      <!-- ================= LOADING ================= -->
+      <div
+        v-if="loading"
+        class="empty-state"
+      >
+
+        <div class="empty-icon loading-icon">
+          <i class="bi bi-arrow-repeat"></i>
+        </div>
+
+        <h3>Loading Fines...</h3>
+
+        <p>
+          Please wait while we load your fine history.
+        </p>
+
+      </div>
+
+
+      <!-- ================= ERROR ================= -->
+      <div
+        v-else-if="error"
+        class="empty-state"
+      >
+
+        <div class="empty-icon error-icon">
+          <i class="bi bi-exclamation-circle"></i>
+        </div>
+
+        <h3>Unable to Load Fines</h3>
+
+        <p>
+          {{ error }}
+        </p>
+
+        <button
+          class="retry-button"
+          @click="fetchMyFines"
+        >
+          Try Again
+        </button>
+
+      </div>
+
+
       <!-- ================= FINE CARDS ================= -->
       <div
-        v-if="fines.length > 0"
+        v-else-if="fines.length > 0"
         class="fine-list"
       >
 
@@ -112,23 +157,15 @@
         v-else
         class="empty-state"
       >
-
         <div class="empty-icon">
-          <i class="bi bi-check-circle"></i>
-        </div>
+                <i class="bi bi-cash-stack"></i>
+              </div>
 
         <h3>No Fines</h3>
 
         <p>
           You don't have any library fines.
         </p>
-
-        <router-link
-          to="/browse-books"
-          class="browse-button"
-        >
-          Browse Books
-        </router-link>
 
       </div>
 
@@ -139,176 +176,451 @@
 
 
 <script>
-import FineTemp from '../../components/user/FineTemp.vue';
+
+import FineCard from "../../components/user/FineTemp.vue";
+
+import { getMyFines }
+  from "../../service/userfineService";
 
 
 export default {
+
   name: "MyFines",
 
+
   components: {
-    FineTemp
+
+    FineCard
+
   },
 
+
   data() {
+
     return {
 
       /*
-       * Temporary JSON data
-       *
-       * Later this data can come from Backend.
+       * =========================
+       * Fine Data
+       * =========================
        */
 
-      fines: [
-
-        {
-          id: 1,
-
-          bookId: 1,
-
-          title: "The Great Gatsby",
-
-          author: "F. Scott Fitzgerald",
-
-          image:
-            "https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg",
-
-          category: "Fiction",
-
-          isbn: "9780743273565",
-
-          dueDate: "2026-07-25",
-
-          returnedDate: "2026-07-30",
-
-          lateDays: 5,
-
-          amount: 2.50,
-
-          status: "Unpaid"
-        },
+      fines: [],
 
 
-        {
-          id: 2,
+      /*
+       * =========================
+       * Loading
+       * =========================
+       */
 
-          bookId: 2,
-
-          title: "Atomic Habits",
-
-          author: "James Clear",
-
-          image:
-            "https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg",
-
-          category: "Self Help",
-
-          isbn: "9780735211292",
-
-          dueDate: "2026-07-20",
-
-          returnedDate: "2026-07-23",
-
-          lateDays: 3,
-
-          amount: 1.50,
-
-          status: "Paid"
-        },
+      loading: false,
 
 
-        {
-          id: 3,
+      /*
+       * =========================
+       * Error
+       * =========================
+       */
 
-          bookId: 3,
-
-          title: "Clean Code",
-
-          author: "Robert C. Martin",
-
-          image:
-            "https://covers.openlibrary.org/b/isbn/9780132350884-L.jpg",
-
-          category: "Technology",
-
-          isbn: "9780132350884",
-
-          dueDate: "2026-07-15",
-
-          returnedDate: "2026-07-18",
-
-          lateDays: 3,
-
-          amount: 1.50,
-
-          status: "Unpaid"
-        }
-
-      ]
+      error: null
 
     };
+
   },
 
 
+  /*
+   * =========================
+   * Mounted
+   * =========================
+   */
+
+  mounted() {
+
+    this.fetchMyFines();
+
+  },
+
+
+  /*
+   * =========================
+   * Computed
+   * =========================
+   */
+
   computed: {
 
+
     /*
-     * Total amount of all fines
+     * =========================
+     * Total Fines
+     * =========================
      */
 
     totalFines() {
 
       return this.fines.reduce(
+
         (total, fine) => {
-          return total + Number(fine.amount);
+
+          return total + Number(
+            fine.amount || 0
+          );
+
         },
+
         0
+
       );
 
     },
 
 
     /*
-     * Total unpaid fines
+     * =========================
+     * Unpaid Fines
+     * =========================
      */
 
     unpaidFines() {
 
       return this.fines
+
         .filter(
-          fine => fine.status === "Unpaid"
+
+          fine =>
+            String(fine.status)
+              .toUpperCase() === "UNPAID"
+
         )
+
         .reduce(
+
           (total, fine) => {
-            return total + Number(fine.amount);
+
+            return total + Number(
+              fine.amount || 0
+            );
+
           },
+
           0
+
         );
 
     },
 
 
     /*
-     * Total paid fines
+     * =========================
+     * Paid Fines
+     * =========================
      */
 
     paidFines() {
 
       return this.fines
+
         .filter(
-          fine => fine.status === "Paid"
+
+          fine =>
+            String(fine.status)
+              .toUpperCase() === "PAID"
+
         )
+
         .reduce(
+
           (total, fine) => {
-            return total + Number(fine.amount);
+
+            return total + Number(
+              fine.amount || 0
+            );
+
           },
+
           0
+
         );
+
+    }
+
+  },
+
+
+  /*
+   * =========================
+   * Methods
+   * =========================
+   */
+
+  methods: {
+
+
+    /*
+     * =========================
+     * Fetch My Fines
+     * =========================
+     */
+
+    async fetchMyFines() {
+
+      this.loading = true;
+
+      this.error = null;
+
+
+      try {
+
+        console.log(
+          "Fetching my fines..."
+        );
+
+
+        /*
+         * Get data from service
+         */
+
+        const data = await getMyFines();
+
+
+        console.log(
+          "My fines response:",
+          data
+        );
+
+
+        /*
+         * Make sure data is array
+         */
+
+        if (!Array.isArray(data)) {
+
+          console.warn(
+            "Fine data is not an array:",
+            data
+          );
+
+          this.fines = [];
+
+          return;
+
+        }
+
+
+        /*
+         * =========================
+         * Format API Data
+         * =========================
+         */
+
+        this.fines = data.map(
+
+          fine => this.formatFine(fine)
+
+        );
+
+
+        console.log(
+          "Formatted my fines:",
+          this.fines
+        );
+
+      }
+
+
+      catch (error) {
+
+        console.error(
+          "Fetch my fines error:",
+          error
+        );
+
+
+        this.error =
+          error.message ||
+          "Unable to load fines.";
+
+
+        this.fines = [];
+
+      }
+
+
+      finally {
+
+        this.loading = false;
+
+      }
+
+    },
+
+
+    /*
+     * =========================
+     * Format Fine
+     * =========================
+     */
+
+    formatFine(fine) {
+
+      return {
+
+        /*
+         * Fine ID
+         */
+
+        id:
+          fine.id,
+
+
+        /*
+         * Book ID
+         */
+
+        bookId:
+          fine.bookId,
+
+
+        /*
+         * Book Title
+         */
+
+        title:
+          fine.title ||
+          fine.bookTitle ||
+          "Unknown Book",
+
+
+        /*
+         * Author
+         */
+
+        author:
+          fine.author ||
+          fine.bookAuthor ||
+          "Unknown Author",
+
+
+        /*
+         * Book Image
+         */
+
+        image:
+          fine.image ||
+          fine.bookImage ||
+          null,
+
+
+        /*
+         * Category
+         */
+
+        category:
+          fine.category ||
+          fine.categoryName ||
+          null,
+
+
+        /*
+         * ISBN
+         */
+
+        isbn:
+          fine.isbn ||
+          fine.bookIsbn ||
+          null,
+
+
+        /*
+         * Due Date
+         */
+
+        dueDate:
+          this.formatDate(
+            fine.dueDate
+          ),
+
+
+        /*
+         * Returned Date
+         */
+
+        returnedDate:
+          this.formatDate(
+
+            fine.returnedDate ||
+            fine.returnDate
+
+          ),
+
+
+        /*
+         * Late Days
+         */
+
+        lateDays:
+          Number(
+
+            fine.lateDays ||
+            fine.lateDay ||
+            0
+
+          ),
+
+
+        /*
+         * Fine Amount
+         */
+
+        amount:
+          Number(
+
+            fine.amount ||
+            fine.fine ||
+            0
+
+          ),
+
+
+        /*
+         * Status
+         */
+
+        status:
+          fine.status ||
+          "Unpaid"
+
+      };
+
+    },
+
+
+    /*
+     * =========================
+     * Format Date
+     * =========================
+     */
+
+    formatDate(date) {
+
+      if (!date) {
+
+        return "-";
+
+      }
+
+
+      return String(date)
+        .split("T")[0];
 
     }
 
   }
 
 };
+
 </script>
 
 
@@ -319,7 +631,9 @@ export default {
 ================================================== */
 
 .my-fines-page {
+
   width: 100%;
+
   min-height: 100%;
 
   padding:
@@ -329,6 +643,7 @@ export default {
   box-sizing: border-box;
 
   background: #f8faff;
+
 }
 
 
@@ -337,24 +652,33 @@ export default {
 ================================================== */
 
 .page-header {
+
   margin-bottom: 24px;
+
 }
 
+
 .page-header h1 {
+
   margin: 0;
 
   font-size: 26px;
+
   font-weight: 700;
 
   color: #1f2937;
+
 }
 
+
 .page-header p {
+
   margin: 6px 0 0;
 
   font-size: 14px;
 
   color: #6b7280;
+
 }
 
 
@@ -363,6 +687,7 @@ export default {
 ================================================== */
 
 .summary-grid {
+
   display: grid;
 
   grid-template-columns:
@@ -371,10 +696,12 @@ export default {
   gap: 16px;
 
   margin-bottom: 30px;
+
 }
 
 
 .summary-card {
+
   display: flex;
 
   align-items: center;
@@ -392,61 +719,83 @@ export default {
   padding: 18px;
 
   box-sizing: border-box;
+
 }
 
 
 .summary-icon {
+
   width: 48px;
+
   height: 48px;
 
   display: flex;
 
   align-items: center;
+
   justify-content: center;
 
   flex-shrink: 0;
 
   border-radius: 11px;
+
 }
 
 
 .summary-icon i {
+
   font-size: 21px;
+
 }
+
 
 
 /* Total */
 
 .total-icon {
+
   background: #fef2f2;
 
   color: #ef4444;
+
 }
 
 
 /* Unpaid */
 
 .unpaid-icon {
+
   background: #fff7ed;
 
   color: #f97316;
+
 }
 
 
 /* Paid */
 
 .paid-icon {
+
   background: #f0fdf4;
 
   color: #22c55e;
+
 }
 
+
+/* ==================================================
+   SUMMARY CONTENT
+================================================== */
 
 .summary-content {
+
   min-width: 0;
+
 }
 
+
 .summary-content span {
+
   display: block;
 
   margin-bottom: 5px;
@@ -454,10 +803,12 @@ export default {
   font-size: 13px;
 
   color: #6b7280;
+
 }
 
 
 .summary-content strong {
+
   display: block;
 
   font-size: 21px;
@@ -465,6 +816,7 @@ export default {
   font-weight: 700;
 
   color: #1f2937;
+
 }
 
 
@@ -473,11 +825,14 @@ export default {
 ================================================== */
 
 .fines-section {
+
   width: 100%;
+
 }
 
 
 .section-header {
+
   display: flex;
 
   align-items: flex-end;
@@ -487,10 +842,12 @@ export default {
   gap: 20px;
 
   margin-bottom: 14px;
+
 }
 
 
 .section-header h2 {
+
   margin: 0;
 
   font-size: 19px;
@@ -498,24 +855,29 @@ export default {
   font-weight: 600;
 
   color: #1f2937;
+
 }
 
 
 .section-header p {
+
   margin: 4px 0 0;
 
   font-size: 13px;
 
   color: #9ca3af;
+
 }
 
 
 .record-count {
+
   flex-shrink: 0;
 
   font-size: 13px;
 
   color: #9ca3af;
+
 }
 
 
@@ -524,6 +886,7 @@ export default {
 ================================================== */
 
 .fine-list {
+
   width: 100%;
 
   display: flex;
@@ -531,14 +894,16 @@ export default {
   flex-direction: column;
 
   gap: 14px;
+
 }
 
 
 /* ==================================================
-   EMPTY STATE
+   EMPTY / LOADING / ERROR
 ================================================== */
 
 .empty-state {
+
   width: 100%;
 
   box-sizing: border-box;
@@ -552,33 +917,116 @@ export default {
   border: 1px solid #e5e7eb;
 
   border-radius: 14px;
+
 }
 
-
-.empty-icon {
+ .empty-icon {
   font-size: 48px;
-
-  color: #22c55e;
+  color: #94a3b8;
 }
 
+
+.loading-icon {
+
+  color: #2563eb;
+
+  animation:
+    spin 1s linear infinite;
+
+}
+
+
+.error-icon {
+
+  color: #ef4444;
+
+}
+
+
+@keyframes spin {
+
+  from {
+
+    transform: rotate(0deg);
+
+  }
+
+  to {
+
+    transform: rotate(360deg);
+
+  }
+
+}
+
+
+/* ==================================================
+   EMPTY TEXT
+================================================== */
 
 .empty-state h3 {
-  margin: 12px 0 5px;
+
+  margin:
+    12px
+    0
+    5px;
 
   font-size: 18px;
 
   font-weight: 600;
 
   color: #374151;
+
 }
 
 
 .empty-state p {
+
   margin: 0;
 
   font-size: 14px;
 
   color: #9ca3af;
+
+}
+
+
+/* ==================================================
+   RETRY BUTTON
+================================================== */
+
+.retry-button {
+
+  margin-top: 18px;
+
+  padding:
+    9px
+    18px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+
+  color: #ffffff;
+
+  font-size: 13px;
+
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease;
+
+}
+
+
+.retry-button:hover {
+
+  background: #1d4ed8;
+
 }
 
 
@@ -587,11 +1035,14 @@ export default {
 ================================================== */
 
 .browse-button {
+
   display: inline-block;
 
   margin-top: 18px;
 
-  padding: 9px 18px;
+  padding:
+    9px
+    18px;
 
   border-radius: 8px;
 
@@ -605,12 +1056,16 @@ export default {
 
   text-decoration: none;
 
-  transition: background 0.2s ease;
+  transition:
+    background 0.2s ease;
+
 }
 
 
 .browse-button:hover {
+
   background: #1d4ed8;
+
 }
 
 
@@ -621,8 +1076,13 @@ export default {
 @media (max-width: 1000px) {
 
   .summary-grid {
+
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
   }
 
 }
@@ -631,24 +1091,29 @@ export default {
 @media (max-width: 700px) {
 
   .my-fines-page {
+
     padding: 16px;
+
   }
 
 
   .summary-grid {
+
     grid-template-columns: 1fr;
+
   }
 
 
   .section-header {
+
     align-items: flex-start;
 
     flex-direction: column;
 
     gap: 8px;
+
   }
 
 }
-
 
 </style>
