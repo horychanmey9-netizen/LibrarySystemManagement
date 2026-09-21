@@ -1,4 +1,4 @@
-
+```vue
 <script setup>
 
 import {
@@ -21,11 +21,8 @@ import {
 // =====================================================
 
 const borrowings = ref([]);
-
 const loading = ref(false);
-
 const error = ref("");
-
 const activeMenu = ref("ALL");
 
 
@@ -34,7 +31,6 @@ const activeMenu = ref("ALL");
 // =====================================================
 
 const displayLimit = ref(16);
-
 const loadAmount = 16;
 
 
@@ -43,37 +39,12 @@ const loadAmount = 16;
 // =====================================================
 
 const menus = [
-
-  {
-    label: "All",
-    value: "ALL"
-  },
-
-  {
-    label: "Returned",
-    value: "RETURNED"
-  },
-
-  {
-    label: "Pending",
-    value: "PENDING"
-  },
-
-  {
-    label: "Borrowed",
-    value: "BORROWED"
-  },
-
-  {
-    label: "Not Accept",
-    value: "REJECTED"
-  },
-
-  {
-    label: "Overdue",
-    value: "OVERDUE"
-  }
-
+  { label: "All", value: "ALL" },
+  { label: "Returned", value: "RETURNED" },
+  { label: "Pending", value: "PENDING" },
+  { label: "Borrowed", value: "BORROWED" },
+  { label: "Not Accept", value: "REJECTED" },
+  { label: "Overdue", value: "OVERDUE" }
 ];
 
 
@@ -84,35 +55,22 @@ const menus = [
 function extractBorrowings(response) {
 
   if (Array.isArray(response)) {
-
     return response;
-
   }
-
 
   if (Array.isArray(response?.data)) {
-
     return response.data;
-
   }
-
 
   if (Array.isArray(response?.data?.data)) {
-
     return response.data.data;
-
   }
-
 
   if (Array.isArray(response?.result)) {
-
     return response.result;
-
   }
 
-
   return [];
-
 }
 
 
@@ -122,16 +80,11 @@ function extractBorrowings(response) {
 
 function formatBorrowing(item) {
 
-  console.log(
-    "BORROWING ITEM:",
-    item
-  );
-
+  console.log("BORROWING ITEM:", item);
 
   return {
 
-    id:
-      item?.id,
+    id: item?.id,
 
     bookId:
       item?.bookId ??
@@ -155,10 +108,6 @@ function formatBorrowing(item) {
       item?.categoryName ??
       item?.book?.category?.name ??
       "",
-
-    // =================================================
-    // IMAGE
-    // =================================================
 
     image:
       item?.image ??
@@ -186,9 +135,7 @@ function formatBorrowing(item) {
     status:
       item?.status ??
       "BORROWED"
-
   };
-
 }
 
 
@@ -204,11 +151,8 @@ function getBorrowingTime(borrowing) {
     borrowing?.borrowingDate;
 
   if (!date) {
-
     return 0;
-
   }
-
 
   const time =
     new Date(date).getTime();
@@ -216,18 +160,16 @@ function getBorrowingTime(borrowing) {
   return Number.isNaN(time)
     ? 0
     : time;
-
 }
 
 
 // =====================================================
-// FETCH MY BORROWINGS
+// FETCH
 // =====================================================
 
 async function fetchMyBorrowings() {
 
   loading.value = true;
-
   error.value = "";
 
   try {
@@ -235,24 +177,16 @@ async function fetchMyBorrowings() {
     const response =
       await getMyBorrowings();
 
-
     console.log(
       "MY BORROWINGS RESPONSE:",
       response
     );
 
-
     const data =
       extractBorrowings(response);
 
-
     const formattedData =
       data.map(formatBorrowing);
-
-
-    // =================================================
-    // NEWEST FIRST
-    // =================================================
 
     formattedData.sort(
       (a, b) =>
@@ -260,60 +194,43 @@ async function fetchMyBorrowings() {
         getBorrowingTime(a)
     );
 
-
     borrowings.value =
       formattedData;
 
-
-    // Reset Show More
     displayLimit.value = 16;
-
 
     console.log(
       "MY BORROWINGS NEWEST FIRST:",
       borrowings.value
     );
 
-  }
-
-  catch (err) {
+  } catch (err) {
 
     console.error(
       "FETCH MY BORROWINGS ERROR:",
       err
     );
 
-
     error.value =
       err?.message ||
       "Failed to load your borrowings.";
 
-
     borrowings.value = [];
 
-  }
-
-  finally {
+  } finally {
 
     loading.value = false;
-
   }
-
 }
 
 
 // =====================================================
-// FILTER BY MENU
+// FILTER
 // =====================================================
 
 const filteredBorrowings = computed(() => {
 
   let result = [];
-
-
-  // ===================================================
-  // ALL
-  // ===================================================
 
   if (activeMenu.value === "ALL") {
 
@@ -321,23 +238,16 @@ const filteredBorrowings = computed(() => {
       ...borrowings.value
     ];
 
-  }
-
-  else {
+  } else {
 
     result =
       borrowings.value.filter(
         borrowing =>
-          borrowing.status?.toUpperCase() ===
+          borrowing.status
+            ?.toUpperCase() ===
           activeMenu.value
       );
-
   }
-
-
-  // ===================================================
-  // NEWEST FIRST
-  // ===================================================
 
   result.sort(
     (a, b) =>
@@ -345,14 +255,12 @@ const filteredBorrowings = computed(() => {
       getBorrowingTime(a)
   );
 
-
   return result;
-
 });
 
 
 // =====================================================
-// VISIBLE BORROWINGS
+// VISIBLE
 // =====================================================
 
 const visibleBorrowings = computed(() => {
@@ -385,8 +293,8 @@ const hasMoreBorrowings = computed(() => {
 
 function showMore() {
 
-  displayLimit.value += loadAmount;
-
+  displayLimit.value +=
+    loadAmount;
 }
 
 
@@ -396,17 +304,16 @@ function showMore() {
 
 function changeMenu(value) {
 
-  activeMenu.value = value;
+  activeMenu.value =
+    value;
 
-
-  // Reset to first 16
-  displayLimit.value = 16;
-
+  displayLimit.value =
+    16;
 }
 
 
 // =====================================================
-// RETURN A BOOK
+// RETURN
 // =====================================================
 
 async function handleReturn(book) {
@@ -415,30 +322,19 @@ async function handleReturn(book) {
 
     await returnBook(book.id);
 
-
-    // =================================================
-    // BACKEND SHOULD CHANGE STATUS
-    // TO RETURN_REQUESTED
-    // =================================================
-
     await fetchMyBorrowings();
 
-  }
-
-  catch (err) {
+  } catch (err) {
 
     console.error(
       "Return request error:",
       err
     );
 
-
     error.value =
       err?.message ||
       "Failed to submit return request.";
-
   }
-
 }
 
 
@@ -450,7 +346,8 @@ const activeBorrowings = computed(() => {
 
   return borrowings.value.filter(
     borrowing =>
-      borrowing.status?.toUpperCase() ===
+      borrowing.status
+        ?.toUpperCase() ===
       "BORROWED"
   ).length;
 
@@ -461,7 +358,8 @@ const returnedBorrowings = computed(() => {
 
   return borrowings.value.filter(
     borrowing =>
-      borrowing.status?.toUpperCase() ===
+      borrowing.status
+        ?.toUpperCase() ===
       "RETURNED"
   ).length;
 
@@ -472,7 +370,8 @@ const overdueBorrowings = computed(() => {
 
   return borrowings.value.filter(
     borrowing =>
-      borrowing.status?.toUpperCase() ===
+      borrowing.status
+        ?.toUpperCase() ===
       "OVERDUE"
   ).length;
 
@@ -486,31 +385,25 @@ const overdueBorrowings = computed(() => {
 function formatDate(date) {
 
   if (!date) {
-
     return "-";
-
   }
-
 
   try {
 
-    return new Date(date).toLocaleDateString(
-      "en-US",
-      {
-        year: "numeric",
-        month: "short",
-        day: "numeric"
-      }
-    );
+    return new Date(date)
+      .toLocaleDateString(
+        "en-US",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        }
+      );
 
-  }
-
-  catch {
+  } catch {
 
     return date;
-
   }
-
 }
 
 
@@ -523,49 +416,32 @@ function getStatusClass(status) {
   const value =
     status?.toUpperCase();
 
-
   if (value === "RETURNED") {
-
     return "returned";
-
   }
-
 
   if (value === "OVERDUE") {
-
     return "overdue";
-
   }
-
 
   if (value === "PENDING") {
-
     return "pending";
-
   }
-
 
   if (value === "REJECTED") {
-
     return "rejected";
-
   }
-
 
   if (value === "RETURN_REQUESTED") {
-
     return "return-requested";
-
   }
 
-
   return "borrowed";
-
 }
 
 
 // =====================================================
-// LOAD DATA
+// MOUNT
 // =====================================================
 
 onMounted(() => {
@@ -581,58 +457,25 @@ onMounted(() => {
 
   <div class="my-borrowings-page">
 
-
     <!-- =================================================
-         HEADER
+         PAGE HEADER
     ================================================== -->
 
     <div class="page-header">
 
-      <div class="header-left">
+      <div>
 
-        <div class="header-icon">
+        <h1>
+          My Borrowings
+        </h1>
 
-          <i class="bi bi-journal-bookmark-fill"></i>
-
-        </div>
-
-        <div>
-
-          <h1>
-
-            My Borrowings
-
-          </h1>
-
-          <p>
-
-            Manage and track all your borrowed books
-
-          </p>
-
-        </div>
+        <p class="hidden sm:flex">
+          Manage your borrowed books
+        </p>
 
       </div>
 
-
-      <button
-        type="button"
-        class="refresh-btn"
-        :disabled="loading"
-        @click="fetchMyBorrowings"
-      >
-
-        <i
-          class="bi bi-arrow-clockwise"
-          :class="{ spinning: loading }"
-        ></i>
-
-        Refresh
-
-      </button>
-
     </div>
-
 
 
     <!-- =================================================
@@ -641,149 +484,108 @@ onMounted(() => {
 
     <div class="statistics-grid">
 
-
-      <!-- ACTIVE -->
+      <!-- ACTIVE BORROWINGS -->
 
       <div class="stat-card">
 
         <div>
 
           <p>
-
             Active Borrowings
-
           </p>
 
           <h2>
-
             {{ activeBorrowings }}
-
           </h2>
 
         </div>
 
         <div class="stat-icon active-icon">
 
-          <i class="bi bi-book-fill"></i>
+          <i class="bi bi-book"></i>
 
         </div>
 
       </div>
 
 
-
-      <!-- RETURNED -->
+      <!-- RETURNED BOOKS -->
 
       <div class="stat-card">
 
         <div>
 
           <p>
-
             Returned Books
-
           </p>
 
           <h2>
-
             {{ returnedBorrowings }}
-
           </h2>
 
         </div>
 
         <div class="stat-icon returned-icon">
 
-          <i class="bi bi-check-circle-fill"></i>
+          <i class="bi bi-check-circle"></i>
 
         </div>
 
       </div>
 
 
-
-      <!-- OVERDUE -->
+      <!-- OVERDUE BOOKS -->
 
       <div class="stat-card">
 
         <div>
 
           <p>
-
             Overdue Books
-
           </p>
 
           <h2>
-
             {{ overdueBorrowings }}
-
           </h2>
 
         </div>
 
         <div class="stat-icon overdue-icon">
 
-          <i class="bi bi-exclamation-circle-fill"></i>
+          <i class="bi bi-exclamation-circle"></i>
 
         </div>
 
       </div>
 
-
     </div>
 
 
-
     <!-- =================================================
-         MENU FILTER
+         MENU
+         KEEP ORIGINAL DESIGN
     ================================================== -->
 
     <div class="menu-card">
 
-      <div class="menu-header">
+      <button
+        v-for="menu in menus"
+        :key="menu.value"
+        class="menu-button"
+        :class="{
+          active:
+            activeMenu === menu.value
+        }"
+        @click="
+          changeMenu(menu.value)
+        "
+      >
 
-        <h2>
+        {{ menu.label }}
 
-          Borrowing History
-
-        </h2>
-
-        <p>
-
-          Filter your borrowing records
-
-        </p>
-
-      </div>
-
-
-      <div class="menu-list">
-
-        <button
-          v-for="menu in menus"
-          :key="menu.value"
-          type="button"
-          class="menu-btn"
-          :class="{
-            active:
-              activeMenu === menu.value
-          }"
-          @click="changeMenu(menu.value)"
-        >
-
-          <span>
-
-            {{ menu.label }}
-
-          </span>
-
-        </button>
-
-      </div>
+      </button>
 
     </div>
-
 
 
     <!-- =================================================
@@ -792,33 +594,12 @@ onMounted(() => {
 
     <div
       v-if="loading"
-      class="state-container"
+      class="loading-state"
     >
 
-      <div class="state-content">
-
-        <div class="loading-icon">
-
-          <i class="bi bi-arrow-repeat spinning"></i>
-
-        </div>
-
-        <h3>
-
-          Loading Borrowings
-
-        </h3>
-
-        <p>
-
-          Please wait while we load your borrowed books...
-
-        </p>
-
-      </div>
+      Loading...
 
     </div>
-
 
 
     <!-- =================================================
@@ -827,192 +608,12 @@ onMounted(() => {
 
     <div
       v-else-if="error"
-      class="state-container error-state"
+      class="error-state"
     >
 
-      <div class="state-content">
-
-        <div class="error-icon">
-
-          <i class="bi bi-exclamation-triangle-fill"></i>
-
-        </div>
-
-        <h3>
-
-          Unable to Load Borrowings
-
-        </h3>
-
-        <p>
-
-          {{ error }}
-
-        </p>
-
-        <button
-          type="button"
-          class="retry-btn"
-          @click="fetchMyBorrowings"
-        >
-
-          <i class="bi bi-arrow-clockwise"></i>
-
-          Try Again
-
-        </button>
-
-      </div>
+      {{ error }}
 
     </div>
-
-
-
-    <!-- =================================================
-         BORROWINGS
-    ================================================== -->
-
-    <div
-      v-else-if="
-        filteredBorrowings.length > 0
-      "
-      class="borrowings-section"
-    >
-
-
-      <!-- =================================================
-           SECTION HEADER
-      ================================================== -->
-
-      <div class="section-header">
-
-        <div>
-
-          <h2>
-
-            {{
-              activeMenu === "ALL"
-                ? "All Borrowings"
-                : menus.find(
-                    menu =>
-                      menu.value ===
-                      activeMenu
-                  )?.label
-            }}
-
-          </h2>
-
-          <p>
-
-            Showing
-
-            {{ visibleBorrowings.length }}
-
-            of
-
-            {{ filteredBorrowings.length }}
-
-            book{{ filteredBorrowings.length > 1 ? "s" : "" }}
-
-          </p>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- =================================================
-           BORROWING LIST
-           NEWEST FIRST
-      ================================================== -->
-
-      <div class="borrowings-list">
-
-        <div
-          v-for="borrowing in visibleBorrowings"
-          :key="borrowing.id"
-          class="borrowing-wrapper"
-        >
-
-          <BorrowCard
-            :book="borrowing"
-            :hide-return-button="
-              borrowing.status?.toUpperCase() === 'REJECTED' ||
-              borrowing.status?.toUpperCase() !== 'BORROWED'
-            "
-            @return="handleReturn"
-          />
-
-        </div>
-
-      </div>
-
-
-
-      <!-- =================================================
-           SHOW MORE
-      ================================================== -->
-
-      <div
-        v-if="hasMoreBorrowings"
-        class="show-more-container"
-      >
-
-        <button
-          type="button"
-          class="show-more-btn"
-          @click="showMore"
-        >
-
-          <span>
-
-            Show More
-
-          </span>
-
-          <i class="bi bi-chevron-down"></i>
-
-        </button>
-
-        <p>
-
-          Showing
-          {{ visibleBorrowings.length }}
-          of
-          {{ filteredBorrowings.length }}
-          borrowings
-
-        </p>
-
-      </div>
-
-
-
-      <!-- =================================================
-           ALL LOADED
-      ================================================== -->
-
-      <div
-        v-else-if="
-          filteredBorrowings.length > 16
-        "
-        class="all-loaded"
-      >
-
-        <i class="bi bi-check-circle"></i>
-
-        <span>
-
-          All borrowings loaded
-
-        </span>
-
-      </div>
-
-
-    </div>
-
 
 
     <!-- =================================================
@@ -1020,68 +621,61 @@ onMounted(() => {
     ================================================== -->
 
     <div
-      v-else
-      class="state-container empty-state"
+      v-else-if="
+        visibleBorrowings.length === 0
+      "
+      class="empty-state"
     >
 
-      <div class="state-content">
+      <i class="bi bi-book"></i>
 
-        <div class="empty-icon">
-
-          <i class="bi bi-journal-x"></i>
-
-        </div>
-
-        <h2>
-
-          No
-          {{
-            activeMenu === "ALL"
-              ? "Borrowings"
-              : menus.find(
-                  menu =>
-                    menu.value ===
-                    activeMenu
-                )?.label
-          }}
-
-        </h2>
-
-        <p>
-
-          No books found in this category.
-
-        </p>
-
-        <router-link
-          v-if="activeMenu === 'ALL'"
-          to="/user/browse-books"
-          class="browse-btn"
-        >
-
-          <i class="bi bi-search"></i>
-
-          Browse Books
-
-        </router-link>
-
-        <button
-          v-else
-          type="button"
-          class="browse-btn"
-          @click="changeMenu('ALL')"
-        >
-
-          <i class="bi bi-arrow-left"></i>
-
-          View All Borrowings
-
-        </button>
-
-      </div>
+      <p>
+        No borrowings found.
+      </p>
 
     </div>
 
+
+    <!-- =================================================
+         BORROWINGS
+    ================================================== -->
+
+    <div
+      v-else
+      class="borrowings-list"
+    >
+
+      <BorrowCard
+        v-for="borrowing in visibleBorrowings"
+        :key="borrowing.id"
+        :book="borrowing"
+        @return="handleReturn"
+      />
+
+    </div>
+
+
+    <!-- =================================================
+         SHOW MORE
+    ================================================== -->
+
+    <div
+      v-if="hasMoreBorrowings"
+      class="show-more-wrapper"
+    >
+
+      <button
+        class="show-more-button"
+        @click="showMore"
+      >
+
+        Show More
+
+        <i class="bi bi-chevron-down"></i>
+
+      </button>
+
+    </div>
 
   </div>
 
@@ -1095,150 +689,30 @@ onMounted(() => {
 ===================================================== */
 
 .my-borrowings-page {
-  min-height: 100vh;
-  padding: 15px 80px;
-  background: #f8faff;
+  width: 100%;
+  padding: 20px 90px;
 }
 
 
 /* =====================================================
-   HEADER
+   PAGE HEADER
 ===================================================== */
 
 .page-header {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 20px;
-
-  margin-bottom: 30px;
-
+  margin-bottom: 24px;
 }
-
-
-.header-left {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 15px;
-
-}
-
-
-.header-icon {
-
-  width: 52px;
-
-  height: 52px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 14px;
-
-  background: #2563eb;
-
-  color: white;
-
-  font-size: 22px;
-
-  box-shadow:
-    0 5px 15px
-    rgba(37, 99, 235, 0.2);
-
-}
-
 
 .page-header h1 {
-
   margin: 0;
-
   font-size: 28px;
-
   font-weight: 700;
-
   color: #1f2937;
-
 }
-
 
 .page-header p {
-
-  margin: 5px 0 0;
-
-  font-size: 14px;
-
+  margin: 6px 0 0;
   color: #6b7280;
-
-}
-
-
-/* =====================================================
-   BUTTON
-===================================================== */
-
-.refresh-btn,
-.retry-btn,
-.browse-btn {
-
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 8px;
-
-  border-radius: 10px;
-
-  padding: 11px 18px;
-
   font-size: 14px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition: 0.25s ease;
-
-}
-
-
-.refresh-btn {
-
-  background: white;
-
-  border: 1px solid #e5e7eb;
-
-  color: #4b5563;
-
-}
-
-
-.refresh-btn:hover {
-
-  color: #2563eb;
-
-  background: #f8fafc;
-
-}
-
-
-.refresh-btn:disabled {
-
-  opacity: 0.6;
-
-  cursor: not-allowed;
-
 }
 
 
@@ -1256,7 +730,6 @@ onMounted(() => {
   gap: 20px;
 
   margin-bottom: 30px;
-
 }
 
 
@@ -1267,6 +740,8 @@ onMounted(() => {
   align-items: center;
 
   justify-content: space-between;
+
+  min-width: 0;
 
   padding: 22px;
 
@@ -1281,18 +756,17 @@ onMounted(() => {
     rgba(0, 0, 0, 0.03);
 
   transition: 0.25s ease;
-
 }
 
 
 .stat-card:hover {
 
-  transform: translateY(-3px);
+  transform:
+    translateY(-3px);
 
   box-shadow:
     0 10px 25px
     rgba(0, 0, 0, 0.08);
-
 }
 
 
@@ -1303,7 +777,6 @@ onMounted(() => {
   font-size: 14px;
 
   color: #6b7280;
-
 }
 
 
@@ -1314,7 +787,6 @@ onMounted(() => {
   font-size: 30px;
 
   color: #1f2937;
-
 }
 
 
@@ -1323,6 +795,8 @@ onMounted(() => {
   width: 52px;
 
   height: 52px;
+
+  min-width: 52px;
 
   display: flex;
 
@@ -1333,7 +807,6 @@ onMounted(() => {
   border-radius: 14px;
 
   font-size: 21px;
-
 }
 
 
@@ -1342,7 +815,6 @@ onMounted(() => {
   background: #eff6ff;
 
   color: #2563eb;
-
 }
 
 
@@ -1351,7 +823,6 @@ onMounted(() => {
   background: #ecfdf5;
 
   color: #16a34a;
-
 }
 
 
@@ -1360,131 +831,76 @@ onMounted(() => {
   background: #fef2f2;
 
   color: #ef4444;
-
 }
 
 
 /* =====================================================
-   MENU FILTER
+   MENU
+   ORIGINAL STYLE
 ===================================================== */
 
 .menu-card {
 
-  width: 100%;
+  display: flex;
 
-  margin-bottom: 30px;
+  gap: 8px;
 
-  padding: 20px;
+  margin-bottom: 24px;
+
+  padding: 6px;
 
   background: white;
 
-  border-radius: 16px;
+  border: 1px solid #eef0f4;
 
-  border: 1px solid #edf0f5;
+  border-radius: 12px;
 
-  box-shadow:
-    0 3px 10px
-    rgba(0, 0, 0, 0.03);
+  overflow-x: auto;
 
+  scrollbar-width: none;
 }
 
 
-.menu-header {
-
-  margin-bottom: 18px;
-
+.menu-card::-webkit-scrollbar {
+  display: none;
 }
 
 
-.menu-header h2 {
+.menu-button {
 
-  margin: 0;
+  border: none;
 
-  font-size: 20px;
+  background: transparent;
 
-  font-weight: 700;
+  padding: 9px 16px;
 
-  color: #1f2937;
+  border-radius: 8px;
 
-}
+  font-size: 13px;
 
-
-.menu-header p {
-
-  margin: 5px 0 0;
-
-  font-size: 14px;
-
-  color: #9ca3af;
-
-}
-
-
-.menu-list {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 10px;
-
-  flex-wrap: wrap;
-
-}
-
-
-.menu-btn {
-
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 11px 20px;
-
-  border: 1px solid #e5e7eb;
-
-  border-radius: 10px;
-
-  background: #f8fafc;
-
-  color: #4b5563;
-
-  font-size: 14px;
-
-  font-weight: 600;
+  color: #6b7280;
 
   cursor: pointer;
 
-  transition: 0.25s ease;
+  white-space: nowrap;
 
+  transition: 0.2s ease;
 }
 
 
-.menu-btn:hover {
+.menu-button:hover {
 
-  border-color: #2563eb;
+  background: #f3f4f6;
 
-  color: #2563eb;
-
-  background: #eff6ff;
-
+  color: #374151;
 }
 
 
-.menu-btn.active {
+.menu-button.active {
 
   background: #2563eb;
 
-  border-color: #2563eb;
-
   color: white;
-
-  box-shadow:
-    0 4px 12px
-    rgba(37, 99, 235, 0.2);
-
 }
 
 
@@ -1492,86 +908,53 @@ onMounted(() => {
    BORROWINGS
 ===================================================== */
 
-.borrowings-section {
-
-  width: 100%;
-
-}
-
-
-.section-header {
-
-  margin-bottom: 18px;
-
-}
-
-
-.section-header h2 {
-
-  margin: 0;
-
-  font-size: 20px;
-
-  color: #1f2937;
-
-}
-
-
-.section-header p {
-
-  margin: 5px 0 0;
-
-  font-size: 14px;
-
-  color: #9ca3af;
-
-}
-
-
 .borrowings-list {
 
-  display: grid;
+  display: flex;
 
-  gap: 20px;
+  flex-direction: column;
 
-}
-
-
-.borrowing-wrapper {
-
-  width: 100%;
-
-  overflow: hidden;
-
-  background: white;
-
-  border-radius: 16px;
-
-  border: 1px solid #edf0f5;
-
-  box-shadow:
-    0 3px 10px
-    rgba(0, 0, 0, 0.03);
-
-  transition: 0.25s ease;
-
-}
-
-
-.borrowing-wrapper:hover {
-
-  box-shadow:
-    0 10px 30px
-    rgba(0, 0, 0, 0.07);
-
+  gap: 16px;
 }
 
 
 /* =====================================================
-   SHOW MORE
+   LOADING
 ===================================================== */
 
-.show-more-container {
+.loading-state {
+
+  padding: 40px;
+
+  text-align: center;
+
+  color: #6b7280;
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.error-state {
+
+  padding: 20px;
+
+  text-align: center;
+
+  color: #dc2626;
+
+  background: #fef2f2;
+
+  border-radius: 12px;
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty-state {
 
   display: flex;
 
@@ -1581,419 +964,433 @@ onMounted(() => {
 
   justify-content: center;
 
-  margin-top: 30px;
-
-  padding: 10px 0 20px;
-
-}
-
-
-.show-more-btn {
-
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 10px;
-
-  min-width: 150px;
-
-  padding: 12px 22px;
-
-  border: 1px solid #2563eb;
-
-  border-radius: 10px;
-
-  background: white;
-
-  color: #2563eb;
-
-  font-size: 14px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition: 0.25s ease;
-
-}
-
-
-.show-more-btn:hover {
-
-  background: #2563eb;
-
-  color: white;
-
-  box-shadow:
-    0 5px 15px
-    rgba(37, 99, 235, 0.2);
-
-  transform: translateY(-1px);
-
-}
-
-
-.show-more-btn i {
-
-  font-size: 12px;
-
-}
-
-
-.show-more-container p {
-
-  margin: 10px 0 0;
-
-  font-size: 13px;
+  padding: 60px 20px;
 
   color: #9ca3af;
 
+  text-align: center;
 }
 
 
-.all-loaded {
+.empty-state i {
+
+  font-size: 42px;
+
+  margin-bottom: 10px;
+}
+
+
+.empty-state p {
+
+  margin: 0;
+
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   SHOW MORE
+===================================================== */
+
+.show-more-wrapper {
+
+  display: flex;
+
+  justify-content: center;
+
+  margin-top: 24px;
+}
+
+
+.show-more-button {
 
   display: flex;
 
   align-items: center;
-
-  justify-content: center;
 
   gap: 8px;
 
-  margin-top: 25px;
-
-  padding: 15px;
-
-  color: #9ca3af;
-
-  font-size: 13px;
-
-}
-
-
-.all-loaded i {
-
-  color: #16a34a;
-
-  font-size: 16px;
-
-}
-
-
-/* =====================================================
-   STATES
-===================================================== */
-
-.state-container {
-
-  min-height: 400px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 40px;
-
-  background: white;
-
-  border-radius: 16px;
-
-  border: 1px solid #edf0f5;
-
-  box-shadow:
-    0 3px 10px
-    rgba(0, 0, 0, 0.03);
-
-}
-
-
-.state-content {
-
-  max-width: 500px;
-
-  text-align: center;
-
-}
-
-
-.state-content h2,
-.state-content h3 {
-
-  margin: 20px 0 0;
-
-  color: #374151;
-
-}
-
-
-.state-content p {
-
-  margin: 10px 0 0;
-
-  color: #9ca3af;
-
-  font-size: 14px;
-
-  line-height: 1.6;
-
-}
-
-
-/* =====================================================
-   STATE ICONS
-===================================================== */
-
-.loading-icon,
-.error-icon,
-.empty-icon {
-
-  width: 80px;
-
-  height: 80px;
-
-  margin: auto;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 50%;
-
-  font-size: 34px;
-
-}
-
-
-.loading-icon {
-
-  background: #eff6ff;
-
-  color: #2563eb;
-
-}
-
-
-.error-icon {
-
-  background: #fef2f2;
-
-  color: #ef4444;
-
-}
-
-
-.empty-icon {
-
-  width: 100px;
-
-  height: 100px;
-
-  background: #eff6ff;
-
-  color: #93c5fd;
-
-  font-size: 48px;
-
-}
-
-
-/* =====================================================
-   ANIMATION
-===================================================== */
-
-.spinning {
-
-  animation:
-    spin 1s linear infinite;
-
-}
-
-
-@keyframes spin {
-
-  from {
-
-    transform: rotate(0deg);
-
-  }
-
-  to {
-
-    transform: rotate(360deg);
-
-  }
-
-}
-
-
-/* =====================================================
-   ERROR BUTTON
-===================================================== */
-
-.retry-btn {
-
-  margin-top: 22px;
-
-  border: none;
-
-  background: #ef4444;
-
-  color: white;
-
-}
-
-
-.retry-btn:hover {
-
-  background: #dc2626;
-
-}
-
-
-/* =====================================================
-   BROWSE BUTTON
-===================================================== */
-
-.browse-btn {
-
-  margin-top: 24px;
-
-  text-decoration: none;
-
   border: none;
 
   background: #2563eb;
 
   color: white;
 
+  padding: 10px 18px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
 }
 
 
-.browse-btn:hover {
+.show-more-button:hover {
 
   background: #1d4ed8;
-
-  transform: translateY(-1px);
-
 }
 
 
 /* =====================================================
-   RESPONSIVE
+   TABLET
 ===================================================== */
 
 @media (max-width: 992px) {
 
+  .my-borrowings-page {
+
+    padding: 15px 40px;
+  }
+
+
   .statistics-grid {
 
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+      repeat(3, minmax(0, 1fr));
 
+    gap: 12px;
   }
 
+
+  .stat-card {
+
+    padding: 15px;
+  }
+
+
+  .stat-card p {
+
+    font-size: 12px;
+  }
+
+
+  .stat-card h2 {
+
+    font-size: 25px;
+  }
+
+
+  .stat-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    min-width: 42px;
+
+    border-radius: 11px;
+
+    font-size: 17px;
+  }
+
+
+  /*
+   * IMPORTANT:
+   * Menu remains exactly the original style.
+   */
 }
 
+
+/* =====================================================
+   MOBILE
+   ONLY STATISTICS IS CHANGED
+   NO SCROLL
+===================================================== */
 
 @media (max-width: 768px) {
 
   .my-borrowings-page {
 
-    padding: 20px;
-
+    padding: 12px;
   }
 
 
   .page-header {
 
-    align-items: flex-start;
-
-    flex-direction: column;
-
-  }
-
-
-  .statistics-grid {
-
-    grid-template-columns: 1fr;
-
-  }
-
-
-  .menu-list {
-
-    display: grid;
-
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-  }
-
-
-  .menu-btn {
-
-    width: 100%;
-
-  }
-
-}
-
-
-@media (max-width: 480px) {
-
-  .my-borrowings-page {
-
-    padding: 15px;
-
+    margin-bottom: 16px;
   }
 
 
   .page-header h1 {
 
-    font-size: 23px;
-
+    font-size: 22px;
   }
 
 
-  .state-container {
+  .page-header p {
 
-    min-height: 350px;
-
-    padding: 25px;
-
+    font-size: 12px;
   }
 
 
-  .menu-card {
+  /* =================================================
+     SMALL STATISTICS
+     3 CARDS IN ONE ROW
+     NO HORIZONTAL SCROLL
+  ================================================== */
 
-    padding: 15px;
+  .statistics-grid {
 
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    gap: 7px;
+
+    margin-bottom: 22px;
+
+    overflow: visible;
+
+    padding: 0;
   }
 
 
-  .menu-list {
+  .stat-card {
 
-    grid-template-columns: 1fr;
-
-  }
-
-
-  .show-more-btn {
+    min-width: 0;
 
     width: 100%;
 
-    max-width: 250px;
+    padding: 9px 7px;
 
+    border-radius: 10px;
+
+    box-shadow:
+      0 2px 7px
+      rgba(0, 0, 0, 0.04);
+  }
+
+
+  .stat-card:hover {
+
+    transform: none;
+
+    box-shadow:
+      0 2px 7px
+      rgba(0, 0, 0, 0.04);
+  }
+
+
+  .stat-card p {
+
+    font-size: 8px;
+
+    line-height: 1.2;
+
+    white-space: nowrap;
+  }
+
+
+  .stat-card h2 {
+
+    margin-top: 3px;
+
+    font-size: 18px;
+
+    line-height: 1;
+  }
+
+
+  .stat-icon {
+
+    width: 28px;
+
+    height: 28px;
+
+    min-width: 28px;
+
+    border-radius: 7px;
+
+    font-size: 11px;
+  }
+
+
+  /* =================================================
+     MENU
+     KEEP OLD DESIGN
+  ================================================== */
+
+  .menu-card {
+
+    display: flex;
+
+    gap: 8px;
+
+    margin-bottom: 24px;
+
+    padding: 6px;
+
+    background: white;
+
+    border: 1px solid #eef0f4;
+
+    border-radius: 12px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+
+  .menu-card::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  .menu-button {
+
+    border: none;
+
+    background: transparent;
+
+    padding: 9px 16px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    color: #6b7280;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: 0.2s ease;
+  }
+
+
+  .menu-button:hover {
+
+    background: #f3f4f6;
+
+    color: #374151;
+  }
+
+
+  .menu-button.active {
+
+    background: #2563eb;
+
+    color: white;
+  }
+
+
+  /* =================================================
+     BORROWINGS
+  ================================================== */
+
+  .borrowings-list {
+
+    gap: 12px;
+  }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+
+  .my-borrowings-page {
+
+    padding: 10px;
+  }
+
+
+  /* =================================================
+     STATISTICS
+     EVEN SMALLER
+     NO SCROLL
+  ================================================== */
+
+  .statistics-grid {
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    gap: 5px;
+
+    margin-bottom: 22px;
+
+    overflow: visible;
+  }
+
+
+  .stat-card {
+
+    padding: 8px 5px;
+
+    border-radius: 9px;
+  }
+
+
+  .stat-card p {
+
+    font-size: 7px;
+
+    letter-spacing: -0.1px;
+  }
+
+
+  .stat-card h2 {
+
+    font-size: 16px;
+
+    margin-top: 3px;
+  }
+
+
+  .stat-icon {
+
+    width: 24px;
+
+    height: 24px;
+
+    min-width: 24px;
+
+    border-radius: 6px;
+
+    font-size: 10px;
+  }
+
+
+  /*
+   * MENU IS STILL ORIGINAL SIZE
+   */
+
+  .menu-card {
+
+    gap: 8px;
+
+    margin-bottom: 24px;
+
+    padding: 6px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+
+  .menu-card::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  .menu-button {
+
+    padding: 9px 16px;
+
+    font-size: 13px;
   }
 
 }
 
 </style>
-
+```

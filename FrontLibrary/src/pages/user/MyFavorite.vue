@@ -1,7 +1,5 @@
-
 <template>
-
-  <div class="min-h-screen bg-slate-50 p-6">
+  <div class="My_Favorite_page min-h-screen bg-slate-50 p-6 max-md:p-5 max-[550px]:p-3">
 
     <!-- =====================================================
          HEADER
@@ -29,9 +27,20 @@
       class="flex items-center justify-center py-20"
     >
 
-      <p class="text-slate-500">
-        Loading favorites...
-      </p>
+      <div class="text-center">
+
+        <div
+          class="mx-auto mb-3 h-8 w-8
+                 animate-spin rounded-full
+                 border-4 border-slate-200
+                 border-t-blue-600"
+        ></div>
+
+        <p class="text-slate-500">
+          Loading favorites...
+        </p>
+
+      </div>
 
     </div>
 
@@ -42,11 +51,8 @@
 
     <div
       v-else-if="error"
-      class="bg-red-50
-             border border-red-200
-             rounded-xl
-             p-5
-             text-red-600"
+      class="rounded-xl border border-red-200
+             bg-red-50 p-5 text-red-600"
     >
 
       {{ error }}
@@ -60,14 +66,11 @@
 
     <div
       v-else-if="favorites.length === 0"
-      class="bg-white
-             border border-slate-200
-             rounded-2xl
-             p-10
-             text-center"
+      class="rounded-2xl border border-slate-200
+             bg-white p-10 text-center"
     >
 
-      <div class="text-5xl mb-4">
+      <div class="mb-4 text-5xl">
         ♡
       </div>
 
@@ -75,21 +78,17 @@
         No Favorite Books
       </h2>
 
-      <p class="text-slate-400 mt-2">
+      <p class="mt-2 text-slate-400">
         You haven't added any books to your favorites yet.
       </p>
 
       <button
         type="button"
         @click="goToBrowseBooks"
-        class="mt-6
-               px-5 py-2.5
-               rounded-xl
-               bg-blue-600
-               hover:bg-blue-700
-               text-white
-               font-medium
-               transition"
+        class="mt-6 rounded-xl
+               bg-blue-600 px-5 py-2.5
+               font-medium text-white
+               transition hover:bg-blue-700"
       >
         Browse Books
       </button>
@@ -98,160 +97,27 @@
 
 
     <!-- =====================================================
-         FAVORITE GRID
+         FAVORITE BOOK GRID
+         SAME STYLE AS BOOK CARD
     ====================================================== -->
 
     <div
       v-else
-      class="grid
-             grid-cols-1
-             sm:grid-cols-2
-             lg:grid-cols-3
-             xl:grid-cols-4
-             gap-6"
+      class="grid grid-cols-2 gap-3
+             sm:grid-cols-3
+             lg:grid-cols-4
+             xl:grid-cols-5
+             2xl:grid-cols-6"
     >
 
-      <div
-        v-for="favorite in favorites"
+      <BookCard
+      class="px-3"
+        v-for="favorite in favoriteBooks"
         :key="favorite.id"
-        class="bg-white
-               border border-slate-200
-               rounded-2xl
-               p-4
-               hover:-translate-y-1
-               hover:shadow-lg
-               transition duration-300"
-      >
-
-        <!-- =================================================
-             FAVORITE BUTTON
-        ================================================== -->
-
-        <div class="flex justify-end mb-2">
-
-          <button
-            type="button"
-            @click="removeFavorite(favorite.bookId)"
-            class="w-9 h-9
-                   border border-slate-200
-                   rounded-lg
-                   text-blue-600
-                   bg-blue-50
-                   hover:bg-red-50
-                   hover:text-red-500
-                   transition"
-            title="Remove from favorite"
-          >
-            ♥
-          </button>
-
-        </div>
-
-
-        <!-- =================================================
-             BOOK IMAGE
-        ================================================== -->
-
-        <div
-          class="h-56
-                 bg-slate-100
-                 rounded-xl
-                 flex items-center
-                 justify-center
-                 overflow-hidden
-                 mb-4"
-        >
-
-          <img
-            v-if="favorite.image"
-            :src="favorite.image"
-            :alt="favorite.title"
-            class="h-full w-full object-contain"
-          />
-
-          <div
-            v-else
-            class="text-slate-400 text-5xl"
-          >
-            📚
-          </div>
-
-        </div>
-
-
-        <!-- =================================================
-             TITLE
-        ================================================== -->
-
-        <h3
-          class="font-bold
-                 text-lg
-                 leading-tight
-                 min-h-[48px]"
-        >
-          {{ favorite.title }}
-        </h3>
-
-
-        <!-- =================================================
-             AUTHOR
-        ================================================== -->
-
-        <p class="text-sm text-slate-400 mt-1">
-          {{ favorite.author || "Unknown Author" }}
-        </p>
-
-
-        <!-- =================================================
-             FAVORITE BADGE
-        ================================================== -->
-
-        <span
-          class="inline-block
-                 mt-3
-                 px-3 py-1
-                 rounded-full
-                 bg-blue-50
-                 text-blue-600
-                 text-xs
-                 font-medium"
-        >
-          ♥ Favorite
-        </span>
-
-
-        <!-- =================================================
-             VIEW DETAILS
-        ================================================== -->
-
-        <button
-          type="button"
-          @click="viewDetails(favorite)"
-          :disabled="detailLoadingId === favorite.bookId"
-          class="w-full
-                 mt-4
-                 border-2
-                 border-blue-500
-                 text-blue-600
-                 hover:bg-blue-600
-                 hover:text-white
-                 disabled:opacity-50
-                 disabled:cursor-not-allowed
-                 py-2.5
-                 rounded-xl
-                 font-medium
-                 transition"
-        >
-
-          {{
-            detailLoadingId === favorite.bookId
-              ? "Loading..."
-              : "View Details"
-          }}
-
-        </button>
-
-      </div>
+        :book="favorite"
+        @bookmark="handleBookmark"
+        @view-details="viewDetails"
+      />
 
     </div>
 
@@ -268,7 +134,6 @@
     />
 
   </div>
-
 </template>
 
 
@@ -283,6 +148,9 @@ import {
   getBooks
 } from "../../service/bookService.js";
 
+import BookCard
+  from "../../components/books/BookCard.vue";
+
 import BookDetails
   from "../../components/books/BookDetails.vue";
 
@@ -294,6 +162,8 @@ export default {
 
   components: {
 
+    BookCard,
+
     BookDetails
 
   },
@@ -303,17 +173,85 @@ export default {
 
     return {
 
+      // =====================================================
+      // FAVORITES
+      // =====================================================
+
       favorites: [],
+
+
+      // =====================================================
+      // LOADING
+      // =====================================================
 
       loading: false,
 
+
+      // =====================================================
+      // ERROR
+      // =====================================================
+
       error: null,
 
+
+      // =====================================================
+      // SELECTED BOOK
+      // =====================================================
+
       selectedBook: null,
+
+
+      // =====================================================
+      // DETAILS LOADING
+      // =====================================================
 
       detailLoadingId: null
 
     };
+
+  },
+
+
+  computed: {
+
+    // =====================================================
+    // CONVERT FAVORITE DATA
+    // INTO BOOKCARD FORMAT
+    // =====================================================
+
+    favoriteBooks() {
+
+      return this.favorites.map((favorite) => {
+
+        return {
+
+          id: favorite.bookId,
+
+          title: favorite.title || "",
+
+          author:
+            favorite.author ||
+            "Unknown Author",
+
+          image:
+            favorite.image ||
+            favorite.imageUrl ||
+            favorite.coverImage ||
+            null,
+
+          bookmarked: true,
+
+          category:
+            favorite.category?.name ||
+            favorite.categoryName ||
+            favorite.category ||
+            "Other"
+
+        };
+
+      });
+
+    }
 
   },
 
@@ -342,23 +280,30 @@ export default {
         const response =
           await getFavorites();
 
+
         if (Array.isArray(response?.data)) {
 
           this.favorites =
             response.data;
 
-        } else if (Array.isArray(response)) {
+        }
+
+        else if (Array.isArray(response)) {
 
           this.favorites =
             response;
 
-        } else {
+        }
+
+        else {
 
           this.favorites = [];
 
         }
 
-      } catch (error) {
+      }
+
+      catch (error) {
 
         console.error(
           "Failed to load favorites:",
@@ -369,7 +314,9 @@ export default {
           error.message ||
           "Failed to load favorite books.";
 
-      } finally {
+      }
+
+      finally {
 
         this.loading = false;
 
@@ -379,23 +326,34 @@ export default {
 
 
     // =====================================================
-    // REMOVE FAVORITE
+    // BOOKMARK CLICK
     // =====================================================
 
-    async removeFavorite(bookId) {
+    async handleBookmark(book) {
+
+      if (!book?.id) {
+
+        return;
+
+      }
 
       try {
 
-        await deleteFavorite(bookId);
+        await deleteFavorite(book.id);
+
+
+        // Remove from local favorite list
 
         this.favorites =
           this.favorites.filter(
             favorite =>
               Number(favorite.bookId) !==
-              Number(bookId)
+              Number(book.id)
           );
 
-      } catch (error) {
+      }
+
+      catch (error) {
 
         console.error(
           "Failed to remove favorite:",
@@ -416,21 +374,24 @@ export default {
     // VIEW BOOK DETAILS
     // =====================================================
 
-    async viewDetails(favorite) {
+    async viewDetails(book) {
 
-      if (!favorite?.bookId) {
+      if (!book?.id) {
 
         return;
 
       }
 
+
       this.detailLoadingId =
-        favorite.bookId;
+        book.id;
+
 
       try {
 
         const response =
           await getBooks();
+
 
         const books =
           Array.isArray(response?.data)
@@ -439,14 +400,16 @@ export default {
               ? response
               : [];
 
-        const book =
+
+        const foundBook =
           books.find(
             item =>
               Number(item.id) ===
-              Number(favorite.bookId)
+              Number(book.id)
           );
 
-        if (!book) {
+
+        if (!foundBook) {
 
           alert(
             "Book information could not be found."
@@ -463,50 +426,56 @@ export default {
 
         this.selectedBook = {
 
-          id: book.id,
+          id:
+            foundBook.id,
 
-          title: book.title || "",
+          title:
+            foundBook.title || "",
 
-          author: book.author || "",
+          author:
+            foundBook.author || "",
 
           category:
-            book.category?.name ||
-            book.categoryName ||
-            book.category ||
+            foundBook.category?.name ||
+            foundBook.categoryName ||
+            foundBook.category ||
             "Other",
 
           status:
-            book.status === true ||
-            book.status === "Available" ||
-            book.status === "AVAILABLE",
+            foundBook.status === true ||
+            foundBook.status === "Available" ||
+            foundBook.status === "AVAILABLE",
 
           qty:
-            Number(book.qty || 0),
+            Number(foundBook.qty || 0),
 
           pages:
-            Number(book.pages || 0),
+            Number(foundBook.pages || 0),
 
           isbn:
-            book.isbn || "",
+            foundBook.isbn || "",
 
           language:
-            book.language || "",
+            foundBook.language || "",
 
           description:
-            book.description || "",
+            foundBook.description || "",
 
           image:
-            book.image ||
-            book.imageUrl ||
-            book.coverImage ||
+            foundBook.image ||
+            foundBook.imageUrl ||
+            foundBook.coverImage ||
             null,
 
           publicationYear:
-            book.publicationYear || null
+            foundBook.publicationYear ||
+            null
 
         };
 
-      } catch (error) {
+      }
+
+      catch (error) {
 
         console.error(
           "Failed to load book details:",
@@ -518,7 +487,9 @@ export default {
           "Failed to load book details."
         );
 
-      } finally {
+      }
+
+      finally {
 
         this.detailLoadingId = null;
 
@@ -559,3 +530,43 @@ export default {
 
 </script>
 
+
+<style scoped>
+
+button {
+
+  -webkit-tap-highlight-color: transparent;
+
+}
+
+.My_Favorite_page{
+    width: 100%;
+
+  min-height: 100%;
+
+  padding: 20px 90px;
+
+  box-sizing: border-box;
+
+  background: #f8faff;
+}
+
+
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 639px) {
+
+  .min-h-screen {
+
+    padding-left: 12px;
+    padding-right: 12px;
+
+  }
+
+}
+
+</style>

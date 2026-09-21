@@ -1,4 +1,3 @@
-```vue
 <template>
 
   <!-- =========================
@@ -73,7 +72,7 @@
             <img
               v-if="borrowing.bookImage"
               :src="borrowing.bookImage"
-              :alt="borrowing.bookTitle"
+              :alt="borrowing.bookTitle || 'Book'"
               class="book-image"
             />
 
@@ -106,6 +105,7 @@
 
             <p>
               Book ID:
+
               <span>
                 {{ borrowing.bookId ?? "-" }}
               </span>
@@ -304,20 +304,26 @@
 
             <span
               class="status-badge"
-              :class="getStatusClass(
-                borrowing.status
-              )"
+              :class="
+                getStatusClass(
+                  borrowing.status
+                )
+              "
             >
 
               <i
-                :class="getStatusIcon(
-                  borrowing.status
-                )"
+                :class="
+                  getStatusIcon(
+                    borrowing.status
+                  )
+                "
               ></i>
 
-              {{ formatStatus(
-                borrowing.status
-              ) }}
+              {{
+                formatStatus(
+                  borrowing.status
+                )
+              }}
 
             </span>
 
@@ -357,9 +363,7 @@
 
 <script setup>
 
-import {
-  computed
-} from "vue";
+import { computed } from "vue";
 
 
 /* =========================
@@ -852,7 +856,8 @@ function getStatusIcon(status) {
 
 .book-info h3 {
 
-  margin: 0 0 7px;
+  margin:
+    0 0 7px;
 
   overflow: hidden;
 
@@ -1070,7 +1075,9 @@ function getStatusIcon(status) {
 }
 
 
-/* Pending */
+/* =========================
+   Pending
+========================= */
 
 .status-pending {
 
@@ -1081,7 +1088,9 @@ function getStatusIcon(status) {
 }
 
 
-/* Borrowed */
+/* =========================
+   Borrowed
+========================= */
 
 .status-borrowed {
 
@@ -1092,7 +1101,9 @@ function getStatusIcon(status) {
 }
 
 
-/* Overdue */
+/* =========================
+   Overdue
+========================= */
 
 .status-overdue {
 
@@ -1103,7 +1114,9 @@ function getStatusIcon(status) {
 }
 
 
-/* Return Requested */
+/* =========================
+   Return Requested
+========================= */
 
 .status-return-requested {
 
@@ -1114,7 +1127,9 @@ function getStatusIcon(status) {
 }
 
 
-/* Returned */
+/* =========================
+   Returned
+========================= */
 
 .status-returned {
 
@@ -1125,7 +1140,9 @@ function getStatusIcon(status) {
 }
 
 
-/* Rejected */
+/* =========================
+   Rejected
+========================= */
 
 .status-rejected {
 
@@ -1136,7 +1153,9 @@ function getStatusIcon(status) {
 }
 
 
-/* Default */
+/* =========================
+   Default
+========================= */
 
 .status-default {
 
@@ -1286,22 +1305,3 @@ function getStatusIcon(status) {
 }
 
 </style>
-```
-
-### Field mapping ជាមួយ Backend របស់អ្នក
-
-| Frontend               | Backend `BorrowerResponse` |
-| ---------------------- | -------------------------- |
-| `borrowing.id`         | `id`                       |
-| `borrowing.userId`     | `userId`                   |
-| `borrowing.userName`   | `userName`                 |
-| `borrowing.bookId`     | `bookId`                   |
-| `borrowing.bookImage`  | `bookImage`                |
-| `borrowing.bookTitle`  | `bookTitle`                |
-| `borrowing.borrowDate` | `borrowDate`               |
-| `borrowing.dueDate`    | `dueDate`                  |
-| `borrowing.returnDate` | `returnDate`               |
-| `borrowing.fine`       | `fine`                     |
-| `borrowing.status`     | `status`                   |
-
-**ចំណុចសំខាន់:** នៅពេលចុច **View** ក្នុង

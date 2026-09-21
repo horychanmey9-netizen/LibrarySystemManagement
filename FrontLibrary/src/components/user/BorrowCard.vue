@@ -1,4 +1,4 @@
-
+```vue
 <script setup>
 
 const props = defineProps({
@@ -196,7 +196,7 @@ function getStatusLabel() {
 <template>
 
   <div
-    class="flex flex-col gap-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition duration-200 hover:shadow-md sm:flex-row"
+    class="borrow-card"
   >
 
     <!-- =========================
@@ -204,22 +204,21 @@ function getStatusLabel() {
     ========================== -->
 
     <div
-      class="h-44 w-full shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:h-36 sm:w-28"
+      class="book-image"
     >
 
       <img
         v-if="book.image"
         :src="book.image"
         :alt="book.title"
-        class="h-full w-full object-cover"
       />
 
       <div
         v-else
-        class="flex h-full w-full items-center justify-center text-gray-400"
+        class="book-image-empty"
       >
 
-        <i class="bi bi-book text-4xl"></i>
+        <i class="bi bi-book"></i>
 
       </div>
 
@@ -230,40 +229,24 @@ function getStatusLabel() {
          BOOK INFORMATION
     ========================== -->
 
-    <div class="min-w-0 flex-1">
+    <div class="book-information">
 
 
       <!-- TITLE + STATUS -->
 
-      <div
-        class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-      >
+      <div class="book-top">
 
-        <div class="min-w-0">
 
-          <h2
-            class="truncate text-lg font-semibold text-gray-800"
-          >
+        <div class="book-heading">
 
+          <h2>
             {{ book.title }}
-
           </h2>
-
-          <p
-            class="mt-1 text-sm text-gray-500"
-          >
-
-            {{ book.author }}
-
-          </p>
-
           <p
             v-if="book.category"
-            class="mt-1 text-xs text-gray-400"
+            class="book-category"
           >
-
             {{ book.category }}
-
           </p>
 
         </div>
@@ -272,19 +255,18 @@ function getStatusLabel() {
         <!-- STATUS -->
 
         <span
-          class="inline-flex h-fit w-fit shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+          class="status-badge"
           :class="getStatusClass()"
         >
 
           <i
             v-if="getStatusIcon()"
             :class="getStatusIcon()"
-            class="text-[0.7rem]"
           ></i>
 
           <span
             v-else
-            class="h-1.5 w-1.5 rounded-full bg-current"
+            class="status-dot"
           ></span>
 
           {{ getStatusLabel() }}
@@ -298,51 +280,35 @@ function getStatusLabel() {
            BORROW INFORMATION + ACTIONS
       ========================== -->
 
-      <div
-        class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-      >
+      <div class="borrow-bottom">
 
 
-        <div
-          class="grid w-full grid-cols-1 gap-3 sm:grid-cols-2"
-        >
+        <!-- INFORMATION -->
+
+        <div class="date-grid">
 
 
           <!-- BORROWED DATE -->
 
-          <div
-            class="rounded-xl bg-blue-50 p-3"
-          >
+          <div class="date-box borrowed-box">
 
-            <div
-              class="flex items-center gap-2"
-            >
+            <div class="date-content">
 
-              <div
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600"
-              >
+              <div class="date-icon borrowed-icon">
 
                 <i class="bi bi-calendar-check"></i>
 
               </div>
 
-              <div class="min-w-0">
+              <div class="date-text">
 
-                <p
-                  class="text-xs text-gray-400"
-                >
-
+                <p>
                   Borrowed Date
-
                 </p>
 
-                <p
-                  class="mt-0.5 text-sm font-semibold text-gray-700"
-                >
-
+                <strong>
                   {{ book.borrowedDate || "-" }}
-
-                </p>
+                </strong>
 
               </div>
 
@@ -353,39 +319,25 @@ function getStatusLabel() {
 
           <!-- DUE DATE -->
 
-          <div
-            class="rounded-xl bg-orange-50 p-3"
-          >
+          <div class="date-box due-box">
 
-            <div
-              class="flex items-center gap-2"
-            >
+            <div class="date-content">
 
-              <div
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600"
-              >
+              <div class="date-icon due-icon">
 
                 <i class="bi bi-calendar-event"></i>
 
               </div>
 
-              <div class="min-w-0">
+              <div class="date-text">
 
-                <p
-                  class="text-xs text-gray-400"
-                >
-
+                <p>
                   Due Date
-
                 </p>
 
-                <p
-                  class="mt-0.5 text-sm font-semibold text-gray-700"
-                >
-
+                <strong>
                   {{ book.dueDate || "-" }}
-
-                </p>
+                </strong>
 
               </div>
 
@@ -401,38 +353,26 @@ function getStatusLabel() {
               isReturned() &&
               book.returnedDate
             "
-            class="rounded-xl bg-green-50 p-3 sm:col-span-2"
+            class="date-box returned-box"
           >
 
-            <div
-              class="flex items-center gap-2"
-            >
+            <div class="date-content">
 
-              <div
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600"
-              >
+              <div class="date-icon returned-icon ">
 
-                <i class="bi bi-check-circle"></i>
+                <i class="bi bi-check-circle flex"></i>
 
               </div>
 
-              <div class="min-w-0">
+              <div class="date-text">
 
-                <p
-                  class="text-xs text-gray-400"
-                >
-
+                <p>
                   Returned Date
-
                 </p>
 
-                <p
-                  class="mt-0.5 text-sm font-semibold text-gray-700"
-                >
-
+                <strong>
                   {{ book.returnedDate }}
-
-                </p>
+                </strong>
 
               </div>
 
@@ -445,38 +385,26 @@ function getStatusLabel() {
 
           <div
             v-if="isRejected()"
-            class="rounded-xl bg-gray-50 p-3 sm:col-span-2"
+            class="message-box rejected-box"
           >
 
-            <div
-              class="flex items-center gap-2"
-            >
+            <div class="date-content">
 
-              <div
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-200 text-gray-600"
-              >
+              <div class="date-icon rejected-icon">
 
                 <i class="bi bi-x-circle"></i>
 
               </div>
 
-              <div class="min-w-0">
+              <div class="date-text">
 
-                <p
-                  class="text-xs text-gray-400"
-                >
-
+                <p>
                   Borrowing Status
-
                 </p>
 
-                <p
-                  class="mt-0.5 text-sm font-semibold text-gray-700"
-                >
-
+                <strong>
                   Your borrowing request was not accepted.
-
-                </p>
+                </strong>
 
               </div>
 
@@ -489,38 +417,26 @@ function getStatusLabel() {
 
           <div
             v-if="isReturnRequested()"
-            class="rounded-xl bg-purple-50 p-3 sm:col-span-2"
+            class="message-box requested-box"
           >
 
-            <div
-              class="flex items-center gap-2"
-            >
+            <div class="date-content">
 
-              <div
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600"
-              >
+              <div class="date-icon requested-icon">
 
                 <i class="bi bi-clock-history"></i>
 
               </div>
 
-              <div class="min-w-0">
+              <div class="date-text">
 
-                <p
-                  class="text-xs text-gray-400"
-                >
-
+                <p>
                   Return Status
-
                 </p>
 
-                <p
-                  class="mt-0.5 text-sm font-semibold text-gray-700"
-                >
-
+                <strong>
                   Your return request is waiting for approval.
-
-                </p>
+                </strong>
 
               </div>
 
@@ -536,26 +452,24 @@ function getStatusLabel() {
              ACTIONS
         ========================== -->
 
-        <!--
-          RETURN BUTTON ONLY BORROWED
-        -->
-
         <div
           v-if="
             !hideReturnButton &&
-            getStatus() === 'BORROWED' ||
-            getStatus() === 'OVERDUE'
+            (
+              getStatus() === 'BORROWED' ||
+              getStatus() === 'OVERDUE'
+            )
           "
-          class="flex w-full shrink-0 flex-col items-start gap-1.5 sm:w-auto sm:items-end"
+          class="actions"
         >
 
           <button
             type="button"
-            class="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition sm:w-auto"
+            class="return-button"
             :class="
               getStatus() === 'OVERDUE'
-                ? 'bg-red-500 hover:bg-red-600'
-                : 'bg-blue-500 hover:bg-blue-600'
+                ? 'overdue-button'
+                : 'borrowed-button'
             "
             @click="emit('return', book)"
           >
@@ -571,7 +485,7 @@ function getStatusLabel() {
 
           <p
             v-if="getStatus() === 'OVERDUE'"
-            class="text-xs font-medium text-red-500"
+            class="overdue-text"
           >
 
             <i class="bi bi-clock-history"></i>
@@ -593,3 +507,751 @@ function getStatusLabel() {
   </div>
 
 </template>
+
+
+<style scoped>
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.borrow-card {
+
+  display: flex;
+
+  align-items: stretch;
+
+  gap: 20px;
+
+  width: 100%;
+
+  padding: 20px;
+
+  background: white;
+
+  border-radius: 16px;
+
+  border: 1px solid #f1f5f9;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.03);
+
+  transition: 0.25s ease;
+
+}
+
+.borrow-card:hover {
+
+  box-shadow:
+    0 8px 24px
+    rgba(0, 0, 0, 0.07);
+
+}
+
+
+/* =====================================================
+   BOOK IMAGE
+===================================================== */
+
+.book-image {
+
+  width: 112px;
+
+  height: 144px;
+
+  flex: 0 0 112px;
+
+  overflow: hidden;
+
+  border-radius: 12px;
+
+  background: #f3f4f6;
+
+}
+
+.book-image img {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+}
+
+.book-image-empty {
+
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #9ca3af;
+
+  font-size: 38px;
+
+}
+
+
+/* =====================================================
+   INFORMATION
+===================================================== */
+
+.book-information {
+
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+
+/* =====================================================
+   TOP
+===================================================== */
+
+.book-top {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+}
+
+.book-heading {
+
+  min-width: 0;
+
+}
+
+.book-heading h2 {
+
+  margin: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 18px;
+
+  font-weight: 600;
+
+  color: #1f2937;
+
+}
+
+.book-author {
+
+  margin: 5px 0 0;
+
+  font-size: 14px;
+
+  color: #6b7280;
+
+}
+
+.book-category {
+
+  margin: 4px 0 0;
+
+  font-size: 12px;
+
+  color: #9ca3af;
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status-badge {
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  width: fit-content;
+
+  height: fit-content;
+
+  flex-shrink: 0;
+
+  padding: 6px 11px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  white-space: nowrap;
+
+}
+
+.status-badge i {
+
+  font-size: 11px;
+
+}
+
+.status-dot {
+
+  width: 6px;
+
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+
+}
+
+
+/* =====================================================
+   BOTTOM
+===================================================== */
+
+.borrow-bottom {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-top: 18px;
+
+}
+
+
+/* =====================================================
+   DATE GRID
+===================================================== */
+
+.date-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  flex: 1;
+
+  min-width: 0;
+
+}
+
+.date-box {
+
+  min-width: 0;
+
+  padding: 10px;
+
+  border-radius: 12px;
+
+}
+
+.borrowed-box {
+
+  background: #eff6ff;
+
+}
+
+.due-box {
+
+  background: #fff7ed;
+
+}
+
+.returned-box {
+
+  background: #f0fdf4;
+
+  grid-column: span 2;
+
+}
+
+.message-box {
+
+  grid-column: span 2;
+
+  padding: 10px;
+
+  border-radius: 12px;
+
+}
+
+.rejected-box {
+
+  background: #f9fafb;
+
+}
+
+.requested-box {
+
+  background: #faf5ff;
+
+}
+
+
+/* =====================================================
+   DATE CONTENT
+===================================================== */
+
+.date-content {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+}
+
+.date-icon {
+
+  width: 34px;
+  height: 34px;
+
+  min-width: 34px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+}
+
+.borrowed-icon {
+
+  background: #dbeafe;
+
+  color: #2563eb;
+
+}
+
+.due-icon {
+
+  background: #ffedd5;
+
+  color: #ea580c;
+
+}
+
+.returned-icon {
+
+  background: #dcfce7;
+
+  color: #16a34a;
+
+}
+
+.rejected-icon {
+
+  background: #e5e7eb;
+
+  color: #4b5563;
+
+}
+
+.requested-icon {
+
+  background: #f3e8ff;
+
+  color: #9333ea;
+
+}
+
+.date-text {
+
+  min-width: 0;
+
+}
+
+.date-text p {
+
+  margin: 0;
+
+  font-size: 11px;
+
+  color: #9ca3af;
+
+}
+
+.date-text strong {
+
+  display: block;
+
+  margin-top: 2px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: #374151;
+
+}
+
+
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+.actions {
+
+  width: auto;
+
+  min-width: 125px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-end;
+
+  gap: 6px;
+
+}
+
+.return-button {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 7px;
+
+  width: 100%;
+
+  padding: 9px 13px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  color: white;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+
+}
+
+.borrowed-button {
+
+  background: #3b82f6;
+
+}
+
+.borrowed-button:hover {
+
+  background: #2563eb;
+
+}
+
+.overdue-button {
+
+  background: #ef4444;
+
+}
+
+.overdue-button:hover {
+
+  background: #dc2626;
+
+}
+
+.overdue-text {
+
+  margin: 0;
+
+  font-size: 11px;
+
+  font-weight: 500;
+
+  color: #ef4444;
+
+  white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   MOBILE
+   Same Desktop layout, only smaller
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .borrow-card {
+
+    gap: 14px;
+
+    padding: 14px;
+
+    border-radius: 14px;
+
+  }
+
+
+  /* IMAGE */
+
+  .book-image {
+
+    width: 88px;
+
+    height: 116px;
+
+    flex: 0 0 88px;
+
+    border-radius: 10px;
+
+  }
+
+  .book-image-empty {
+
+    font-size: 30px;
+
+  }
+
+
+  /* TOP */
+
+  .book-top {
+
+    gap: 8px;
+
+  }
+
+  .book-heading h2 {
+
+    font-size: 15px;
+
+  }
+
+  .book-author {
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+  }
+
+  .book-category {
+
+    margin-top: 3px;
+
+    font-size: 10px;
+
+  }
+
+
+  /* STATUS */
+
+  .status-badge {
+
+    padding: 5px 8px;
+
+    gap: 4px;
+
+    font-size: 10px;
+
+  }
+
+  .status-badge i {
+
+    font-size: 9px;
+
+  }
+
+
+  /* BOTTOM */
+
+  .borrow-bottom {
+
+    gap: 8px;
+
+    margin-top: 12px;
+
+  }
+
+
+  /* DATE */
+
+  .date-grid {
+
+    gap: 7px;
+
+  }
+
+  .date-box,
+  .message-box {
+
+    padding: 8px;
+
+    border-radius: 9px;
+
+  }
+
+  .date-content {
+
+    gap: 6px;
+
+  }
+
+  .date-icon {
+
+    width: 28px;
+    height: 28px;
+
+    min-width: 28px;
+
+    border-radius: 7px;
+
+    font-size: 11px;
+
+  }
+
+  .date-text p {
+
+    font-size: 9px;
+
+  }
+
+  .date-text strong {
+
+    font-size: 10px;
+
+  }
+
+
+  /* ACTION */
+
+  .actions {
+
+    min-width: 100px;
+
+  }
+
+  .return-button {
+
+    padding: 8px 9px;
+
+    gap: 5px;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+
+  }
+
+  .overdue-text {
+
+    font-size: 9px;
+
+  }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+/* =====================================================
+   MOBILE DATE - TEXT ONLY
+===================================================== */
+
+/* =====================================================
+   MOBILE DATE - TEXT ONLY / VERTICAL
+===================================================== */
+
+@media (max-width: 768px) {
+
+  /* Borrowed Date on top, Due Date below */
+  .date-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+
+  /* Remove date card design */
+  .date-box,
+  .message-box {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* Remove icons */
+  .date-icon {
+    display: none;
+  }
+
+  /* Text only */
+  .date-content {
+    display: block;
+  }
+
+  .date-text {
+    min-width: 0;
+  }
+
+  .date-text p {
+    margin: 0;
+    font-size: 9px;
+    color: #9ca3af;
+  }
+
+  .date-text strong {
+    display: block;
+    margin-top: 1px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+}
+</style>
+```

@@ -112,14 +112,6 @@
                 :class="getRoleClass(user.role)"
               >
 
-                <i
-                  :class="
-                    String(user.role).toUpperCase() === 'ADMIN'
-                      ? 'bi bi-shield-fill'
-                      : 'bi bi-person-fill'
-                  "
-                ></i>
-
                 {{ user.role }}
 
               </span>

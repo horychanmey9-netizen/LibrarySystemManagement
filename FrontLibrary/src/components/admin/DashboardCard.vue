@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="stats-grid">
 
@@ -7,7 +8,9 @@
       class="stat-card"
     >
 
-      <!-- Icon -->
+      <!-- =================================================
+           ICON
+      ================================================== -->
       <div
         class="stat-icon"
         :class="stat.color"
@@ -15,20 +18,33 @@
         <i :class="stat.icon"></i>
       </div>
 
-      <!-- Content -->
+
+      <!-- =================================================
+           CONTENT
+      ================================================== -->
       <div class="stat-content">
 
-        <p>{{ stat.title }}</p>
+        <p>
+          {{ stat.title }}
+        </p>
 
-        <h2>{{ stat.value }}</h2>
+        <h2>
+          {{ stat.loading ? "..." : stat.value }}
+        </h2>
 
-        <span :class="stat.changeType">
-          <i :class="stat.changeIcon"></i>
-          {{ stat.change }}
+        <span
+          class="live-status"
+          :class="stat.loading ? 'loading' : ''"
+        >
+          <i
+            :class="
+              stat.loading
+                ? 'bi bi-arrow-repeat spinning'
+                : 'bi bi-check-circle'
+            "
+          ></i>
 
-          <small>
-            from last month
-          </small>
+          {{ stat.loading ? "Loading..." : "Live data" }}
         </span>
 
       </div>
@@ -41,66 +57,533 @@
 
 <script setup>
 
-const stats = [
+import {
+  ref,
+  onMounted
+} from "vue";
+
+
+import {
+  getBooks
+} from "../../service/bookService.js";
+
+
+import {
+  getUsers
+} from "../../service/userService.js";
+
+
+import {
+  getBorrowings
+} from "../../service/borrowingService.js";
+
+
+// =====================================================
+// API
+// =====================================================
+
+const FINE_API_URL =
+  "http://localhost:8080/api/fine";
+
+
+// =====================================================
+// STATS
+// =====================================================
+
+const stats = ref([
 
   {
     title: "Total Books",
-    value: "1,250",
+    value: "0",
     icon: "bi bi-book",
     color: "purple",
-    changeIcon: "bi bi-arrow-up",
-    change: "12.5%",
-    changeType: "increase"
+    loading: true
   },
 
   {
     title: "Total Users",
-    value: "350",
+    value: "0",
     icon: "bi bi-people",
     color: "blue",
-    changeIcon: "bi bi-arrow-up",
-    change: "8.2%",
-    changeType: "increase"
+    loading: true
   },
 
   {
     title: "Borrowed Books",
-    value: "85",
+    value: "0",
     icon: "bi bi-journal-bookmark",
     color: "orange",
-    changeIcon: "bi bi-arrow-up",
-    change: "5.4%",
-    changeType: "increase"
+    loading: true
   },
 
   {
     title: "Overdue Books",
-    value: "12",
+    value: "0",
     icon: "bi bi-exclamation-triangle",
     color: "red",
-    changeIcon: "bi bi-arrow-down",
-    change: "3.1%",
-    changeType: "decrease"
+    loading: true
   },
 
   {
     title: "Total Fines",
-    value: "$1,240",
+    value: "$0.00",
     icon: "bi bi-cash-coin",
     color: "green",
-    changeIcon: "bi bi-arrow-up",
-    change: "6.8%",
-    changeType: "increase"
+    loading: true
   }
 
-];
+]);
+
+
+// =====================================================
+// FORMAT NUMBER
+// =====================================================
+
+function formatNumber(value) {
+
+  const number =
+    Number(value) || 0;
+
+  return number.toLocaleString("en-US");
+
+}
+
+
+// =====================================================
+// FORMAT MONEY
+// =====================================================
+
+function formatMoney(value) {
+
+  const amount =
+    Number(value) || 0;
+
+  return `$${amount.toLocaleString(
+    "en-US",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }
+  )}`;
+
+}
+
+
+// =====================================================
+// GET FINE SUMMARY
+// =====================================================
+
+async function fetchFineSummary() {
+
+  const token =
+    sessionStorage.getItem("token");
+
+  if (!token) {
+    throw new Error(
+      "Authentication token not found."
+    );
+  }
+
+
+  const response =
+    await fetch(
+      `${FINE_API_URL}/getsummary`,
+      {
+        method: "GET",
+
+        headers: {
+          Authorization:
+            `Bearer ${token}`,
+
+          "Content-Type":
+            "application/json"
+        }
+      }
+    );
+
+
+  let result = null;
+
+
+  try {
+
+    result =
+      await response.json();
+
+  } catch {
+
+    result = null;
+
+  }
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      result?.message ||
+      result?.msg ||
+      `Failed to fetch fine summary (${response.status})`
+    );
+
+  }
+
+
+  console.log(
+    "FINE SUMMARY RESPONSE:",
+    result
+  );
+
+
+  return (
+    result?.data ??
+    result
+  );
+
+}
+
+
+// =====================================================
+// GET TOTAL BOOKS
+// =====================================================
+
+async function fetchTotalBooks() {
+
+  try {
+
+    const response =
+      await getBooks();
+
+
+    /*
+     * bookService.js already returns
+     * the array from result.data
+     */
+
+    const books =
+      Array.isArray(response)
+        ? response
+        : [];
+
+
+    /*
+     * Total Books = total copies
+     *
+     * Example:
+     * Book A qty = 5
+     * Book B qty = 3
+     * Book C qty = 2
+     *
+     * Total Books = 10
+     */
+
+    const totalBooks =
+      books.reduce(
+        (total, book) => {
+
+          const qty =
+            Number(
+              book?.qty ??
+              book?.quantity ??
+              0
+            );
+
+          return total + qty;
+
+        },
+        0
+      );
+
+
+    stats.value[0].value =
+      formatNumber(totalBooks);
+
+
+    console.log(
+      "TOTAL BOOKS:",
+      totalBooks
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "FETCH TOTAL BOOKS ERROR:",
+      error
+    );
+
+    stats.value[0].value =
+      "0";
+
+  } finally {
+
+    stats.value[0].loading =
+      false;
+
+  }
+
+}
+
+
+// =====================================================
+// GET TOTAL USERS
+// =====================================================
+
+async function fetchTotalUsers() {
+
+  try {
+
+    const response =
+      await getUsers();
+
+
+    /*
+     * userService.js returns result.data
+     */
+
+    const users =
+      Array.isArray(response)
+        ? response
+        : [];
+
+
+    const totalUsers =
+      users.length;
+
+
+    stats.value[1].value =
+      formatNumber(totalUsers);
+
+
+    console.log(
+      "TOTAL USERS:",
+      totalUsers
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "FETCH TOTAL USERS ERROR:",
+      error
+    );
+
+    stats.value[1].value =
+      "0";
+
+  } finally {
+
+    stats.value[1].loading =
+      false;
+
+  }
+
+}
+
+
+// =====================================================
+// GET BORROWED + OVERDUE
+// =====================================================
+
+async function fetchBorrowingStats() {
+
+  try {
+
+    const response =
+      await getBorrowings();
+
+
+    /*
+     * borrowingService.js returns
+     * result.data
+     */
+
+    const borrowings =
+      Array.isArray(response)
+        ? response
+        : [];
+
+
+    // ================================================
+    // BORROWED BOOKS
+    // ================================================
+
+    const borrowedBooks =
+      borrowings.filter(
+        borrowing =>
+          borrowing?.status
+            ?.toUpperCase() ===
+          "BORROWED"
+      ).length;
+
+
+    // ================================================
+    // OVERDUE BOOKS
+    // ================================================
+
+    const overdueBooks =
+      borrowings.filter(
+        borrowing =>
+          borrowing?.status
+            ?.toUpperCase() ===
+          "OVERDUE"
+      ).length;
+
+
+    stats.value[2].value =
+      formatNumber(
+        borrowedBooks
+      );
+
+
+    stats.value[3].value =
+      formatNumber(
+        overdueBooks
+      );
+
+
+    console.log(
+      "BORROWED BOOKS:",
+      borrowedBooks
+    );
+
+
+    console.log(
+      "OVERDUE BOOKS:",
+      overdueBooks
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "FETCH BORROWING STATS ERROR:",
+      error
+    );
+
+
+    stats.value[2].value =
+      "0";
+
+
+    stats.value[3].value =
+      "0";
+
+  } finally {
+
+    stats.value[2].loading =
+      false;
+
+
+    stats.value[3].loading =
+      false;
+
+  }
+
+}
+
+
+// =====================================================
+// GET TOTAL FINES
+// =====================================================
+
+async function fetchTotalFines() {
+
+  try {
+
+    const summary =
+      await fetchFineSummary();
+
+
+    /*
+     * Backend:
+     *
+     * FineSummaryResponse
+     *
+     * totalFines
+     * unpaid
+     * paid
+     * totalLateDays
+     */
+
+    const totalFines =
+      Number(
+        summary?.totalFines ?? 0
+      );
+
+
+    stats.value[4].value =
+      formatMoney(totalFines);
+
+
+    console.log(
+      "TOTAL FINES:",
+      totalFines
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "FETCH TOTAL FINES ERROR:",
+      error
+    );
+
+
+    stats.value[4].value =
+      "$0.00";
+
+  } finally {
+
+    stats.value[4].loading =
+      false;
+
+  }
+
+}
+
+
+// =====================================================
+// LOAD ALL DASHBOARD STATS
+// =====================================================
+
+async function loadDashboardStats() {
+
+  await Promise.all([
+
+    fetchTotalBooks(),
+
+    fetchTotalUsers(),
+
+    fetchBorrowingStats(),
+
+    fetchTotalFines()
+
+  ]);
+
+}
+
+
+// =====================================================
+// ON MOUNTED
+// =====================================================
+
+onMounted(() => {
+
+  loadDashboardStats();
+
+});
 
 </script>
 
 
 <style scoped>
 
+/* =================================================
+   STATS GRID
+================================================= */
+
 .stats-grid {
+
   display: grid;
 
   grid-template-columns:
@@ -109,12 +592,13 @@ const stats = [
   gap: 16px;
 
   margin-bottom: 20px;
+
 }
 
 
-/* =========================
-   Stat Card
-========================= */
+/* =================================================
+   STAT CARD
+================================================= */
 
 .stat-card {
 
@@ -140,18 +624,20 @@ const stats = [
 }
 
 
-/* =========================
-   Stat Icon
-========================= */
+/* =================================================
+   ICON
+================================================= */
 
 .stat-icon {
 
   width: 48px;
+
   height: 48px;
 
   display: flex;
 
   align-items: center;
+
   justify-content: center;
 
   border-radius: 10px;
@@ -163,52 +649,79 @@ const stats = [
 }
 
 
-/* Purple */
+/* =================================================
+   PURPLE
+================================================= */
 
 .stat-icon.purple {
+
   background: #eeeaff;
+
   color: #5b3df5;
+
 }
 
 
-/* Blue */
+/* =================================================
+   BLUE
+================================================= */
 
 .stat-icon.blue {
+
   background: #e7f1ff;
+
   color: #2878d4;
+
 }
 
 
-/* Orange */
+/* =================================================
+   ORANGE
+================================================= */
 
 .stat-icon.orange {
+
   background: #fff2dd;
+
   color: #e88a16;
+
 }
 
 
-/* Red */
+/* =================================================
+   RED
+================================================= */
 
 .stat-icon.red {
+
   background: #ffe8e8;
+
   color: #e05252;
+
 }
 
 
-/* Green */
+/* =================================================
+   GREEN
+================================================= */
 
 .stat-icon.green {
+
   background: #e5f8ed;
+
   color: #16864a;
+
 }
 
 
-/* =========================
-   Content
-========================= */
+/* =================================================
+   CONTENT
+================================================= */
 
 .stat-content {
+
   min-width: 0;
+
 }
 
 
@@ -231,67 +744,74 @@ const stats = [
 
   color: #172033;
 
+  font-weight: 700;
+
 }
 
 
-/* =========================
-   Change
-========================= */
+/* =================================================
+   LIVE STATUS
+================================================= */
 
-.increase,
-.decrease {
+.live-status {
 
   display: flex;
 
   align-items: center;
 
-  gap: 3px;
+  gap: 4px;
 
-  font-size: 11px;
+  font-size: 10px;
 
-  font-weight: 600;
-
-}
-
-
-.increase {
+  font-weight: 500;
 
   color: #16864a;
 
 }
 
 
-.decrease {
-
-  color: #16864a;
-
-}
-
-
-.increase i,
-.decrease i {
+.live-status i {
 
   font-size: 10px;
 
 }
 
 
-.stat-content small {
-
-  margin-left: 3px;
+.live-status.loading {
 
   color: #9aa1b1;
 
-  font-size: 10px;
+}
 
-  font-weight: normal;
+
+/* =================================================
+   SPINNING
+================================================= */
+
+.spinning {
+
+  animation:
+    spin 1s linear infinite;
 
 }
 
 
-/* =========================
-   Responsive
-========================= */
+@keyframes spin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* =================================================
+   RESPONSIVE
+================================================= */
 
 @media (max-width: 1200px) {
 
@@ -316,3 +836,4 @@ const stats = [
 }
 
 </style>
+```

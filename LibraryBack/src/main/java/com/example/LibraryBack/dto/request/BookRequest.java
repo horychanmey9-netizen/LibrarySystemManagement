@@ -21,5 +21,6 @@ public class BookRequest {
     private String language;
     private String image;
     private Status status;
+    private String publishYear;
 
 }

@@ -157,9 +157,10 @@
         v-else
         class="empty-state"
       >
+
         <div class="empty-icon">
-                <i class="bi bi-cash-stack"></i>
-              </div>
+          <i class="bi bi-cash-stack"></i>
+        </div>
 
         <h3>No Fines</h3>
 
@@ -179,8 +180,9 @@
 
 import FineCard from "../../components/user/FineTemp.vue";
 
-import { getMyFines }
-  from "../../service/userfineService";
+import {
+  getMyFines
+} from "../../service/userfineService";
 
 
 export default {
@@ -199,29 +201,9 @@ export default {
 
     return {
 
-      /*
-       * =========================
-       * Fine Data
-       * =========================
-       */
-
       fines: [],
 
-
-      /*
-       * =========================
-       * Loading
-       * =========================
-       */
-
       loading: false,
-
-
-      /*
-       * =========================
-       * Error
-       * =========================
-       */
 
       error: null
 
@@ -230,12 +212,6 @@ export default {
   },
 
 
-  /*
-   * =========================
-   * Mounted
-   * =========================
-   */
-
   mounted() {
 
     this.fetchMyFines();
@@ -243,20 +219,7 @@ export default {
   },
 
 
-  /*
-   * =========================
-   * Computed
-   * =========================
-   */
-
   computed: {
-
-
-    /*
-     * =========================
-     * Total Fines
-     * =========================
-     */
 
     totalFines() {
 
@@ -276,12 +239,6 @@ export default {
 
     },
 
-
-    /*
-     * =========================
-     * Unpaid Fines
-     * =========================
-     */
 
     unpaidFines() {
 
@@ -311,12 +268,6 @@ export default {
 
     },
 
-
-    /*
-     * =========================
-     * Paid Fines
-     * =========================
-     */
 
     paidFines() {
 
@@ -349,20 +300,7 @@ export default {
   },
 
 
-  /*
-   * =========================
-   * Methods
-   * =========================
-   */
-
   methods: {
-
-
-    /*
-     * =========================
-     * Fetch My Fines
-     * =========================
-     */
 
     async fetchMyFines() {
 
@@ -378,10 +316,6 @@ export default {
         );
 
 
-        /*
-         * Get data from service
-         */
-
         const data = await getMyFines();
 
 
@@ -390,10 +324,6 @@ export default {
           data
         );
 
-
-        /*
-         * Make sure data is array
-         */
 
         if (!Array.isArray(data)) {
 
@@ -408,12 +338,6 @@ export default {
 
         }
 
-
-        /*
-         * =========================
-         * Format API Data
-         * =========================
-         */
 
         this.fines = data.map(
 
@@ -457,95 +381,45 @@ export default {
     },
 
 
-    /*
-     * =========================
-     * Format Fine
-     * =========================
-     */
-
     formatFine(fine) {
 
       return {
 
-        /*
-         * Fine ID
-         */
-
         id:
           fine.id,
 
-
-        /*
-         * Book ID
-         */
-
         bookId:
           fine.bookId,
-
-
-        /*
-         * Book Title
-         */
 
         title:
           fine.title ||
           fine.bookTitle ||
           "Unknown Book",
 
-
-        /*
-         * Author
-         */
-
         author:
           fine.author ||
           fine.bookAuthor ||
           "Unknown Author",
-
-
-        /*
-         * Book Image
-         */
 
         image:
           fine.image ||
           fine.bookImage ||
           null,
 
-
-        /*
-         * Category
-         */
-
         category:
           fine.category ||
           fine.categoryName ||
           null,
-
-
-        /*
-         * ISBN
-         */
 
         isbn:
           fine.isbn ||
           fine.bookIsbn ||
           null,
 
-
-        /*
-         * Due Date
-         */
-
         dueDate:
           this.formatDate(
             fine.dueDate
           ),
-
-
-        /*
-         * Returned Date
-         */
 
         returnedDate:
           this.formatDate(
@@ -554,11 +428,6 @@ export default {
             fine.returnDate
 
           ),
-
-
-        /*
-         * Late Days
-         */
 
         lateDays:
           Number(
@@ -569,11 +438,6 @@ export default {
 
           ),
 
-
-        /*
-         * Fine Amount
-         */
-
         amount:
           Number(
 
@@ -583,11 +447,6 @@ export default {
 
           ),
 
-
-        /*
-         * Status
-         */
-
         status:
           fine.status ||
           "Unpaid"
@@ -596,12 +455,6 @@ export default {
 
     },
 
-
-    /*
-     * =========================
-     * Format Date
-     * =========================
-     */
 
     formatDate(date) {
 
@@ -636,7 +489,7 @@ export default {
 
   min-height: 100%;
 
-  padding:15px 80px;
+  padding: 20px 90px;
 
   box-sizing: border-box;
 
@@ -745,7 +598,6 @@ export default {
   font-size: 21px;
 
 }
-
 
 
 /* Total */
@@ -918,9 +770,13 @@ export default {
 
 }
 
- .empty-icon {
+
+.empty-icon {
+
   font-size: 48px;
+
   color: #94a3b8;
+
 }
 
 
@@ -1068,7 +924,7 @@ export default {
 
 
 /* ==================================================
-   RESPONSIVE
+   TABLET
 ================================================== */
 
 @media (max-width: 1000px) {
@@ -1086,29 +942,297 @@ export default {
 }
 
 
+/* ==================================================
+   MOBILE
+================================================== */
+
 @media (max-width: 700px) {
 
   .my-fines-page {
 
-    padding: 16px;
+    padding: 12px;
+
+  }
+
+
+  /* ---------------- HEADER ---------------- */
+
+  .page-header {
+
+    margin-bottom: 16px;
+
+  }
+
+
+  .page-header h1 {
+
+    font-size: 22px;
+
+  }
+
+
+  .page-header p {
+
+    margin-top: 4px;
+
+    font-size: 12px;
+
+  }
+
+
+  /* ---------------- SUMMARY ---------------- */
+
+  .summary-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 8px;
+
+    margin-bottom: 22px;
+
+  }
+
+
+  .summary-card {
+
+    gap: 9px;
+
+    min-height: 68px;
+
+    padding: 11px;
+
+    border-radius: 11px;
+
+  }
+
+
+  /* Third card takes full row */
+
+  .summary-card:nth-child(3) {
+
+    grid-column:
+      1 / -1;
+
+  }
+
+
+  .summary-icon {
+
+    width: 34px;
+
+    height: 34px;
+
+    border-radius: 8px;
+
+  }
+
+
+  .summary-icon i {
+
+    font-size: 15px;
+
+  }
+
+
+  .summary-content span {
+
+    margin-bottom: 2px;
+
+    font-size: 11px;
+
+    line-height: 1.2;
+
+  }
+
+
+  .summary-content strong {
+
+    font-size: 16px;
+
+    line-height: 1.2;
+
+  }
+
+
+  /* ---------------- SECTION HEADER ---------------- */
+
+  .section-header {
+
+    align-items: center;
+
+    flex-direction: row;
+
+    gap: 8px;
+
+    margin-bottom: 10px;
+
+  }
+
+
+  .section-header h2 {
+
+    font-size: 17px;
+
+  }
+
+
+  .section-header p {
+
+    margin-top: 3px;
+
+    font-size: 11px;
+
+  }
+
+
+  .record-count {
+
+    font-size: 11px;
+
+    white-space: nowrap;
+
+  }
+
+
+  /* ---------------- FINE LIST ---------------- */
+
+  .fine-list {
+
+    gap: 10px;
+
+  }
+
+
+  /* ---------------- EMPTY ---------------- */
+
+  .empty-state {
+
+    padding: 40px 14px;
+
+    border-radius: 11px;
+
+  }
+
+
+  .empty-icon {
+
+    font-size: 38px;
+
+  }
+
+
+  .empty-state h3 {
+
+    margin-top: 9px;
+
+    font-size: 16px;
+
+  }
+
+
+  .empty-state p {
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+  }
+
+
+  .retry-button {
+
+    margin-top: 14px;
+
+    padding:
+      8px
+      15px;
+
+    font-size: 12px;
+
+  }
+
+}
+
+
+/* ==================================================
+   SMALL MOBILE
+================================================== */
+
+@media (max-width: 400px) {
+
+  .my-fines-page {
+
+    padding: 10px;
 
   }
 
 
   .summary-grid {
 
-    grid-template-columns: 1fr;
+    gap: 7px;
 
   }
 
 
-  .section-header {
+  .summary-card {
 
-    align-items: flex-start;
+    min-height: 62px;
 
-    flex-direction: column;
+    padding: 9px;
 
-    gap: 8px;
+    gap: 7px;
+
+  }
+
+
+  .summary-icon {
+
+    width: 30px;
+
+    height: 30px;
+
+  }
+
+
+  .summary-icon i {
+
+    font-size: 13px;
+
+  }
+
+
+  .summary-content span {
+
+    font-size: 10px;
+
+  }
+
+
+  .summary-content strong {
+
+    font-size: 14px;
+
+  }
+
+
+  .section-header h2 {
+
+    font-size: 16px;
+
+  }
+
+
+  .section-header p {
+
+    font-size: 10px;
+
+  }
+
+
+  .record-count {
+
+    font-size: 10px;
 
   }
 

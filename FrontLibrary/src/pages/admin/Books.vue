@@ -363,6 +363,9 @@ async function fetchBooks() {
       categoryId:
         book.category?.id ?? null,
 
+      publishYear:
+        book.publishYear || "",
+
       categoryName:
         book.category?.name || ""
 

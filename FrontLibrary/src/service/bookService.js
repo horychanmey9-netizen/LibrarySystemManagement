@@ -86,7 +86,7 @@ export async function getBooks() {
 
 
   // ===================================================
-  // BACKEND:
+  // BACKEND RESPONSE
   //
   // {
   //   msg: "...",
@@ -94,7 +94,6 @@ export async function getBooks() {
   //   data: [...]
   // }
   // ===================================================
-
 
   if (Array.isArray(result)) {
 
@@ -116,6 +115,7 @@ export async function getBooks() {
   return [];
 
 }
+
 
 // =====================================================
 // REJECT RETURN
@@ -144,20 +144,58 @@ export async function rejectReturn(id) {
     );
 
 
+  let result = null;
+
+
+  try {
+
+    const contentType =
+      response.headers.get(
+        "content-type"
+      );
+
+
+    if (
+      contentType?.includes(
+        "application/json"
+      )
+    ) {
+
+      result =
+        await response.json();
+
+    } else {
+
+      result =
+        await response.text();
+
+    }
+
+  } catch (e) {
+
+    result = null;
+
+  }
+
+
   if (!response.ok) {
 
-    const message =
-      await response.text();
-
     throw new Error(
-      message ||
-      "Failed to reject return."
+
+      typeof result === "string"
+
+        ? result
+
+        : result?.message ||
+          result?.msg ||
+          "Failed to reject return."
+
     );
 
   }
 
 
-  return response.json();
+  return result;
 
 }
 
@@ -362,29 +400,29 @@ export async function createBook(
 
 
   // ===================================================
-  // PUBLICATION YEAR
+  // PUBLISH YEAR
   //
-  // Date picker gives:
+  // Date picker:
   //
-  // 2026-09-10
+  // "2026-09-21"
   //
-  // Backend String:
+  // Backend:
   //
-  // 2026-09-10
+  // String publishYear
   //
   // IMPORTANT:
-  // Do NOT use substring(0, 4)
+  // Keep the complete date.
   // ===================================================
 
   if (
-    book.publicationYear !== null &&
-    book.publicationYear !== undefined &&
-    book.publicationYear !== ""
+    book.publishYear !== null &&
+    book.publishYear !== undefined &&
+    book.publishYear !== ""
   ) {
 
     formData.append(
-      "publicationYear",
-      String(book.publicationYear)
+      "publishYear",
+      String(book.publishYear)
     );
 
   }
@@ -496,7 +534,7 @@ export async function createBook(
 
 
   // ===================================================
-  // POST REQUEST
+  // POST
   // ===================================================
 
   const response =
@@ -634,10 +672,19 @@ export async function createBook(
 // =====================================================
 // UPDATE BOOK
 // =====================================================
+//
+// IMPORTANT:
+// This version accepts:
+//
+// updateBook(id, book, imageFile)
+//
+// so EditBook.vue can upload a new image.
+// =====================================================
 
 export async function updateBook(
   id,
-  book
+  book,
+  imageFile
 ) {
 
   const token =
@@ -739,29 +786,24 @@ export async function updateBook(
 
 
   // ===================================================
-  // PUBLICATION YEAR
+  // PUBLISH YEAR
   //
-  // Date picker gives:
+  // Example:
   //
-  // 2026-09-10
+  // "2026-09-21"
   //
-  // Backend String:
-  //
-  // 2026-09-10
-  //
-  // IMPORTANT:
-  // Do NOT use substring(0, 4)
+  // Keep as String.
   // ===================================================
 
   if (
-    book.publicationYear !== null &&
-    book.publicationYear !== undefined &&
-    book.publicationYear !== ""
+    book.publishYear !== null &&
+    book.publishYear !== undefined &&
+    book.publishYear !== ""
   ) {
 
     formData.append(
-      "publicationYear",
-      String(book.publicationYear)
+      "publishYear",
+      String(book.publishYear)
     );
 
   }
@@ -783,7 +825,7 @@ export async function updateBook(
 
   // ===================================================
   // STATUS
-  // =====================================================
+  // ===================================================
 
   if (book.status) {
 
@@ -798,17 +840,17 @@ export async function updateBook(
   // ===================================================
   // IMAGE
   //
-  // Only send when user selects new image
+  // Only append when a NEW image is selected.
   // ===================================================
 
   if (
-    book.file &&
-    book.file instanceof File
+    imageFile &&
+    imageFile instanceof File
   ) {
 
     formData.append(
       "file",
-      book.file
+      imageFile
     );
 
   }
@@ -863,6 +905,12 @@ export async function updateBook(
 
 
   console.log(
+    "NEW IMAGE FILE:",
+    imageFile
+  );
+
+
+  console.log(
     "TOKEN EXISTS:",
     !!token
   );
@@ -874,7 +922,7 @@ export async function updateBook(
 
 
   // ===================================================
-  // PUT REQUEST
+  // PUT
   // ===================================================
 
   const response =

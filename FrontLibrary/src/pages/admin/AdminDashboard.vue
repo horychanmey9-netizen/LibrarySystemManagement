@@ -63,10 +63,6 @@
     </div>
 
 
-    <!-- ================= OVERDUE ================= -->
-
-    <OverdueBooks />
-
   </div>
 </template>
 
