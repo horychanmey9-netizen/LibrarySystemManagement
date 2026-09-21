@@ -11,4 +11,5 @@ public interface AuthService {
     VerifyOtpResponse verifyOtp(VerifyOtpRequest request);
     String forgotPassword(ForgotPasswordRequest request);
     String resetPassword(ResetPasswordRequest request);
+    String changePassword(String email, ChangePasswordRequest request);
 }

@@ -67,7 +67,7 @@ public class TelegramAccountController {
         }
 
         return new TelegramStatusResponse(
-                true,
+                Boolean.TRUE.equals(account.getConnectedAt()),
                 account.getChatId(),
                 account.getUsername(),
                 account.getConnectedAt()
