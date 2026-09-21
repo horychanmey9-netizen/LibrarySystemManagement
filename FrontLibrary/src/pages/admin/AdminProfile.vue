@@ -1,6 +1,10 @@
 <template>
   <div class="profile-page">
 
+    <!-- =====================================================
+         LOADING
+    ====================================================== -->
+
     <div
       v-if="loading"
       class="flex items-center justify-center py-20"
@@ -8,48 +12,58 @@
       <div class="text-center">
 
         <div
-          class="w-10 h-10 border-4 border-gray-200
-                 border-t-indigo-600 rounded-full
-                 animate-spin mx-auto"
+          class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600"
         ></div>
 
-        <p class="text-gray-500 mt-4">
+        <p class="mt-4 text-gray-500">
           Loading profile...
         </p>
+
       </div>
     </div>
 
 
-    <!-- ================= PROFILE ================= -->
+    <!-- =====================================================
+         PROFILE
+    ====================================================== -->
+
     <ProfileCard
       v-else-if="profile"
       :profile="profile"
       :saving="saving"
       role="ADMIN"
+
+      :telegram-status="telegramStatus"
+      :telegram-connection="telegramConnection"
+      :telegram-loading="telegramLoading"
+      :telegram-status-loading="telegramStatusLoading"
+
       @save="saveProfile"
+      @telegram-connect="handleTelegramConnect"
+      @telegram-disconnect="handleTelegramDisconnect"
     />
 
 
-    <!-- ================= ERROR ================= -->
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
+
     <div
       v-else
-      class="bg-white rounded-2xl shadow-sm
-             border border-gray-100 p-8 text-center"
+      class="rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm"
     >
 
       <i
-        class="bi bi-person-x text-4xl
-               text-gray-400"
+        class="bi bi-person-x text-4xl text-gray-400"
       ></i>
 
       <h2
-        class="text-xl font-semibold
-               text-gray-700 mt-4"
+        class="mt-4 text-xl font-semibold text-gray-700"
       >
         Profile not found
       </h2>
 
-      <p class="text-gray-500 mt-2">
+      <p class="mt-2 text-gray-500">
         Unable to load your profile information.
       </p>
 
@@ -60,9 +74,15 @@
 
 
 <script setup>
-import { ref, onMounted } from "vue";
 
-import ProfileCard from "@/components/user/ProfileCard.vue";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+} from "vue";
+
+import ProfileCard
+  from "@/components/user/ProfileCard.vue";
 
 import {
   getProfile,
@@ -70,20 +90,30 @@ import {
   updateProfile,
 } from "../../service/profileservice";
 
+import {
+  getTelegramStatus,
+  connectTelegram,
+  disconnectTelegram,
+} from "../../service/telegramservice";
 
-// ========================================
+
+// =========================================================
 // USER FROM SESSION
-// ========================================
+// =========================================================
+
 const storedUser =
   sessionStorage.getItem("user");
 
 let user = null;
 
 try {
+
   user = storedUser
     ? JSON.parse(storedUser)
     : null;
+
 } catch (error) {
+
   console.error(
     "Invalid user data:",
     error
@@ -93,10 +123,12 @@ try {
 }
 
 
-// ========================================
+// =========================================================
 // PROFILE
-// ========================================
+// =========================================================
+
 const profile = ref({
+
   id: "",
 
   fullName:
@@ -109,47 +141,106 @@ const profile = ref({
     "",
 
   gender: "",
+
   phone: "",
+
   address: "",
+
   dateOfBirth: "",
 
   avatar: "",
+
 });
 
 
-// ========================================
-// STATES
-// ========================================
+// =========================================================
+// PROFILE STATES
+// =========================================================
+
 const loading = ref(true);
+
 const saving = ref(false);
+
 const errorMessage = ref("");
 
 
-// ========================================
+// =========================================================
+// TELEGRAM STATES
+// =========================================================
+
+const telegramStatus = ref({
+
+  connected: false,
+
+  chatId: null,
+
+  username: null,
+
+  connectedAt: null,
+
+});
+
+
+const telegramConnection = ref({
+
+  code: "",
+
+  botUsername: "",
+
+  telegramLink: "",
+
+  message: "",
+
+});
+
+
+const telegramLoading =
+  ref(false);
+
+
+const telegramStatusLoading =
+  ref(false);
+
+
+// =========================================================
+// TELEGRAM POLLING
+// =========================================================
+
+let telegramPolling = null;
+
+
+// =========================================================
 // GET PROFILE
-// ========================================
+// =========================================================
+
 const loadProfile = async () => {
 
   try {
 
     loading.value = true;
+
     errorMessage.value = "";
+
 
     const response =
       await getProfile();
+
 
     console.log(
       "ADMIN PROFILE RESPONSE:",
       response
     );
 
+
     const data =
       response?.data;
+
 
     console.log(
       "ADMIN PROFILE DATA:",
       data
     );
+
 
     if (data) {
 
@@ -157,6 +248,7 @@ const loadProfile = async () => {
         "ADMIN PROFILE IMAGE:",
         data.image
       );
+
 
       profile.value = {
 
@@ -195,7 +287,14 @@ const loadProfile = async () => {
           data.image ||
           data.avatar ||
           "",
+
       };
+
+
+      console.log(
+        "PROFILE STATE:",
+        profile.value
+      );
 
     } else {
 
@@ -210,9 +309,11 @@ const loadProfile = async () => {
       error
     );
 
+
     errorMessage.value =
-      error.message ||
+      error?.message ||
       "Failed to load profile";
+
 
   } finally {
 
@@ -223,72 +324,83 @@ const loadProfile = async () => {
 };
 
 
-// ========================================
+// =========================================================
 // SAVE PROFILE
-// ========================================
-const saveProfile = async (
-  updatedProfile
-) => {
+// =========================================================
+
+const saveProfile =
+  async (profileData) => {
 
   try {
 
     saving.value = true;
-    errorMessage.value = "";
+
 
     console.log(
-      "Updated admin profile:",
-      updatedProfile
+      "PROFILE DATA RECEIVED:",
+      profileData
     );
-
-
-    // ========================================
-    // IMAGE FILE
-    // ========================================
-    const imageFile =
-      updatedProfile.imageFile ||
-      null;
 
 
     let response;
 
 
-    // ========================================
-    // UPDATE EXISTING PROFILE
-    // ========================================
-    if (profile.value?.id) {
+    // =====================================================
+    // UPDATE
+    // =====================================================
+
+    if (profileData?.id) {
+
+      console.log(
+        "Updating existing profile..."
+      );
+
 
       response =
         await updateProfile(
-          updatedProfile,
-          imageFile
+          profileData,
+          profileData.imageFile
         );
+
+
+      console.log(
+        "PROFILE UPDATE RESPONSE:",
+        response
+      );
 
     }
 
 
-    // ========================================
-    // CREATE NEW PROFILE
-    // ========================================
+    // =====================================================
+    // CREATE
+    // =====================================================
+
     else {
+
+      console.log(
+        "Creating new profile..."
+      );
+
 
       response =
         await createProfile(
-          updatedProfile,
-          imageFile
+          profileData,
+          profileData.imageFile
         );
+
+
+      console.log(
+        "PROFILE CREATE RESPONSE:",
+        response
+      );
 
     }
 
 
-    console.log(
-      "SAVE ADMIN PROFILE RESPONSE:",
-      response
-    );
+    // =====================================================
+    // UPDATE LOCAL PROFILE
+    // =====================================================
 
-
-    // ========================================
-    // RESPONSE DATA
-    // ========================================
     const data =
       response?.data;
 
@@ -301,95 +413,62 @@ const saveProfile = async (
 
         id:
           data.id ||
-          profile.value.id,
+          profileData.id ||
+          "",
 
         fullName:
           data.fullName ||
           data.name ||
-          updatedProfile.fullName,
+          profileData.fullName ||
+          "",
 
         email:
           data.email ||
-          updatedProfile.email,
+          profileData.email ||
+          "",
 
         gender:
           data.gender ||
-          updatedProfile.gender,
+          profileData.gender ||
+          "",
 
         phone:
           data.phone ||
-          updatedProfile.phone,
+          profileData.phone ||
+          "",
 
         address:
           data.address ||
-          updatedProfile.address,
+          profileData.address ||
+          "",
 
         dateOfBirth:
           data.dateOfBirth ||
-          updatedProfile.dateOfBirth,
+          profileData.dateOfBirth ||
+          "",
 
         avatar:
           data.image ||
           data.avatar ||
-          profile.value.avatar,
+          profileData.avatar ||
+          "",
+
       };
+
+
+      console.log(
+        "PROFILE UPDATED LOCALLY:",
+        profile.value
+      );
 
     }
 
 
-    // ========================================
-    // UPDATE SESSION USER
-    // ========================================
-    const currentUser =
-      JSON.parse(
-        sessionStorage.getItem(
-          "user"
-        ) || "{}"
-      );
+    // =====================================================
+    // RELOAD PROFILE
+    // =====================================================
 
-
-    const updatedUser = {
-
-      ...currentUser,
-
-      name:
-        profile.value.fullName,
-
-      email:
-        profile.value.email,
-
-      avatar:
-        profile.value.avatar,
-    };
-
-
-    sessionStorage.setItem(
-      "user",
-      JSON.stringify(
-        updatedUser
-      )
-    );
-
-
-    console.log(
-      "Updated session user:",
-      updatedUser
-    );
-
-
-    // ========================================
-    // NOTIFY NAVBAR
-    // ========================================
-    window.dispatchEvent(
-      new Event(
-        "profile-updated"
-      )
-    );
-
-
-    alert(
-      "Profile updated successfully!"
-    );
+    await loadProfile();
 
 
   } catch (error) {
@@ -399,14 +478,6 @@ const saveProfile = async (
       error
     );
 
-    errorMessage.value =
-      error.message ||
-      "Failed to save profile";
-
-
-    alert(
-      errorMessage.value
-    );
 
   } finally {
 
@@ -417,16 +488,386 @@ const saveProfile = async (
 };
 
 
-// ========================================
-// LOAD PROFILE WHEN PAGE OPENS
-// ========================================
-onMounted(() => {
+// =========================================================
+// GET TELEGRAM STATUS
+// =========================================================
 
-  loadProfile();
+const loadTelegramStatus =
+  async () => {
+
+  try {
+
+    telegramStatusLoading.value =
+      true;
+
+
+    const response =
+      await getTelegramStatus();
+
+
+    console.log(
+      "TELEGRAM STATUS RESPONSE:",
+      response
+    );
+
+
+    const data =
+      response?.data;
+
+
+    console.log(
+      "TELEGRAM STATUS DATA:",
+      data
+    );
+
+
+    if (data) {
+
+      telegramStatus.value = {
+
+        connected:
+          data.connected === true,
+
+        chatId:
+          data.chatId ??
+          null,
+
+        username:
+          data.username ??
+          null,
+
+        connectedAt:
+          data.connectedAt ??
+          null,
+
+      };
+
+
+      console.log(
+        "TELEGRAM STATUS UPDATED:",
+        telegramStatus.value
+      );
+
+
+      // ===================================================
+      // IF CONNECTED
+      // ===================================================
+
+      if (
+        telegramStatus.value.connected
+      ) {
+
+        stopTelegramPolling();
+
+
+        // Connection is completed.
+        // We no longer need the old code.
+
+        telegramConnection.value = {
+
+          code: "",
+
+          botUsername: "",
+
+          telegramLink: "",
+
+          message:
+            "Telegram connected successfully.",
+
+        };
+
+      }
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Get Telegram status error:",
+      error
+    );
+
+  } finally {
+
+    telegramStatusLoading.value =
+      false;
+
+  }
+
+};
+
+
+// =========================================================
+// CONNECT TELEGRAM
+// =========================================================
+
+const handleTelegramConnect =
+  async () => {
+
+  try {
+
+    telegramLoading.value =
+      true;
+
+
+    console.log(
+      "Generating Telegram connection..."
+    );
+
+
+    const response =
+      await connectTelegram();
+
+
+    console.log(
+      "TELEGRAM CONNECT RESPONSE:",
+      response
+    );
+
+
+    const data =
+      response?.data;
+
+
+    console.log(
+      "TELEGRAM CONNECTION DATA:",
+      data
+    );
+
+
+    if (data) {
+
+      telegramConnection.value = {
+
+        /*
+         * Support both:
+         *
+         * data.code
+         *
+         * and
+         *
+         * data.connectionCode
+         */
+
+        code:
+          data.code ||
+          data.connectionCode ||
+          "",
+
+
+        botUsername:
+          data.botUsername ||
+          data.username ||
+          "",
+
+
+        telegramLink:
+          data.telegramLink ||
+          data.link ||
+          "",
+
+
+        message:
+          data.message ||
+          "Open Telegram and press Start.",
+
+      };
+
+
+      console.log(
+        "TELEGRAM CONNECTION STATE:",
+        telegramConnection.value
+      );
+
+
+      // =================================================
+      // START POLLING
+      // =================================================
+
+      startTelegramPolling();
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Connect Telegram error:",
+      error
+    );
+
+  } finally {
+
+    telegramLoading.value =
+      false;
+
+  }
+
+};
+
+
+// =========================================================
+// START TELEGRAM POLLING
+// =========================================================
+
+const startTelegramPolling =
+  () => {
+
+  // Prevent multiple intervals.
+
+  stopTelegramPolling();
+
+
+  console.log(
+    "Starting Telegram status polling..."
+  );
+
+
+  telegramPolling =
+    setInterval(
+      async () => {
+
+        console.log(
+          "Checking Telegram connection..."
+        );
+
+
+        await loadTelegramStatus();
+
+
+        // loadTelegramStatus()
+        // automatically stops polling
+        // if connected.
+
+      },
+      3000
+    );
+
+};
+
+
+// =========================================================
+// STOP TELEGRAM POLLING
+// =========================================================
+
+const stopTelegramPolling =
+  () => {
+
+  if (telegramPolling) {
+
+    clearInterval(
+      telegramPolling
+    );
+
+
+    telegramPolling = null;
+
+
+    console.log(
+      "Telegram polling stopped."
+    );
+
+  }
+
+};
+
+
+// =========================================================
+// DISCONNECT TELEGRAM
+// =========================================================
+
+const handleTelegramDisconnect =
+  async () => {
+
+  try {
+
+    telegramLoading.value =
+      true;
+
+
+    console.log(
+      "Disconnecting Telegram..."
+    );
+
+
+    await disconnectTelegram();
+
+
+    console.log(
+      "Telegram disconnected successfully."
+    );
+
+
+    stopTelegramPolling();
+
+
+    telegramStatus.value = {
+
+      connected: false,
+
+      chatId: null,
+
+      username: null,
+
+      connectedAt: null,
+
+    };
+
+
+    telegramConnection.value = {
+
+      code: "",
+
+      botUsername: "",
+
+      telegramLink: "",
+
+      message: "",
+
+    };
+
+  } catch (error) {
+
+    console.error(
+      "Disconnect Telegram error:",
+      error
+    );
+
+  } finally {
+
+    telegramLoading.value =
+      false;
+
+  }
+
+};
+
+
+// =========================================================
+// PAGE LOAD
+// =========================================================
+
+onMounted(
+  async () => {
+
+    await loadProfile();
+
+    await loadTelegramStatus();
+
+  }
+);
+
+
+// =========================================================
+// PAGE UNMOUNT
+// =========================================================
+
+onBeforeUnmount(() => {
+
+  stopTelegramPolling();
 
 });
-</script>
 
+</script>
 
 
 <style scoped>
@@ -436,14 +877,19 @@ onMounted(() => {
 ======================================== */
 
 .profile-page {
-  width: 100%;
-  min-height: calc(100vh - 70px);
 
-  /* បន្ថយគម្លាត */
+  width: 100%;
+
+  min-height:
+    calc(100vh - 70px);
+
   padding: 16px;
 
   box-sizing: border-box;
-  background: #f8fafc;
+
+  background:
+    #f8fafc;
+
 }
 
 
@@ -452,27 +898,39 @@ onMounted(() => {
 ======================================== */
 
 .page-header {
+
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
 
-  /* បន្ថយ margin */
   margin-bottom: 16px;
+
 }
 
+
 .page-header h1 {
+
   margin: 0;
 
   font-size: 26px;
+
   font-weight: 700;
+
   color: #1e293b;
+
 }
 
+
 .page-header p {
+
   margin: 4px 0 0;
 
   font-size: 14px;
+
   color: #94a3b8;
+
 }
 
 
@@ -483,17 +941,25 @@ onMounted(() => {
 @media (max-width: 768px) {
 
   .profile-page {
+
     padding: 12px;
+
   }
+
 
   .page-header {
+
     margin-bottom: 12px;
+
   }
 
+
   .page-header h1 {
+
     font-size: 22px;
+
   }
 
 }
-</style>
 
+</style>

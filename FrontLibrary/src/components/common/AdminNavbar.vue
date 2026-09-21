@@ -1,9 +1,11 @@
 <template>
+
   <header class="admin-navbar">
 
     <!-- =========================
          Left Side
     ========================== -->
+
     <div class="navbar-left">
 
       <!-- Mobile Menu -->
@@ -36,54 +38,194 @@
     <!-- =========================
          Right Side
     ========================== -->
+
     <div class="navbar-right">
 
-      <!-- Admin Profile -->
-      <button
-        type="button"
-        class="admin-profile"
-        title="Admin Profile"
-        @click="goToProfile"
+      <!-- =================================
+           ADMIN PROFILE DROPDOWN
+      ================================== -->
+
+      <div
+        ref="adminMenuRef"
+        class="admin-menu"
       >
 
-        <!-- =========================
-             PROFILE IMAGE
-        ========================== -->
-        <div class="profile-avatar">
+        <!-- Admin Profile Button -->
 
-          <img
-            v-if="adminAvatar"
-            :src="adminAvatar"
-            :alt="adminName"
-            class="avatar-image"
-            @error="handleImageError"
-          />
+        <button
+          type="button"
+          class="admin-profile"
+          title="Admin Menu"
+          :class="{
+            'admin-profile-open': isMenuOpen
+          }"
+          @click="toggleMenu"
+          aria-haspopup="true"
+          :aria-expanded="isMenuOpen"
+        >
 
-          <span v-else>
-            {{ getInitial(adminName) }}
-          </span>
+          <!-- PROFILE IMAGE -->
 
-        </div>
+          <div class="profile-avatar">
+
+            <img
+              v-if="adminAvatar"
+              :src="adminAvatar"
+              :alt="adminName"
+              class="avatar-image"
+              @error="handleImageError"
+            />
+
+            <span v-else>
+              {{ getInitial(adminName) }}
+            </span>
+
+          </div>
 
 
-        <!-- Profile Info -->
-        <div class="profile-info">
+          <!-- Profile Info -->
 
-          <h4>
-            {{ adminName }}
-          </h4>
+          <div class="profile-info">
 
-          <span>
-            Administrator
-          </span>
+            <h4>
+              {{ adminName }}
+            </h4>
 
-        </div>
+            <span>
+              Administrator
+            </span>
 
-      </button>
+          </div>
+
+
+          <!-- Dropdown Arrow -->
+
+          <i
+            class="bi bi-chevron-down profile-arrow"
+            :class="{
+              rotated: isMenuOpen
+            }"
+          ></i>
+
+        </button>
+
+
+        <!-- =================================
+             DROPDOWN
+        ================================== -->
+
+        <Transition name="admin-dropdown">
+
+          <div
+            v-if="isMenuOpen"
+            class="admin-dropdown"
+          >
+
+            <!-- =================================
+                 USER INFORMATION
+            ================================== -->
+
+            <div class="dropdown-user-info">
+
+              <div class="dropdown-avatar">
+
+                <img
+                  v-if="adminAvatar"
+                  :src="adminAvatar"
+                  :alt="adminName"
+                  class="dropdown-avatar-image"
+                  @error="handleImageError"
+                />
+
+                <span v-else>
+                  {{ getInitial(adminName) }}
+                </span>
+
+              </div>
+
+
+              <div class="dropdown-user-details">
+
+                <div class="dropdown-user-name">
+                  {{ adminName }}
+                </div>
+
+                <div
+                  v-if="adminEmail"
+                  class="dropdown-user-email"
+                >
+                  {{ adminEmail }}
+                </div>
+
+                <div class="dropdown-user-role">
+                  Administrator
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- Divider -->
+
+            <div class="dropdown-divider"></div>
+
+
+            <!-- =================================
+                 PROFILE
+            ================================== -->
+
+            <button
+              type="button"
+              class="dropdown-item"
+              @click="goToProfile"
+            >
+
+              <i class="bi bi-person"></i>
+
+              <span>
+                Profile
+              </span>
+
+            </button>
+
+
+            <!-- =================================
+                 CHANGE PASSWORD
+            ================================== -->
+
+            <button
+              type="button"
+              class="dropdown-item"
+              @click="goToChangePassword"
+            >
+
+              <i class="bi bi-lock"></i>
+
+              <span>
+                Change Password
+              </span>
+
+            </button>
+
+
+            <!-- Divider -->
+
+            <div class="dropdown-divider"></div>
+
+
+            
+
+          </div>
+
+        </Transition>
+
+      </div>
 
     </div>
 
   </header>
+
 </template>
 
 
@@ -93,12 +235,14 @@ import {
   computed,
   onMounted,
   onBeforeUnmount,
-  ref,
+  ref
 } from "vue";
+
 
 import {
   useRouter
 } from "vue-router";
+
 
 import {
   getProfile
@@ -117,10 +261,23 @@ const router = useRouter();
 // ========================================
 
 const admin = ref({
+
   name: "",
+
   email: "",
+
   avatar: "",
+
 });
+
+
+// ========================================
+// ADMIN DROPDOWN
+// ========================================
+
+const isMenuOpen = ref(false);
+
+const adminMenuRef = ref(null);
 
 
 // ========================================
@@ -138,6 +295,7 @@ const loadAdminProfile = async () => {
     const storedUser =
       sessionStorage.getItem("user");
 
+
     if (storedUser) {
 
       try {
@@ -145,14 +303,17 @@ const loadAdminProfile = async () => {
         const user =
           JSON.parse(storedUser);
 
+
         admin.value.name =
           user?.name ||
           user?.fullName ||
           "Admin";
 
+
         admin.value.email =
           user?.email ||
           "";
+
 
         admin.value.avatar =
           user?.avatar ||
@@ -177,6 +338,7 @@ const loadAdminProfile = async () => {
 
     const response =
       await getProfile();
+
 
     console.log(
       "ADMIN NAVBAR PROFILE:",
@@ -276,6 +438,20 @@ const adminName = computed(() => {
 
 
 // ========================================
+// COMPUTED EMAIL
+// ========================================
+
+const adminEmail = computed(() => {
+
+  return (
+    admin.value.email ||
+    ""
+  );
+
+});
+
+
+// ========================================
 // COMPUTED AVATAR
 // ========================================
 
@@ -296,12 +472,157 @@ const adminAvatar = computed(() => {
 function getInitial(name) {
 
   if (!name) {
+
     return "A";
+
   }
 
-  return name
-    .charAt(0)
-    .toUpperCase();
+
+  const names =
+    name
+      .trim()
+      .split(/\s+/);
+
+
+  // One name
+
+  if (
+    names.length === 1
+  ) {
+
+    return names[0]
+      .substring(0, 2)
+      .toUpperCase();
+
+  }
+
+
+  // First + Last
+
+  return (
+    names[0].charAt(0) +
+    names[
+      names.length - 1
+    ].charAt(0)
+  ).toUpperCase();
+
+}
+
+
+// ========================================
+// TOGGLE MENU
+// ========================================
+
+function toggleMenu() {
+
+  isMenuOpen.value =
+    !isMenuOpen.value;
+
+}
+
+
+// ========================================
+// CLOSE MENU
+// ========================================
+
+function closeMenu() {
+
+  isMenuOpen.value = false;
+
+}
+
+
+// ========================================
+// CLICK OUTSIDE
+// ========================================
+
+function handleClickOutside(event) {
+
+  if (
+    adminMenuRef.value &&
+    !adminMenuRef.value.contains(
+      event.target
+    )
+  ) {
+
+    closeMenu();
+
+  }
+
+}
+
+
+// ========================================
+// PROFILE
+// ========================================
+
+function goToProfile() {
+
+  closeMenu();
+
+  router.push(
+    "/admin/profile"
+  );
+
+}
+
+
+// ========================================
+// CHANGE PASSWORD
+// ========================================
+
+function goToChangePassword() {
+
+  closeMenu();
+
+  router.push(
+    "/admin/change-password"
+  );
+
+}
+
+
+// ========================================
+// LOGOUT
+// ========================================
+
+function logout() {
+
+  closeMenu();
+
+
+  // Remove logged-in user
+
+  sessionStorage.removeItem(
+    "user"
+  );
+
+
+  /*
+   * If your JWT/token is stored in
+   * sessionStorage, remove it here.
+   *
+   * Example:
+   *
+   * sessionStorage.removeItem("token");
+   *
+   */
+
+
+  /*
+   * If your JWT/token is stored in
+   * localStorage, remove it here.
+   *
+   * Example:
+   *
+   * localStorage.removeItem("token");
+   *
+   */
+
+
+  router.push(
+    "/login"
+  );
 
 }
 
@@ -317,6 +638,7 @@ function handleImageError(event) {
     event.target.src
   );
 
+
   admin.value.avatar = "";
 
 }
@@ -331,6 +653,7 @@ const handleProfileUpdated = () => {
   console.log(
     "Profile updated → reload Admin Navbar"
   );
+
 
   loadAdminProfile();
 
@@ -353,19 +676,6 @@ function openSidebar() {
 
 
 // ========================================
-// PROFILE
-// ========================================
-
-function goToProfile() {
-
-  router.push(
-    "/admin/profile"
-  );
-
-}
-
-
-// ========================================
 // MOUNT
 // ========================================
 
@@ -373,9 +683,16 @@ onMounted(() => {
 
   loadAdminProfile();
 
+
   window.addEventListener(
     "profile-updated",
     handleProfileUpdated
+  );
+
+
+  document.addEventListener(
+    "click",
+    handleClickOutside
   );
 
 });
@@ -390,6 +707,12 @@ onBeforeUnmount(() => {
   window.removeEventListener(
     "profile-updated",
     handleProfileUpdated
+  );
+
+
+  document.removeEventListener(
+    "click",
+    handleClickOutside
   );
 
 });
@@ -408,14 +731,17 @@ onBeforeUnmount(() => {
   position: fixed;
 
   top: 0;
+
   left: 250px;
+
   right: 0;
 
   height: 75px;
 
   background: #ffffff;
 
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom:
+    1px solid #e5e7eb;
 
   display: flex;
 
@@ -458,6 +784,7 @@ onBeforeUnmount(() => {
   display: none;
 
   width: 40px;
+
   height: 40px;
 
   border: none;
@@ -553,6 +880,21 @@ onBeforeUnmount(() => {
 
 
 /* ========================================
+   ADMIN MENU
+======================================== */
+
+.admin-menu {
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+}
+
+
+/* ========================================
    ADMIN PROFILE
 ======================================== */
 
@@ -574,7 +916,8 @@ onBeforeUnmount(() => {
 
   cursor: pointer;
 
-  transition: 0.2s;
+  transition:
+    background 0.2s ease;
 
   text-align: left;
 
@@ -590,6 +933,13 @@ onBeforeUnmount(() => {
 }
 
 
+.admin-profile-open {
+
+  background: #f3f4f6;
+
+}
+
+
 /* ========================================
    AVATAR
 ======================================== */
@@ -597,6 +947,7 @@ onBeforeUnmount(() => {
 .profile-avatar {
 
   width: 38px;
+
   height: 38px;
 
   border-radius: 50%;
@@ -623,6 +974,7 @@ onBeforeUnmount(() => {
 .avatar-image {
 
   width: 100%;
+
   height: 100%;
 
   object-fit: cover;
@@ -683,11 +1035,324 @@ onBeforeUnmount(() => {
 
 .profile-arrow {
 
-  font-size: 14px;
+  font-size: 13px;
 
   color: #6b7280;
 
   margin-left: 3px;
+
+  transition:
+    transform 0.2s ease;
+
+}
+
+
+.profile-arrow.rotated {
+
+  transform: rotate(180deg);
+
+}
+
+
+/* ========================================
+   ADMIN DROPDOWN
+======================================== */
+
+.admin-dropdown {
+
+  position: absolute;
+
+  top: calc(100% + 10px);
+
+  right: 0;
+
+  width: 280px;
+
+  padding: 8px;
+
+  background: #ffffff;
+
+  border:
+    1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.12),
+    0 4px 10px rgba(15, 23, 42, 0.05);
+
+  z-index: 1100;
+
+}
+
+
+/* ========================================
+   DROPDOWN USER INFO
+======================================== */
+
+.dropdown-user-info {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 10px;
+
+}
+
+
+/* ========================================
+   DROPDOWN AVATAR
+======================================== */
+
+.dropdown-avatar {
+
+  width: 44px;
+
+  height: 44px;
+
+  min-width: 44px;
+
+  border-radius: 50%;
+
+  background: #eeeaff;
+
+  color: #5b3df5;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  overflow: hidden;
+
+  border:
+    1px solid #e6e1ff;
+
+}
+
+
+.dropdown-avatar-image {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+}
+
+
+/* ========================================
+   DROPDOWN USER DETAILS
+======================================== */
+
+.dropdown-user-details {
+
+  min-width: 0;
+
+  flex: 1;
+
+}
+
+
+.dropdown-user-name {
+
+  color: #111827;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
+
+
+.dropdown-user-email {
+
+  margin-top: 3px;
+
+  color: #6b7280;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
+
+
+.dropdown-user-role {
+
+  margin-top: 4px;
+
+  color: #5b3df5;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+}
+
+
+/* ========================================
+   DIVIDER
+======================================== */
+
+.dropdown-divider {
+
+  height: 1px;
+
+  background: #e5e7eb;
+
+  margin: 6px 4px;
+
+}
+
+
+/* ========================================
+   DROPDOWN ITEM
+======================================== */
+
+.dropdown-item {
+
+  width: 100%;
+
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 0 12px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #344054;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  text-align: left;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+}
+
+
+.dropdown-item i {
+
+  width: 20px;
+
+  font-size: 17px;
+
+  color: #667085;
+
+  transition:
+    color 0.15s ease;
+
+}
+
+
+.dropdown-item:hover {
+
+  background: #f5f3ff;
+
+  color: #5b3df5;
+
+}
+
+
+.dropdown-item:hover i {
+
+  color: #5b3df5;
+
+}
+
+
+/* ========================================
+   LOGOUT
+======================================== */
+
+.logout-item {
+
+  color: #dc2626;
+
+}
+
+
+.logout-item i {
+
+  color: #dc2626;
+
+}
+
+
+.logout-item:hover {
+
+  background: #fff1f2;
+
+  color: #dc2626;
+
+}
+
+
+.logout-item:hover i {
+
+  color: #dc2626;
+
+}
+
+
+/* ========================================
+   DROPDOWN ANIMATION
+======================================== */
+
+.admin-dropdown-enter-active,
+.admin-dropdown-leave-active {
+
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+
+}
+
+
+.admin-dropdown-enter-from,
+.admin-dropdown-leave-to {
+
+  opacity: 0;
+
+  transform:
+    translateY(-6px);
 
 }
 
@@ -754,14 +1419,6 @@ onBeforeUnmount(() => {
   }
 
 
-  .notification-btn {
-
-    width: 40px;
-    height: 40px;
-
-  }
-
-
   .profile-info {
 
     display: none;
@@ -779,6 +1436,15 @@ onBeforeUnmount(() => {
   .admin-profile {
 
     padding: 5px;
+
+  }
+
+
+  .admin-dropdown {
+
+    right: 0;
+
+    width: 270px;
 
   }
 
@@ -824,6 +1490,7 @@ onBeforeUnmount(() => {
   .mobile-menu-btn {
 
     width: 38px;
+
     height: 38px;
 
     font-size: 20px;
@@ -831,27 +1498,20 @@ onBeforeUnmount(() => {
   }
 
 
-  /* .notification-btn {
-
-    width: 36px;
-    height: 36px;
-
-  }
-
-
-  .notification-btn i {
-
-    font-size: 18px;
-
-  }
- */
-
   .profile-avatar {
 
     width: 35px;
+
     height: 35px;
 
     font-size: 13px;
+
+  }
+
+
+  .admin-dropdown {
+
+    width: 260px;
 
   }
 

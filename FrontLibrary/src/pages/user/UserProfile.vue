@@ -1,5 +1,9 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+} from "vue";
 
 import ProfileCard from "@/components/user/ProfileCard.vue";
 
@@ -9,523 +13,562 @@ import {
   updateProfile,
 } from "../../service/profileservice";
 
+import {
+  getTelegramStatus,
+  connectTelegram,
+  disconnectTelegram,
+} from "../../service/telegramservice";
 
-// =========================
-// USER FROM SESSION
-// =========================
-const storedUser =
-  sessionStorage.getItem("user");
+/* =========================================================
+   USER
+========================================================= */
 
-let user = null;
+const user = ref(null);
 
-try {
-  user = storedUser
-    ? JSON.parse(storedUser)
-    : null;
-
-} catch (error) {
-
-  console.error(
-    "Invalid user data:",
-    error
-  );
-
-  user = null;
-}
-
-
-// =========================
-// PROFILE
-// =========================
 const profile = ref({
-
-  id: "",
-
-  fullName:
-    user?.name ||
-    user?.fullName ||
-    "",
-
-  email:
-    user?.email ||
-    "",
-
+  id: null,
+  fullName: "",
+  email: "",
   gender: "",
   phone: "",
   address: "",
   dateOfBirth: "",
-
   avatar: "",
-
 });
 
+/* =========================================================
+   PROFILE STATE
+========================================================= */
 
-// =========================
-// LOADING
-// =========================
 const loading = ref(true);
-
 const saving = ref(false);
-
 const errorMessage = ref("");
 
+/* =========================================================
+   TELEGRAM STATE
+========================================================= */
 
-// =========================
-// GET PROFILE
-// =========================
+const telegramLoading = ref(false);
+const telegramStatusLoading = ref(false);
+
+const telegramStatus = ref({
+  connected: false,
+  chatId: null,
+  username: null,
+  connectedAt: null,
+});
+
+const telegramConnection = ref({
+  code: "",
+  botUsername: "",
+  telegramLink: "",
+  message: "",
+});
+
+/* =========================================================
+   TELEGRAM POLLING
+========================================================= */
+
+let telegramPolling = null;
+
+/* =========================================================
+   LOAD PROFILE
+========================================================= */
+
 const loadProfile = async () => {
-
   try {
-
     loading.value = true;
-
     errorMessage.value = "";
 
-    const response =
-      await getProfile();
+    const sessionUser = sessionStorage.getItem("user");
 
-
-    console.log(
-      "ADMIN PROFILE RESPONSE:",
-      response
-    );
-
-
-    console.log(
-      "ADMIN PROFILE IMAGE:",
-      response?.data?.image
-    );
-
-
-    const data =
-      response?.data;
-
-
-    if (data) {
-
-      profile.value = {
-
-        id:
-          data.id ||
-          "",
-
-
-        // =========================
-        // USER INFORMATION
-        // =========================
-
-        fullName:
-          data.fullName ||
-          data.name ||
-          user?.name ||
-          "",
-
-
-        email:
-          data.email ||
-          user?.email ||
-          "",
-
-
-        // =========================
-        // PROFILE INFORMATION
-        // =========================
-
-        gender:
-          data.gender ||
-          "",
-
-
-        phone:
-          data.phone ||
-          "",
-
-
-        address:
-          data.address ||
-          "",
-
-
-        dateOfBirth:
-          data.dateOfBirth ||
-          "",
-
-
-        // =========================
-        // IMAGE
-        // =========================
-
-        avatar:
-          data.image ||
-          data.avatar ||
-          "",
-
-      };
-
+    if (!sessionUser) {
+      errorMessage.value = "User information not found.";
+      return;
     }
 
+    user.value = JSON.parse(sessionUser);
+
+    const response = await getProfile();
+
+    console.log("PROFILE RESPONSE:", response);
+
+    /*
+     * Adjust these fallbacks depending on your backend response.
+     */
+
+    profile.value = {
+      id:
+        response?.id ||
+        user.value?.id ||
+        null,
+
+      fullName:
+        response?.fullName ||
+        user.value?.fullName ||
+        user.value?.name ||
+        "",
+
+      email:
+        response?.email ||
+        user.value?.email ||
+        "",
+
+      gender:
+        response?.gender || "",
+
+      phone:
+        response?.phone || "",
+
+      address:
+        response?.address || "",
+
+      dateOfBirth:
+        response?.dateOfBirth || "",
+
+      avatar:
+        response?.avatar ||
+        response?.image ||
+        "",
+    };
   } catch (error) {
-
-    console.error(
-      "Get admin profile error:",
-      error
-    );
-
+    console.error("Load profile error:", error);
 
     errorMessage.value =
-      error.message ||
-      "Failed to load profile";
-
+      error?.message ||
+      "Failed to load profile.";
   } finally {
-
     loading.value = false;
-
   }
-
 };
 
+/* =========================================================
+   SAVE PROFILE
+========================================================= */
 
-// =========================
-// SAVE PROFILE
-// =========================
-const saveProfile = async (
-  updatedProfile
-) => {
-
+const saveProfile = async (updatedProfile) => {
   try {
-
     saving.value = true;
-
     errorMessage.value = "";
 
-
-    console.log(
-      "Updated admin profile:",
-      updatedProfile
-    );
-
-
-    // =========================
-    // IMAGE FILE
-    // =========================
-
     const imageFile =
-      updatedProfile.imageFile ||
-      null;
+      updatedProfile?.imageFile || null;
 
+    const payload = {
+      phone: updatedProfile.phone || "",
+      gender: updatedProfile.gender || "",
+      dateOfBirth:
+        updatedProfile.dateOfBirth || "",
+      address: updatedProfile.address || "",
+    };
 
     let response;
 
-
-    // =========================
-    // EXISTING PROFILE
-    // =========================
+    /*
+     * If profile already exists -> UPDATE
+     * Otherwise -> CREATE
+     */
 
     if (profile.value.id) {
-
-      response =
-        await updateProfile(
-          updatedProfile,
-          imageFile
-        );
-
+      response = await updateProfile(
+        payload,
+        imageFile
+      );
+    } else {
+      response = await createProfile(
+        payload,
+        imageFile
+      );
     }
-
-
-    // =========================
-    // NEW PROFILE
-    // =========================
-
-    else {
-
-      response =
-        await createProfile(
-          updatedProfile,
-          imageFile
-        );
-
-    }
-
 
     console.log(
-      "Save admin profile response:",
+      "SAVE PROFILE RESPONSE:",
       response
     );
 
+    /*
+     * Update local profile.
+     */
 
-    // =========================
-    // UPDATE LOCAL PROFILE
-    // =========================
-
-    const data =
-      response?.data;
-
-
-    if (data) {
-
-      profile.value = {
-
-        ...profile.value,
-
-
-        id:
-          data.id ||
-          profile.value.id,
-
-
-        fullName:
-          data.fullName ||
-          data.name ||
-          updatedProfile.fullName,
-
-
-        email:
-          data.email ||
-          updatedProfile.email,
-
-
-        gender:
-          data.gender ||
-          updatedProfile.gender,
-
-
-        phone:
-          data.phone ||
-          updatedProfile.phone,
-
-
-        address:
-          data.address ||
-          updatedProfile.address,
-
-
-        dateOfBirth:
-          data.dateOfBirth ||
-          updatedProfile.dateOfBirth,
-
-
-        avatar:
-          data.image ||
-          data.avatar ||
-          profile.value.avatar,
-
-      };
-
-    }
-
-
-    // =========================
-    // UPDATE SESSION USER
-    // =========================
-
-    const currentUser =
-      JSON.parse(
-        sessionStorage.getItem(
-          "user"
-        ) || "{}"
-      );
-
-
-    const updatedUser = {
-
-      ...currentUser,
-
-
-      name:
-        profile.value.fullName,
-
-
-      email:
-        profile.value.email,
-
-
+    profile.value = {
+      ...profile.value,
+      ...updatedProfile,
       avatar:
+        response?.avatar ||
+        response?.image ||
+        updatedProfile?.avatar ||
         profile.value.avatar,
-
     };
 
+    /*
+     * Update session user.
+     */
 
-    sessionStorage.setItem(
-      "user",
-      JSON.stringify(
-        updatedUser
-      )
-    );
+    const currentUser =
+      sessionStorage.getItem("user");
 
+    if (currentUser) {
+      const parsedUser =
+        JSON.parse(currentUser);
 
-    console.log(
-      "Updated session user:",
-      updatedUser
-    );
+      const updatedUser = {
+        ...parsedUser,
+        fullName:
+          updatedProfile.fullName ||
+          parsedUser.fullName,
 
+        email:
+          updatedProfile.email ||
+          parsedUser.email,
 
-    // =========================
-    // NOTIFY NAVBAR
-    // =========================
+        avatar:
+          profile.value.avatar ||
+          parsedUser.avatar,
+      };
+
+      sessionStorage.setItem(
+        "user",
+        JSON.stringify(updatedUser)
+      );
+
+      user.value = updatedUser;
+    }
+
+    /*
+     * Notify other components.
+     */
 
     window.dispatchEvent(
-      new Event(
-        "profile-updated"
-      )
+      new CustomEvent("profile-updated", {
+        detail: profile.value,
+      })
     );
-
-
-    alert(
-      "Profile updated successfully!"
-    );
-
   } catch (error) {
-
     console.error(
-      "Save admin profile error:",
+      "Save profile error:",
       error
     );
 
-
-    errorMessage.value =
-      error.message ||
-      "Failed to save profile";
-
-
     alert(
-      errorMessage.value
+      error?.message ||
+        "Failed to save profile."
     );
-
   } finally {
-
     saving.value = false;
-
   }
-
 };
 
+/* =========================================================
+   LOAD TELEGRAM STATUS
+========================================================= */
 
-// =========================
-// LOAD WHEN PAGE OPENS
-// =========================
+const loadTelegramStatus = async () => {
+  try {
+    telegramStatusLoading.value = true;
+
+    const response =
+      await getTelegramStatus();
+
+    console.log(
+      "Telegram status:",
+      response
+    );
+
+    telegramStatus.value = {
+      connected:
+        response?.connected || false,
+
+      chatId:
+        response?.chatId || null,
+
+      username:
+        response?.username || null,
+
+      connectedAt:
+        response?.connectedAt || null,
+    };
+
+    /*
+     * If already connected, clear old
+     * connection information.
+     */
+
+    if (telegramStatus.value.connected) {
+      telegramConnection.value = {
+        code: "",
+        botUsername: "",
+        telegramLink: "",
+        message: "",
+      };
+
+      stopTelegramPolling();
+    }
+  } catch (error) {
+    console.error(
+      "Get Telegram status error:",
+      error
+    );
+  } finally {
+    telegramStatusLoading.value = false;
+  }
+};
+
+/* =========================================================
+   CONNECT TELEGRAM
+========================================================= */
+
+const handleTelegramConnect =
+  async () => {
+    try {
+      telegramLoading.value = true;
+
+      const response =
+        await connectTelegram();
+
+      console.log(
+        "Telegram connection:",
+        response
+      );
+
+      telegramConnection.value = {
+        code:
+          response?.code || "",
+
+        botUsername:
+          response?.botUsername || "",
+
+        telegramLink:
+          response?.telegramLink || "",
+
+        message:
+          response?.message || "",
+      };
+
+      /*
+       * Check immediately.
+       */
+
+      await loadTelegramStatus();
+
+      /*
+       * Telegram connection happens asynchronously
+       * through the Telegram bot webhook.
+       *
+       * Therefore poll every 3 seconds.
+       */
+
+      startTelegramPolling();
+    } catch (error) {
+      console.error(
+        "Connect Telegram error:",
+        error
+      );
+
+      alert(
+        error?.message ||
+          "Failed to connect Telegram."
+      );
+    } finally {
+      telegramLoading.value = false;
+    }
+  };
+
+/* =========================================================
+   DISCONNECT TELEGRAM
+========================================================= */
+
+const handleTelegramDisconnect =
+  async () => {
+    const confirmed =
+      window.confirm(
+        "Are you sure you want to disconnect your Telegram account?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      telegramLoading.value = true;
+
+      await disconnectTelegram();
+
+      telegramStatus.value = {
+        connected: false,
+        chatId: null,
+        username: null,
+        connectedAt: null,
+      };
+
+      telegramConnection.value = {
+        code: "",
+        botUsername: "",
+        telegramLink: "",
+        message: "",
+      };
+
+      stopTelegramPolling();
+    } catch (error) {
+      console.error(
+        "Disconnect Telegram error:",
+        error
+      );
+
+      alert(
+        error?.message ||
+          "Failed to disconnect Telegram."
+      );
+    } finally {
+      telegramLoading.value = false;
+    }
+  };
+
+/* =========================================================
+   START TELEGRAM POLLING
+========================================================= */
+
+const startTelegramPolling = () => {
+  stopTelegramPolling();
+
+  telegramPolling =
+    setInterval(async () => {
+      /*
+       * Don't create another request while
+       * the previous request is loading.
+       */
+
+      if (
+        telegramStatusLoading.value
+      ) {
+        return;
+      }
+
+      await loadTelegramStatus();
+
+      /*
+       * loadTelegramStatus automatically
+       * stops polling when connected.
+       */
+    }, 3000);
+};
+
+/* =========================================================
+   STOP TELEGRAM POLLING
+========================================================= */
+
+const stopTelegramPolling = () => {
+  if (telegramPolling) {
+    clearInterval(telegramPolling);
+    telegramPolling = null;
+  }
+};
+
+/* =========================================================
+   MOUNT
+========================================================= */
+
 onMounted(() => {
-
   loadProfile();
+  loadTelegramStatus();
+});
 
+/* =========================================================
+   UNMOUNT
+========================================================= */
+
+onUnmounted(() => {
+  stopTelegramPolling();
 });
 </script>
 
 <template>
-
-  <!-- =========================
-       PROFILE PAGE
-  ========================== -->
-
   <div
-    class="min-h-screen
-           w-full
-           bg-[#f8faff]
-           px-8
-           py-6"
+    class="min-h-screen bg-slate-50 px-3 py-4 sm:px-6 sm:py-6 lg:px-8"
   >
-
-    <!-- =========================
+    <!-- =====================================================
          LOADING
-    ========================== -->
+    ====================================================== -->
 
     <div
       v-if="loading"
-      class="min-h-[400px]
-             flex items-center
-             justify-center"
+      class="flex min-h-[500px] items-center justify-center"
     >
-
-      <div class="text-center">
-
+      <div class="flex flex-col items-center gap-3">
         <div
-          class="w-10 h-10
-                 border-4
-                 border-gray-200
-                 border-t-black
-                 rounded-full
-                 animate-spin
-                 mx-auto"
+          class="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"
         ></div>
 
-        <p
-          class="text-gray-500
-                 mt-4"
-        >
+        <p class="text-sm text-slate-500">
           Loading profile...
         </p>
-
       </div>
-
     </div>
 
-
-    <!-- =========================
-         ADMIN FOUND
-    ========================== -->
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
 
     <div
-      v-else-if="user"
-      class="w-full"
+      v-else-if="errorMessage"
+      class="mx-auto max-w-4xl rounded-2xl border border-red-200 bg-red-50 p-6 text-center"
     >
+      <div
+        class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600"
+      >
+        !
+      </div>
 
+      <h2
+        class="text-lg font-semibold text-red-800"
+      >
+        Unable to load profile
+      </h2>
+
+      <p
+        class="mt-2 text-sm text-red-600"
+      >
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="mt-5 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-red-700"
+        @click="loadProfile"
+      >
+        Try Again
+      </button>
+    </div>
+
+    <!-- =====================================================
+         PROFILE
+    ====================================================== -->
+
+    <div
+      v-else
+      class="mx-auto w-full max-w-6xl"
+    >
       <ProfileCard
         :profile="profile"
         :saving="saving"
         role="ADMIN"
+        :telegram-status="telegramStatus"
+        :telegram-connection="
+          telegramConnection
+        "
+        :telegram-loading="
+          telegramLoading
+        "
+        :telegram-status-loading="
+          telegramStatusLoading
+        "
         @save="saveProfile"
+        @telegram-connect="
+          handleTelegramConnect
+        "
+        @telegram-disconnect="
+          handleTelegramDisconnect
+        "
       />
-
     </div>
-
-
-    <!-- =========================
-         ADMIN NOT FOUND
-    ========================== -->
-
-    <div
-      v-else
-      class="min-h-[400px]
-             flex items-center
-             justify-center"
-    >
-
-      <div
-        class="bg-white
-               rounded-2xl
-               shadow
-               p-8
-               text-center"
-      >
-
-        <i
-          class="bi bi-person-x
-                 text-4xl
-                 text-gray-400"
-        ></i>
-
-
-        <h2
-          class="text-xl
-                 font-semibold
-                 text-gray-700
-                 mt-4"
-        >
-          Admin information not found
-        </h2>
-
-
-        <p
-          class="text-gray-500
-                 mt-2"
-        >
-          Please login again.
-        </p>
-
-      </div>
-
-    </div>
-
   </div>
-
 </template>
-

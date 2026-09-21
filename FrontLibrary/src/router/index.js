@@ -42,6 +42,7 @@ import Register from "../pages/auth/Register.vue";
 import OTPForm from "../pages/auth/OTPForm.vue";
 import ForgotPassword from "../pages/auth/ForgotPassword.vue";
 import ResetPassword from "../pages/auth/ResetPassword.vue";
+import ChangePassword from "../pages/auth/ChangePassword.vue";
 
 
 // =====================================================
@@ -89,6 +90,11 @@ const routes = [
     path: '/reset-password',
     name: "ResetPassword",
     component: ResetPassword
+  },
+  {
+    path: "/admin/change-password",
+    name: "AdminChangePassword",
+    component: ChangePassword,
   },
 
   // ===================================================

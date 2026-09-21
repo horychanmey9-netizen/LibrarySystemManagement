@@ -109,3 +109,44 @@ export async function VerifyOTP(email, otp) {
 
   return data;
 }
+export async function ChangePassword(
+  currentPassword,
+  newPassword,
+  confirmPassword
+) {
+  const token = sessionStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/change-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...(token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {}),
+    },
+    body: JSON.stringify({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    }),
+  });
+
+  const data = await readResponse(response);
+
+  if (!response.ok) {
+    const message =
+      typeof data === "string"
+        ? data
+        : data?.message || "Failed to change password";
+
+    const error = new Error(message);
+    error.status = response.status;
+
+    throw error;
+  }
+
+  return data;
+}

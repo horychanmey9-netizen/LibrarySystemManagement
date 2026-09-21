@@ -42,7 +42,6 @@
 
       <!-- =====================================================
            NAVIGATION MENU
-           FAVORITE REMOVED
       ====================================================== -->
 
       <nav class="navbar-menu">
@@ -119,39 +118,180 @@
 
 
         <!-- =================================================
-             PROFILE BUTTON
+             USER DROPDOWN
         ================================================== -->
 
-        <button
-          type="button"
-          class="user-button"
-          @click="goToProfile"
+        <div
+          ref="userMenuRef"
+          class="user-menu"
         >
 
-          <div class="navbar-avatar">
+          <!-- USER BUTTON -->
 
-            <img
-              v-if="userAvatar"
-              :src="userAvatar"
-              :alt="userName"
-              class="avatar-image"
-              @error="handleAvatarError"
-            />
+          <button
+            type="button"
+            class="user-button"
+            :class="{ 'user-button-open': isUserMenuOpen }"
+            @click="toggleUserMenu"
+            aria-haspopup="true"
+            :aria-expanded="isUserMenuOpen"
+          >
 
-            <span v-else>
-              {{ userInitials }}
+            <div class="navbar-avatar">
+
+              <img
+                v-if="userAvatar"
+                :src="userAvatar"
+                :alt="userName"
+                class="avatar-image"
+                @error="handleAvatarError"
+              />
+
+              <span v-else>
+                {{ userInitials }}
+              </span>
+
+            </div>
+
+
+            <span class="navbar-user-name">
+              {{ userName }}
             </span>
 
-          </div>
+
+            <!-- CHEVRON -->
+
+            <i
+              class="bi bi-chevron-down user-chevron"
+              :class="{ rotated: isUserMenuOpen }"
+            ></i>
+
+          </button>
 
 
-          <span class="navbar-user-name">
+          <!-- =================================================
+               DROPDOWN
+          ================================================== -->
 
-            {{ userName }}
+          <Transition name="user-dropdown">
 
-          </span>
+            <div
+              v-if="isUserMenuOpen"
+              class="user-dropdown"
+            >
 
-        </button>
+              <!-- =================================================
+                   USER INFORMATION
+              ================================================== -->
+
+              <div class="dropdown-user-info">
+
+                <div class="dropdown-avatar">
+
+                  <img
+                    v-if="userAvatar"
+                    :src="userAvatar"
+                    :alt="userName"
+                    class="dropdown-avatar-image"
+                    @error="handleAvatarError"
+                  />
+
+                  <span v-else>
+                    {{ userInitials }}
+                  </span>
+
+                </div>
+
+
+                <div class="dropdown-user-details">
+
+                  <div class="dropdown-user-name">
+                    {{ userName }}
+                  </div>
+
+                  <div
+                    v-if="userEmail"
+                    class="dropdown-user-email"
+                  >
+                    {{ userEmail }}
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- DIVIDER -->
+
+              <div class="dropdown-divider"></div>
+
+
+              <!-- =================================================
+                   PROFILE
+              ================================================== -->
+
+              <button
+                type="button"
+                class="dropdown-item"
+                @click="goToProfile"
+              >
+
+                <i class="bi bi-person"></i>
+
+                <span>
+                  Profile
+                </span>
+
+              </button>
+
+
+              <!-- =================================================
+                   CHANGE PASSWORD
+              ================================================== -->
+
+              <button
+                type="button"
+                class="dropdown-item"
+                @click="goToChangePassword"
+              >
+
+                <i class="bi bi-lock"></i>
+
+                <span>
+                  Change Password
+                </span>
+
+              </button>
+
+
+              <!-- DIVIDER -->
+
+              <div class="dropdown-divider"></div>
+
+
+              <!-- =================================================
+                   LOGOUT
+              ================================================== -->
+
+              <button
+                type="button"
+                class="dropdown-item logout-item"
+                @click="logout"
+              >
+
+                <i class="bi bi-box-arrow-right"></i>
+
+                <span>
+                  Logout
+                </span>
+
+              </button>
+
+            </div>
+
+          </Transition>
+
+        </div>
 
       </div>
 
@@ -185,12 +325,29 @@ import {
 const router = useRouter();
 
 
+/* =====================================================
+   EVENTS
+===================================================== */
+
 const emit = defineEmits([
   "toggle-sidebar"
 ]);
 
 
+/* =====================================================
+   PROFILE IMAGE
+===================================================== */
+
 const profileImage = ref("");
+
+
+/* =====================================================
+   USER DROPDOWN
+===================================================== */
+
+const isUserMenuOpen = ref(false);
+
+const userMenuRef = ref(null);
 
 
 /* =====================================================
@@ -224,6 +381,13 @@ try {
 
 /* =====================================================
    USER NAME
+   This comes from the name used when the user
+   registered/logged in.
+   Example:
+   {
+      "name": "Sara",
+      "email": "norchanden@gmail.com"
+   }
 ===================================================== */
 
 const userName = computed(() => {
@@ -232,6 +396,22 @@ const userName = computed(() => {
     user?.name ||
     user?.fullName ||
     "User"
+  );
+
+});
+
+
+/* =====================================================
+   USER EMAIL
+   This also comes from the authenticated user.
+===================================================== */
+
+const userEmail = computed(() => {
+
+  return (
+    user?.email ||
+    user?.username ||
+    ""
   );
 
 });
@@ -260,9 +440,7 @@ const loadProfile = async () => {
 
 
     if (!data) {
-
       return;
-
     }
 
 
@@ -374,16 +552,56 @@ const userInitials = computed(() => {
   ================================================== */
 
   return (
-
     names[0].charAt(0) +
-
     names[
       names.length - 1
     ].charAt(0)
-
   ).toUpperCase();
 
 });
+
+
+/* =====================================================
+   TOGGLE USER MENU
+===================================================== */
+
+function toggleUserMenu() {
+
+  isUserMenuOpen.value =
+    !isUserMenuOpen.value;
+
+}
+
+
+/* =====================================================
+   CLOSE USER MENU
+===================================================== */
+
+function closeUserMenu() {
+
+  isUserMenuOpen.value = false;
+
+}
+
+
+/* =====================================================
+   CLICK OUTSIDE USER MENU
+===================================================== */
+
+function handleClickOutside(event) {
+
+  if (
+    userMenuRef.value &&
+    !userMenuRef.value.contains(
+      event.target
+    )
+  ) {
+
+    closeUserMenu();
+
+  }
+
+}
 
 
 /* =====================================================
@@ -392,8 +610,25 @@ const userInitials = computed(() => {
 
 function goToProfile() {
 
+  closeUserMenu();
+
   router.push(
     "/user/profile"
+  );
+
+}
+
+
+/* =====================================================
+   GO TO CHANGE PASSWORD
+===================================================== */
+
+function goToChangePassword() {
+
+  closeUserMenu();
+
+  router.push(
+    "/user/change-password"
   );
 
 }
@@ -408,6 +643,27 @@ function goToFavorite() {
   router.push(
     "/user/myfavorite"
   );
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+function logout() {
+
+  // Close user dropdown
+  closeUserMenu();
+
+  // Remove authentication token
+  sessionStorage.removeItem("token");
+
+  // Remove logged-in user information
+  sessionStorage.removeItem("user");
+
+  // Redirect to login page
+  router.push("/login");
 
 }
 
@@ -467,6 +723,12 @@ onMounted(() => {
     handleProfileUpdated
   );
 
+
+  document.addEventListener(
+    "click",
+    handleClickOutside
+  );
+
 });
 
 
@@ -481,12 +743,17 @@ onUnmounted(() => {
     handleProfileUpdated
   );
 
+
+  document.removeEventListener(
+    "click",
+    handleClickOutside
+  );
+
 });
 
 </script>
 
 
-```css
 <style scoped>
 
 /* =====================================================
@@ -498,6 +765,7 @@ onUnmounted(() => {
   width: 100%;
 
   height: 75px;
+
   min-height: 75px;
 
   background: #ffffff;
@@ -529,9 +797,11 @@ onUnmounted(() => {
   height: 100%;
 
   margin-left: auto;
+
   margin-right: auto;
 
   padding-left: 24px;
+
   padding-right: 24px;
 
   display: flex;
@@ -839,6 +1109,21 @@ onUnmounted(() => {
 
 
 /* =====================================================
+   USER MENU
+===================================================== */
+
+.user-menu {
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+}
+
+
+/* =====================================================
    USER BUTTON
 ===================================================== */
 
@@ -850,9 +1135,9 @@ onUnmounted(() => {
 
   align-items: center;
 
-  gap: 10px;
+  gap: 9px;
 
-  padding: 4px 8px 4px 5px;
+  padding: 4px 9px 4px 5px;
 
   border: none;
 
@@ -880,6 +1165,17 @@ onUnmounted(() => {
 
 
 /* =====================================================
+   USER BUTTON OPEN
+===================================================== */
+
+.user-button-open {
+
+  background: #f8f9fc;
+
+}
+
+
+/* =====================================================
    USER NAME
 ===================================================== */
 
@@ -898,6 +1194,29 @@ onUnmounted(() => {
   font-size: 15px;
 
   font-weight: 600;
+
+}
+
+
+/* =====================================================
+   USER CHEVRON
+===================================================== */
+
+.user-chevron {
+
+  font-size: 12px;
+
+  color: #667085;
+
+  transition:
+    transform 0.2s ease;
+
+}
+
+
+.user-chevron.rotated {
+
+  transform: rotate(180deg);
 
 }
 
@@ -951,6 +1270,300 @@ onUnmounted(() => {
   object-fit: cover;
 
   display: block;
+
+}
+
+
+/* =====================================================
+   USER DROPDOWN
+===================================================== */
+
+.user-dropdown {
+
+  position: absolute;
+
+  top: calc(100% + 10px);
+
+  right: 0;
+
+  width: 270px;
+
+  padding: 8px;
+
+  background: #ffffff;
+
+  border:
+    1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.12),
+    0 4px 10px rgba(15, 23, 42, 0.05);
+
+  z-index: 1000;
+
+}
+
+
+/* =====================================================
+   DROPDOWN USER INFO
+===================================================== */
+
+.dropdown-user-info {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 10px;
+
+}
+
+
+/* =====================================================
+   DROPDOWN AVATAR
+===================================================== */
+
+.dropdown-avatar {
+
+  width: 42px;
+
+  height: 42px;
+
+  min-width: 42px;
+
+  border-radius: 50%;
+
+  overflow: hidden;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #eeeaff;
+
+  color: #5b3df5;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  border:
+    1px solid #e6e1ff;
+
+}
+
+
+.dropdown-avatar-image {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+}
+
+
+/* =====================================================
+   DROPDOWN USER DETAILS
+===================================================== */
+
+.dropdown-user-details {
+
+  min-width: 0;
+
+  flex: 1;
+
+}
+
+
+.dropdown-user-name {
+
+  color: #172033;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
+
+
+.dropdown-user-email {
+
+  margin-top: 3px;
+
+  color: #8a92a3;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
+
+
+/* =====================================================
+   DROPDOWN DIVIDER
+===================================================== */
+
+.dropdown-divider {
+
+  height: 1px;
+
+  background: #e5e7eb;
+
+  margin:
+    6px 4px;
+
+}
+
+
+/* =====================================================
+   DROPDOWN ITEM
+===================================================== */
+
+.dropdown-item {
+
+  width: 100%;
+
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding:
+    0 12px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #344054;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  text-align: left;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+}
+
+
+.dropdown-item i {
+
+  width: 20px;
+
+  font-size: 17px;
+
+  color: #667085;
+
+  transition:
+    color 0.15s ease;
+
+}
+
+
+.dropdown-item:hover {
+
+  background: #f5f3ff;
+
+  color: #5b3df5;
+
+}
+
+
+.dropdown-item:hover i {
+
+  color: #5b3df5;
+
+}
+
+
+/* =====================================================
+   LOGOUT ITEM
+===================================================== */
+
+.logout-item {
+
+  color: #dc2626;
+
+}
+
+
+.logout-item i {
+
+  color: #dc2626;
+
+}
+
+
+.logout-item:hover {
+
+  background: #fff1f2;
+
+  color: #dc2626;
+
+}
+
+
+.logout-item:hover i {
+
+  color: #dc2626;
+
+}
+
+
+/* =====================================================
+   DROPDOWN ANIMATION
+===================================================== */
+
+.user-dropdown-enter-active,
+
+.user-dropdown-leave-active {
+
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+
+}
+
+
+.user-dropdown-enter-from,
+
+.user-dropdown-leave-to {
+
+  opacity: 0;
+
+  transform:
+    translateY(-6px);
 
 }
 
@@ -1161,6 +1774,15 @@ onUnmounted(() => {
   }
 
 
+  /* Hide chevron */
+
+  .user-chevron {
+
+    display: none;
+
+  }
+
+
   /* =================================================
      AVATAR MOBILE
   ================================================== */
@@ -1174,6 +1796,19 @@ onUnmounted(() => {
     min-width: 36px;
 
     font-size: 13px;
+
+  }
+
+
+  /* =================================================
+     DROPDOWN MOBILE
+  ================================================== */
+
+  .user-dropdown {
+
+    right: 0;
+
+    width: 260px;
 
   }
 
@@ -1246,9 +1881,27 @@ onUnmounted(() => {
 
   }
 
+
+  .user-dropdown {
+
+    width: 250px;
+
+  }
+
 }
 
 </style>
 ```
 
-នេះនឹងធ្វើឲ្យ **Font Navbar ធំជាង version មុន** ហើយនៅ Desktop នឹងមើលឃើញច្បាស់ជាងមុន៖ **Home / My Borrowings / My Fines = 15px** និង Username = **15px**។
+The **only functional change** is:
+
+```js
+function logout() {
+  closeUserMenu();
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("user");
+  router.push("/login");
+}
+```
+
+Everything else remains as in your original code.
