@@ -26,6 +26,8 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
     private final CategoryRepository categoryRepository;
 
+
+
     @Override
     public BookResponse create(BookRequest bookRequest, MultipartFile file) throws IOException {
         if (bookRepository.existsByIsbn(bookRequest.getIsbn())) {
@@ -89,7 +91,7 @@ public class BookServiceImpl implements BookService {
 
             book.setImage(imageUrl);
         }
-        Book updatedBook = bookRepository.save(book);   
+        Book updatedBook = bookRepository.save(book);
 
         return bookMapper.bookResponse(updatedBook);
     }

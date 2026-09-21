@@ -29,6 +29,7 @@ public class Book {
     private String isbn;
     private String language;
     private String image;
+    private String publishYear;
     @Enumerated(EnumType.STRING)
     private Status status;
     @Column(name = "created_at", updatable = false)

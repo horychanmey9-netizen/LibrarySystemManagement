@@ -1,4 +1,4 @@
-```vue
+
 <template>
 
   <!-- ================= OVERLAY ================= -->
@@ -280,7 +280,7 @@
                          font-bold
                          text-slate-800"
                 >
-                  {{ book.publicationYear || "-" }}
+                  {{ book.publishYear || "-" }}
                 </p>
 
               </div>
@@ -930,34 +930,3 @@ export default {
 };
 
 </script>
-```
-
-### ចំណុចដែលបានកែ
-
-Image ឥឡូវប្រើ៖
-
-```vue
-:src="imageUrl"
-```
-
-ហើយ `imageUrl()` នឹង handle៖
-
-```text
-https://example.com/book.jpg
-```
-
-ឬ
-
-```text
-/uploads/books/book.jpg
-```
-
-ដោយបម្លែង path ទីពីរទៅជា៖
-
-```text
-http://localhost:8080/uploads/books/book.jpg
-```
-
-ហើយ `object-cover` ធ្វើឱ្យ **រូបពេញប្រអប់** មិនសល់ space ដូចដែលអ្នកចង់បាន។
-
-**ចំណាំ:** បើ `BookCard.vue` របស់អ្នកមាន image URL ជាក់លាក់ផ្សេងពី `http://localhost:8080/...` សូមផ្ញើ `BookCard.vue` មក។ ខ្ញុំនឹងធ្វើ `BookDetail` ឱ្យប្រើ image logic ដូចគ្នា 100%។

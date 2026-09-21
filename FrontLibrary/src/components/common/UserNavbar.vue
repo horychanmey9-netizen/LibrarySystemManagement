@@ -1,4 +1,4 @@
-```vue
+
 <template>
 
   <header class="navbar">
@@ -761,26 +761,20 @@ onUnmounted(() => {
 ===================================================== */
 
 .navbar {
-
   width: 100%;
-
   height: 75px;
 
   min-height: 75px;
 
   background: #ffffff;
 
-  border-bottom:
-    1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
 
   box-sizing: border-box;
 
-  position: sticky;
+  position: relative;
 
-  top: 0;
-
-  z-index: 900;
-
+  z-index: 901;
 }
 
 

@@ -1,36 +1,26 @@
-
 <template>
-
   <div class="edit-book-page">
 
     <!-- =====================================================
          HEADER
     ====================================================== -->
-
     <div class="page-header">
 
       <div>
-
-        <h1>
-          Edit Book
-        </h1>
-
+        <h2>Edit Book</h2>
         <p>
-          Update book information
+          Update the information of this book.
         </p>
-
       </div>
-
 
       <button
         type="button"
         class="back-btn"
-        @click="goBack"
-        :disabled="saving"
+        :disabled="submitting"
+        @click="handleCancel"
       >
-
-        ← Back
-
+        <i class="bi bi-arrow-left"></i>
+        Back
       </button>
 
     </div>
@@ -39,93 +29,78 @@
     <!-- =====================================================
          ERROR MESSAGE
     ====================================================== -->
-
     <div
       v-if="errorMessage"
-      class="alert error-message"
+      class="alert-message error"
     >
-
-      <span class="alert-icon">
-        ⚠
-      </span>
+      <i class="bi bi-exclamation-circle-fill"></i>
 
       <span>
         {{ errorMessage }}
       </span>
-
     </div>
 
 
     <!-- =====================================================
          SUCCESS MESSAGE
     ====================================================== -->
-
     <div
       v-if="successMessage"
-      class="alert success-message"
+      class="alert-message success"
     >
-
-      <span class="alert-icon">
-        ✓
-      </span>
+      <i class="bi bi-check-circle-fill"></i>
 
       <span>
         {{ successMessage }}
       </span>
-
-    </div>
-
-
-    <!-- =====================================================
-         LOADING
-    ====================================================== -->
-
-    <div
-      v-if="loading"
-      class="loading-box"
-    >
-
-      <div class="spinner"></div>
-
-      <span>
-        Loading book information...
-      </span>
-
     </div>
 
 
     <!-- =====================================================
          FORM
     ====================================================== -->
-
-    <div
-      v-else
-      class="form-card"
+    <form
+      class="book-form"
+      @submit.prevent="updateBookData"
     >
 
-      <form
-        @submit.prevent="updateBook"
-      >
+      <!-- ===================================================
+           BOOK INFORMATION
+      ==================================================== -->
+      <section class="form-card">
+
+        <div class="section-header">
+
+          <div class="section-icon">
+            <i class="bi bi-book"></i>
+          </div>
+
+          <div>
+            <h3>Book Information</h3>
+
+            <p>
+              Update the basic information about the book.
+            </p>
+          </div>
+
+        </div>
 
 
-        <!-- =================================================
-             ROW 1
-        ================================================== -->
+        <div class="form-grid">
 
-        <div class="form-row">
+          <!-- ===============================================
+               TITLE
+          ================================================ -->
+          <div class="form-group full-width">
 
-
-          <!-- TITLE -->
-
-          <div class="form-group">
-
-            <label>
+            <label for="title">
               Book Title
-              <span class="required">*</span>
+              <span>*</span>
             </label>
 
             <input
-              v-model.trim="form.title"
+              id="title"
+              v-model="form.title"
               type="text"
               placeholder="Enter book title"
               required
@@ -134,17 +109,19 @@
           </div>
 
 
-          <!-- AUTHOR -->
-
+          <!-- ===============================================
+               AUTHOR
+          ================================================ -->
           <div class="form-group">
 
-            <label>
+            <label for="author">
               Author
-              <span class="required">*</span>
+              <span>*</span>
             </label>
 
             <input
-              v-model.trim="form.author"
+              id="author"
+              v-model="form.author"
               type="text"
               placeholder="Enter author name"
               required
@@ -152,579 +129,1237 @@
 
           </div>
 
-        </div>
 
-
-        <!-- =================================================
-             ROW 2
-        ================================================== -->
-
-        <div class="form-row">
-
-
-          <!-- CATEGORY -->
-
+          <!-- ===============================================
+               ISBN
+          ================================================ -->
           <div class="form-group">
 
-            <label>
+            <label for="isbn">
+              ISBN
+              <span>*</span>
+            </label>
+
+            <input
+              id="isbn"
+              v-model="form.isbn"
+              type="text"
+              placeholder="Enter ISBN"
+              required
+            />
+
+          </div>
+
+
+          <!-- ===============================================
+               CATEGORY
+          ================================================ -->
+          <div class="form-group">
+
+            <label for="category">
               Category
-              <span class="required">*</span>
+              <span>*</span>
             </label>
 
             <select
+              id="category"
               v-model="form.categoryId"
               required
             >
 
-              <option
-                value=""
-                disabled
-              >
-                Select Category
+              <option value="">
+                Select category
               </option>
-
 
               <option
                 v-for="category in categories"
                 :key="category.id"
-                :value="String(category.id)"
+                :value="category.id"
               >
-
                 {{ category.name }}
-
               </option>
 
             </select>
 
-
             <small
-              v-if="categoryLoading"
-              class="helper-text"
+              v-if="loadingCategories"
+              class="field-hint"
             >
-
               Loading categories...
-
             </small>
-
 
             <small
-              v-if="
-                !categoryLoading &&
-                categories.length === 0
-              "
-              class="helper-error"
+              v-else-if="categories.length === 0"
+              class="field-hint warning"
             >
-
               No categories found.
-
             </small>
 
           </div>
 
 
-          <!-- ISBN -->
-
+          <!-- ===============================================
+               LANGUAGE
+          ================================================ -->
           <div class="form-group">
 
-            <label>
-              ISBN
-            </label>
-
-            <input
-              v-model.trim="form.isbn"
-              type="text"
-              placeholder="Enter ISBN"
-            />
-
-          </div>
-
-        </div>
-
-
-        <!-- =================================================
-     ROW 3
-================================================== -->
-
-<div class="form-row">
-
-  <!-- QUANTITY -->
-
-  <div class="form-group">
-
-    <label>
-      Quantity
-      <span class="required">*</span>
-    </label>
-
-    <input
-      v-model.number="form.quantity"
-      type="number"
-      min="0"
-      placeholder="Enter quantity"
-      required
-    />
-
-    <small class="helper-text">
-      Current quantity:
-      {{ form.quantity }}
-    </small>
-
-  </div>
-
-
-  <!-- PUBLICATION DATE -->
-
-  <div class="form-group">
-
-    <label>
-      Publication Date
-    </label>
-
-    <input
-      v-model="form.publicationYear"
-      type="date"
-    />
-
-  </div>
-
-</div>
-
-
-        <!-- =================================================
-             ROW 4
-        ================================================== -->
-
-        <div class="form-row">
-
-
-          <!-- LANGUAGE -->
-
-          <div class="form-group">
-
-            <label>
+            <label for="language">
               Language
+              <span>*</span>
+            </label>
+
+            <select
+              id="language"
+              v-model="form.language"
+              required
+            >
+
+              <option value="">
+                Select language
+              </option>
+
+              <option value="Khmer">
+                Khmer
+              </option>
+
+              <option value="French">
+                French
+              </option>
+
+              <option value="English">
+                English
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ===============================================
+               QUANTITY
+          ================================================ -->
+          <div class="form-group">
+
+            <label for="quantity">
+              Quantity
+              <span>*</span>
             </label>
 
             <input
-              v-model.trim="form.language"
-              type="text"
-              placeholder="Enter language"
+              id="quantity"
+              v-model.number="form.quantity"
+              type="number"
+              min="1"
+              placeholder="Enter quantity"
+              required
             />
 
           </div>
 
 
-          <!-- PAGES -->
-
+          <!-- ===============================================
+               PAGES
+          ================================================ -->
           <div class="form-group">
 
-            <label>
+            <label for="pages">
               Pages
             </label>
 
             <input
+              id="pages"
               v-model.number="form.pages"
               type="number"
-              min="0"
+              min="1"
               placeholder="Enter number of pages"
             />
 
           </div>
 
-        </div>
 
+          <!-- ===============================================
+               PUBLICATION DATE
+          ================================================ -->
+          <div class="form-group">
 
-        <!-- =================================================
-             BOOK IMAGE
-        ================================================== -->
+            <label for="publishYear">
+              Publication Date
+              <span>*</span>
+            </label>
 
-        <div class="form-group full">
-
-          <label>
-            Book Image
-          </label>
-
-
-          <!-- OLD IMAGE -->
-
-          <div
-            v-if="currentImage"
-            class="current-image-section"
-          >
-
-            <span class="image-label">
-              Current Image
-            </span>
-
-            <div class="image-preview-wrapper">
-
-              <img
-                :src="currentImage"
-                alt="Current book image"
-                class="current-image"
-                @error="handleImageError"
-              />
-
-            </div>
-
-          </div>
-
-
-          <!-- FILE INPUT -->
-
-          <input
-            type="file"
-            accept="image/*"
-            @change="handleImageChange"
-          />
-
-
-          <small class="helper-text">
-
-            Leave empty to keep the current image.
-
-          </small>
-
-
-          <!-- NEW IMAGE -->
-
-          <div
-            v-if="newImage"
-            class="new-image-info"
-          >
-
-            <span>
-              New image selected:
-            </span>
-
-            <strong>
-              {{ newImage.name }}
-            </strong>
-
-          </div>
-
-
-          <!-- NEW IMAGE PREVIEW -->
-
-          <div
-            v-if="newImagePreview"
-            class="new-image-preview-wrapper"
-          >
-
-            <span class="image-label">
-              New Image Preview
-            </span>
-
-            <img
-              :src="newImagePreview"
-              alt="New book image"
-              class="new-image-preview"
+            <input
+              id="publishYear"
+              v-model="form.publishYear"
+              type="date"
+              :min="minPublicationDate"
+              :max="maxPublicationDate"
+              required
             />
 
+            <small class="field-hint">
+              Example: 2026-09-21
+            </small>
+
+          </div>
+
+
+          <!-- ===============================================
+               STATUS
+          ================================================ -->
+          <div class="form-group">
+
+            <label for="status">
+              Status
+            </label>
+
+            <select
+              id="status"
+              v-model="form.status"
+              disabled
+            >
+
+              <option value="Available">
+                Available
+              </option>
+
+              <option value="Borrowed">
+                Borrowed
+              </option>
+
+              <option value="Unavailable">
+                Unavailable
+              </option>
+
+              <option value="Overdue">
+                Overdue
+              </option>
+
+            </select>
+
+            <small class="field-hint">
+              Book status is managed by the borrowing system.
+            </small>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           DESCRIPTION
+      ==================================================== -->
+      <section class="form-card">
+
+        <div class="section-header">
+
+          <div class="section-icon">
+            <i class="bi bi-card-text"></i>
+          </div>
+
+          <div>
+            <h3>Description</h3>
+
+            <p>
+              Update the description of this book.
+            </p>
           </div>
 
         </div>
 
 
-        <!-- =================================================
-             DESCRIPTION
-        ================================================== -->
+        <div class="form-group">
 
-        <div class="form-group full">
-
-          <label>
+          <label for="description">
             Description
           </label>
 
           <textarea
-            v-model.trim="form.description"
+            id="description"
+            v-model="form.description"
             rows="6"
-            placeholder="Enter book description"
+            placeholder="Enter book description..."
           ></textarea>
 
         </div>
 
+      </section>
 
-        <!-- =================================================
-             BOOK INFO
-        ================================================== -->
 
-        <div
-          v-if="form.id"
-          class="book-info"
+      <!-- ===================================================
+           BOOK IMAGE
+      ==================================================== -->
+      <section class="form-card">
+
+        <div class="section-header">
+
+          <div class="section-icon">
+            <i class="bi bi-image"></i>
+          </div>
+
+          <div>
+            <h3>Book Cover</h3>
+
+            <p>
+              Update the book cover if needed.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="image-upload-area">
+
+          <!-- ===============================================
+               IMAGE PREVIEW
+          ================================================ -->
+          <div
+            v-if="imagePreview"
+            class="image-preview"
+          >
+
+            <img
+              :src="imagePreview"
+              alt="Book cover preview"
+            />
+
+            <button
+              type="button"
+              class="remove-image-btn"
+              @click="removeImage"
+            >
+              <i class="bi bi-x-lg"></i>
+            </button>
+
+          </div>
+
+
+          <!-- ===============================================
+               UPLOAD BOX
+          ================================================ -->
+          <label
+            v-else
+            for="bookImage"
+            class="upload-box"
+          >
+
+            <div class="upload-icon">
+              <i class="bi bi-cloud-arrow-up"></i>
+            </div>
+
+            <h4>
+              Upload New Book Cover
+            </h4>
+
+            <p>
+              Click to choose an image
+            </p>
+
+            <span>
+              PNG, JPG or JPEG
+            </span>
+
+          </label>
+
+
+          <input
+            id="bookImage"
+            ref="fileInput"
+            type="file"
+            accept="image/png,image/jpeg,image/jpg"
+            hidden
+            @change="handleImageChange"
+          />
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           FORM ACTIONS
+      ==================================================== -->
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="cancel-btn"
+          :disabled="submitting"
+          @click="handleCancel"
+        >
+          Cancel
+        </button>
+
+
+        <button
+          type="submit"
+          class="submit-btn"
+          :disabled="submitting"
         >
 
-          <div class="info-item">
+          <i
+            v-if="submitting"
+            class="bi bi-arrow-repeat spin"
+          ></i>
 
-            <span class="info-label">
-              Book ID
-            </span>
+          <i
+            v-else
+            class="bi bi-check-lg"
+          ></i>
 
-            <strong>
-              #{{ form.id }}
-            </strong>
+          {{
+            submitting
+              ? "Updating Book..."
+              : "Update Book"
+          }}
 
-          </div>
+        </button>
 
+      </div>
 
-          <div class="info-item">
-
-            <span class="info-label">
-              Category ID
-            </span>
-
-            <strong>
-              {{ form.categoryId || "-" }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item">
-
-            <span class="info-label">
-              Quantity
-            </span>
-
-            <strong>
-              {{ form.quantity }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item">
-
-            <span class="info-label">
-              Language
-            </span>
-
-            <strong>
-              {{ form.language || "-" }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item">
-
-            <span class="info-label">
-              Pages
-            </span>
-
-            <strong>
-              {{ form.pages ?? "-" }}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <!-- =================================================
-             ACTIONS
-        ================================================== -->
-
-        <div class="form-actions">
-
-          <button
-            type="button"
-            class="cancel-btn"
-            @click="goBack"
-            :disabled="saving"
-          >
-
-            Cancel
-
-          </button>
-
-
-          <button
-            type="submit"
-            class="save-btn"
-            :disabled="
-              saving ||
-              categoryLoading
-            "
-          >
-
-            <span
-              v-if="saving"
-              class="button-content"
-            >
-
-              <span class="button-spinner"></span>
-
-              Updating...
-
-            </span>
-
-
-            <span
-              v-else
-              class="button-content"
-            >
-
-              ✓
-
-              Save Changes
-
-            </span>
-
-          </button>
-
-        </div>
-
-      </form>
-
-    </div>
+    </form>
 
   </div>
-
 </template>
 
 
 <script setup>
-
 import {
-  ref,
-  watch,
+  computed,
+  onBeforeUnmount,
   onMounted,
-  onBeforeUnmount
+  ref,
+  watch
 } from "vue";
 
-
-import {
-  updateBook as updateBookApi
-} from "../../service/bookService.js";
+import { updateBook } from "../../service/bookService";
+import { getCategories } from "../../service/categoryService";
 
 
-import {
-  getCategories
-} from "../../service/categoryService.js";
-
-
-// =====================================================
-// PROPS
-// =====================================================
+/* =========================================================
+   PROPS
+========================================================= */
 
 const props = defineProps({
 
   book: {
-
     type: Object,
-
     default: null
-
   }
 
 });
 
 
-// =====================================================
-// EVENTS
-// =====================================================
+/* =========================================================
+   EMITS
+========================================================= */
 
 const emit = defineEmits([
-
-  "close",
-
-  "updated"
-
+  "updated",
+  "cancel"
 ]);
 
 
-// =====================================================
-// DATA
-// =====================================================
+/* =========================================================
+   FORM
+========================================================= */
 
-const categories =
-  ref([]);
+const form = ref({
 
+  id: null,
 
-const loading =
-  ref(false);
+  title: "",
 
+  description: "",
 
-const categoryLoading =
-  ref(false);
+  author: "",
 
+  categoryId: "",
 
-const saving =
-  ref(false);
+  isbn: "",
 
+  quantity: 0,
 
-const errorMessage =
-  ref("");
+  status: "Available",
 
+  language: "",
 
-const successMessage =
-  ref("");
+  pages: null,
 
+  /*
+   * IMPORTANT
+   *
+   * Backend:
+   * private String publishYear;
+   *
+   * Example:
+   * "2026-09-21"
+   */
+  publishYear: ""
 
-// =====================================================
-// ORIGINAL BOOK
-// =====================================================
-
-const originalBook =
-  ref(null);
-
-
-// =====================================================
-// NEW IMAGE
-// =====================================================
-
-const newImage =
-  ref(null);
+});
 
 
-const newImagePreview =
-  ref("");
+/* =========================================================
+   STATE
+========================================================= */
+
+const categories = ref([]);
+
+const loadingCategories = ref(false);
+
+const submitting = ref(false);
+
+const errorMessage = ref("");
+
+const successMessage = ref("");
+
+const selectedImage = ref(null);
+
+const imagePreview = ref("");
+
+const fileInput = ref(null);
 
 
-// =====================================================
-// CURRENT IMAGE
-// =====================================================
+/* =========================================================
+   DATE
+========================================================= */
 
-const currentImage =
-  ref("");
+const today = new Date();
+
+const currentDate = computed(() => {
+
+  const year =
+    today.getFullYear();
+
+  const month =
+    String(
+      today.getMonth() + 1
+    ).padStart(2, "0");
+
+  const day =
+    String(
+      today.getDate()
+    ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+
+});
 
 
-// =====================================================
-// FORM
-// =====================================================
+const minPublicationDate =
+  "1900-01-01";
 
-const form =
-  ref({
 
-    id: null,
+const maxPublicationDate =
+  computed(() => {
 
-    title: "",
-
-    description: "",
-
-    author: "",
-
-    categoryId: "",
-
-    isbn: "",
-
-    quantity: 0,
-
-    status: "Available",
-
-    language: "",
-
-    pages: null,
-
-    publicationYear: ""
+    return currentDate.value;
 
   });
 
 
-// =====================================================
-// RESET FORM
-// =====================================================
+/* =========================================================
+   FETCH CATEGORIES
+========================================================= */
+
+async function fetchCategories() {
+
+  loadingCategories.value = true;
+
+  try {
+
+    const response =
+      await getCategories();
+
+    let categoryData = [];
+
+
+    if (Array.isArray(response)) {
+
+      categoryData = response;
+
+    } else if (
+      Array.isArray(response?.data)
+    ) {
+
+      categoryData =
+        response.data;
+
+    } else if (
+      Array.isArray(
+        response?.data?.data
+      )
+    ) {
+
+      categoryData =
+        response.data.data;
+
+    } else if (
+      Array.isArray(
+        response?.result
+      )
+    ) {
+
+      categoryData =
+        response.result;
+
+    }
+
+
+    categories.value =
+      categoryData;
+
+
+  } catch (error) {
+
+    console.error(
+      "Failed to fetch categories:",
+      error
+    );
+
+    categories.value = [];
+
+    errorMessage.value =
+      "Failed to load categories. Please try again.";
+
+  } finally {
+
+    loadingCategories.value = false;
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD BOOK
+========================================================= */
+
+function loadBook(book) {
+
+  if (!book) {
+    return;
+  }
+
+
+  /*
+   * IMPORTANT:
+   *
+   * Backend returns:
+   *
+   * publishYear: "2026-09-21"
+   *
+   * Keep the complete String.
+   *
+   * DO NOT:
+   * substring(0, 10)
+   *
+   * DO NOT:
+   * substring(0, 4)
+   */
+
+  form.value = {
+
+    id:
+      book.id ?? null,
+
+    title:
+      book.title ?? "",
+
+    description:
+      book.description ?? "",
+
+    author:
+      book.author ?? "",
+
+    categoryId:
+      book.category?.id ??
+      book.categoryId ??
+      "",
+
+    isbn:
+      book.isbn ?? "",
+
+    quantity:
+      book.qty ??
+      book.quantity ??
+      0,
+
+    status:
+      book.status ??
+      "Available",
+
+    language:
+      book.language ?? "",
+
+    pages:
+      book.pages ??
+      null,
+
+    publishYear:
+      book.publishYear
+        ? String(book.publishYear)
+        : ""
+
+  };
+
+
+  /*
+   * Existing image
+   */
+
+  if (book.image) {
+
+    imagePreview.value =
+      getImageUrl(book.image);
+
+  } else {
+
+    imagePreview.value = "";
+
+  }
+
+}
+
+
+/* =========================================================
+   GET IMAGE URL
+========================================================= */
+
+function getImageUrl(image) {
+
+  if (!image) {
+    return "";
+  }
+
+
+  /*
+   * Already a complete URL
+   */
+
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://") ||
+    image.startsWith("blob:")
+  ) {
+
+    return image;
+
+  }
+
+
+  /*
+   * Backend upload path
+   */
+
+  if (image.startsWith("/")) {
+
+    return `http://localhost:8080${image}`;
+
+  }
+
+
+  return `http://localhost:8080/${image}`;
+
+}
+
+
+/* =========================================================
+   IMAGE CHANGE
+========================================================= */
+
+function handleImageChange(event) {
+
+  const file =
+    event.target.files?.[0];
+
+
+  if (!file) {
+    return;
+  }
+
+
+  errorMessage.value = "";
+
+
+  /* -----------------------------------------------
+     File type
+  ------------------------------------------------ */
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png"
+  ];
+
+
+  if (
+    !allowedTypes.includes(
+      file.type
+    )
+  ) {
+
+    errorMessage.value =
+      "Please select a PNG, JPG, or JPEG image.";
+
+    event.target.value = "";
+
+    return;
+  }
+
+
+  /* -----------------------------------------------
+     File size
+  ------------------------------------------------ */
+
+  const maxSize =
+    5 * 1024 * 1024;
+
+
+  if (file.size > maxSize) {
+
+    errorMessage.value =
+      "Image size must be less than 5MB.";
+
+    event.target.value = "";
+
+    return;
+  }
+
+
+  /*
+   * Remove previous preview URL
+   */
+
+  if (
+    imagePreview.value &&
+    imagePreview.value.startsWith("blob:")
+  ) {
+
+    URL.revokeObjectURL(
+      imagePreview.value
+    );
+
+  }
+
+
+  selectedImage.value =
+    file;
+
+
+  imagePreview.value =
+    URL.createObjectURL(file);
+
+}
+
+
+/* =========================================================
+   REMOVE IMAGE
+========================================================= */
+
+function removeImage() {
+
+  if (
+    imagePreview.value &&
+    imagePreview.value.startsWith("blob:")
+  ) {
+
+    URL.revokeObjectURL(
+      imagePreview.value
+    );
+
+  }
+
+
+  selectedImage.value =
+    null;
+
+
+  imagePreview.value =
+    "";
+
+
+  if (fileInput.value) {
+
+    fileInput.value.value =
+      "";
+
+  }
+
+}
+
+
+/* =========================================================
+   VALIDATE FORM
+========================================================= */
+
+function validateForm() {
+
+  errorMessage.value = "";
+
+
+  /* -----------------------------------------------
+     Title
+  ------------------------------------------------ */
+
+  if (
+    !form.value.title.trim()
+  ) {
+
+    errorMessage.value =
+      "Please enter the book title.";
+
+    return false;
+
+  }
+
+
+  /* -----------------------------------------------
+     Author
+  ------------------------------------------------ */
+
+  if (
+    !form.value.author.trim()
+  ) {
+
+    errorMessage.value =
+      "Please enter the author name.";
+
+    return false;
+
+  }
+
+
+  /* -----------------------------------------------
+     ISBN
+  ------------------------------------------------ */
+
+  if (
+    !form.value.isbn.trim()
+  ) {
+
+    errorMessage.value =
+      "Please enter the ISBN.";
+
+    return false;
+
+  }
+
+
+  /* -----------------------------------------------
+     Category
+  ------------------------------------------------ */
+
+  if (
+    form.value.categoryId === "" ||
+    form.value.categoryId === null ||
+    form.value.categoryId === undefined
+  ) {
+
+    errorMessage.value =
+      "Please select a category.";
+
+    return false;
+
+  }
+
+
+  /* -----------------------------------------------
+     Language
+  ------------------------------------------------ */
+
+  if (!form.value.language) {
+
+    errorMessage.value =
+      "Please select a language.";
+
+    return false;
+
+  }
+
+
+  /* -----------------------------------------------
+     Quantity
+  ------------------------------------------------ */
+
+  if (
+    form.value.quantity === null ||
+    form.value.quantity === undefined ||
+    Number(form.value.quantity) < 1
+  ) {
+
+    errorMessage.value =
+      "Quantity must be at least 1.";
+
+    return false;
+
+  }
+
+
+  /* -----------------------------------------------
+     Pages
+  ------------------------------------------------ */
+
+  if (
+    form.value.pages !== null &&
+    form.value.pages !== "" &&
+    Number(form.value.pages) < 1
+  ) {
+
+    errorMessage.value =
+      "Pages must be greater than 0.";
+
+    return false;
+
+  }
+
+
+  /* -----------------------------------------------
+     Publication Date
+     
+     Backend:
+     String publishYear
+     
+     Example:
+     2026-09-21
+  ------------------------------------------------ */
+
+  if (!form.value.publishYear) {
+
+    errorMessage.value =
+      "Please select the publication date.";
+
+    return false;
+
+  }
+
+
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(
+      form.value.publishYear
+    )
+  ) {
+
+    errorMessage.value =
+      "Please select a valid publication date.";
+
+    return false;
+
+  }
+
+
+  /* -----------------------------------------------
+     Future date
+  ------------------------------------------------ */
+
+  if (
+    form.value.publishYear >
+    maxPublicationDate.value
+  ) {
+
+    errorMessage.value =
+      "Publication date cannot be in the future.";
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+/* =========================================================
+   UPDATE BOOK
+========================================================= */
+
+async function updateBookData() {
+
+  successMessage.value = "";
+
+  errorMessage.value = "";
+
+
+  /* -----------------------------------------------
+     Validate
+  ------------------------------------------------ */
+
+  if (!validateForm()) {
+    return;
+  }
+
+
+  if (!form.value.id) {
+
+    errorMessage.value =
+      "Book ID is missing.";
+
+    return;
+
+  }
+
+
+  submitting.value = true;
+
+
+  try {
+
+    /*
+     * IMPORTANT:
+     *
+     * publishYear remains String.
+     *
+     * Example:
+     * "2026-09-21"
+     */
+
+    const bookRequest = {
+
+      categoryId:
+        Number(
+          form.value.categoryId
+        ),
+
+      title:
+        form.value.title.trim(),
+
+      qty:
+        Number(
+          form.value.quantity
+        ),
+
+      description:
+        form.value.description.trim(),
+
+      author:
+        form.value.author.trim(),
+
+      pages:
+        form.value.pages !== null &&
+        form.value.pages !== ""
+          ? Number(form.value.pages)
+          : null,
+
+      isbn:
+        form.value.isbn.trim(),
+
+      language:
+        form.value.language,
+
+      status:
+        form.value.status,
+
+      publishYear:
+        form.value.publishYear !== null &&
+        form.value.publishYear !== undefined &&
+        form.value.publishYear !== ""
+          ? String(
+              form.value.publishYear
+            )
+          : null
+
+    };
+
+
+    console.log(
+      "UPDATE BOOK REQUEST:",
+      bookRequest
+    );
+
+
+    console.log(
+      "PUBLISH YEAR:",
+      bookRequest.publishYear,
+      typeof bookRequest.publishYear
+    );
+
+
+    /* ---------------------------------------------
+       UPDATE
+    ---------------------------------------------- */
+
+    const response =
+      await updateBook(
+        form.value.id,
+        bookRequest,
+        selectedImage.value
+      );
+
+
+    console.log(
+      "UPDATE BOOK RESPONSE:",
+      response
+    );
+
+
+    /* ---------------------------------------------
+       Success
+    ---------------------------------------------- */
+
+    successMessage.value =
+      "Book updated successfully.";
+
+
+    /* ---------------------------------------------
+       Updated book
+    ---------------------------------------------- */
+
+    const updatedBook = {
+
+      ...form.value,
+
+      qty:
+        form.value.quantity,
+
+      publishYear:
+        bookRequest.publishYear,
+
+      image:
+        selectedImage.value
+          ? imagePreview.value
+          : props.book?.image ?? ""
+
+    };
+
+
+    /* ---------------------------------------------
+       Emit updated
+    ---------------------------------------------- */
+
+    emit(
+      "updated",
+      updatedBook
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Failed to update book:",
+      error
+    );
+
+
+    errorMessage.value =
+      error?.message ||
+      "Failed to update book. Please try again.";
+
+
+  } finally {
+
+    submitting.value = false;
+
+  }
+
+}
+
+
+/* =========================================================
+   RESET FORM
+========================================================= */
 
 function resetForm() {
 
@@ -750,585 +1385,26 @@ function resetForm() {
 
     pages: null,
 
-    publicationYear: ""
+    publishYear: ""
 
   };
 
 
-  originalBook.value =
+  selectedImage.value =
     null;
 
 
-  newImage.value =
-    null;
-
-
-  clearNewImagePreview();
-
-
-  currentImage.value =
-    "";
-
-}
-
-
-// =====================================================
-// CLEAN PREVIEW
-// =====================================================
-
-function clearNewImagePreview() {
-
-  if (
-    newImagePreview.value
-  ) {
-
-    URL.revokeObjectURL(
-      newImagePreview.value
-    );
-
-  }
-
-
-  newImagePreview.value =
-    "";
-
-}
-
-
-// =====================================================
-// GET CATEGORY ID
-// =====================================================
-
-function getBookCategoryId(book) {
-
-  if (!book) {
-
-    return "";
-
-  }
-
-
-  // ===================================================
-  // FIRST: categoryId
-  // ===================================================
-
-  if (
-    book.categoryId !== undefined &&
-    book.categoryId !== null &&
-    book.categoryId !== ""
-  ) {
-
-    return String(
-      book.categoryId
-    );
-
-  }
-
-
-  // ===================================================
-  // SECOND: category.id
-  // ===================================================
-
-  if (
-    book.category &&
-    typeof book.category === "object" &&
-    book.category.id !== undefined &&
-    book.category.id !== null
-  ) {
-
-    return String(
-      book.category.id
-    );
-
-  }
-
-
-  // ===================================================
-  // THIRD: category name
-  // ===================================================
-
-  if (
-    typeof book.category === "string" &&
-    categories.value.length > 0
-  ) {
-
-    const category =
-      categories.value.find(
-        item =>
-          String(item.name)
-            .trim()
-            .toLowerCase() ===
-          String(book.category)
-            .trim()
-            .toLowerCase()
-      );
-
-
-    if (category) {
-
-      return String(
-        category.id
-      );
-
-    }
-
-  }
-
-
-  return "";
-
-}
-
-
-// =====================================================
-// LOAD BOOK
-// =====================================================
-
-function loadBook(book) {
-
-  if (!book) {
-
-    resetForm();
-
-    return;
-
-  }
-
-
-  console.log(
-    "================================"
-  );
-
-  console.log(
-    "EDIT BOOK DATA:",
-    book
-  );
-
-  console.log(
-    "================================"
-  );
-
-
-  // ===================================================
-  // KEEP ORIGINAL BOOK
-  // ===================================================
-
-  originalBook.value = {
-
-    ...book
-
-  };
-
-
-  // ===================================================
-  // CATEGORY
-  // ===================================================
-
-  const categoryId =
-    getBookCategoryId(
-      book
-    );
-
-
-  console.log(
-    "OLD CATEGORY ID:",
-    categoryId
-  );
-
-
-  // ===================================================
-  // QUANTITY
-  // ===================================================
-
-  let quantity = 0;
-
-
-  if (
-    book.qty !== undefined &&
-    book.qty !== null
-  ) {
-
-    quantity =
-      Number(
-        book.qty
-      );
-
-  }
-
-  else if (
-    book.quantity !== undefined &&
-    book.quantity !== null
-  ) {
-
-    quantity =
-      Number(
-        book.quantity
-      );
-
-  }
-
-
-  if (
-    Number.isNaN(quantity)
-  ) {
-
-    quantity = 0;
-
-  }
-
-
-  // ===================================================
-  // IMAGE
-  // ===================================================
-
-  const image =
-    book.image ||
-    book.imageUrl ||
+  imagePreview.value =
     "";
 
 
-  // ===================================================
-  // SET FORM
-  // ===================================================
+  if (fileInput.value) {
 
-  form.value = {
-
-    id:
-      book.id ??
-      null,
-
-    title:
-      book.title ??
-      "",
-
-    description:
-      book.description ??
-      "",
-
-    author:
-      book.author ??
-      "",
-
-    categoryId:
-      categoryId,
-
-    isbn:
-      book.isbn ??
-      "",
-
-    quantity:
-      quantity,
-
-    status:
-      book.status ??
-      "Available",
-
-    language:
-      book.language ??
-      "",
-
-    pages:
-      book.pages ??
-      null,
-
-    publicationYear:
-    book.publicationYear
-    ? String(book.publicationYear).substring(0, 10)
-    : ""
-
-  };
-
-
-  // ===================================================
-  // CURRENT IMAGE
-  // ===================================================
-
-  currentImage.value =
-    image;
-
-
-  // ===================================================
-  // RESET NEW IMAGE
-  // ===================================================
-
-  newImage.value =
-    null;
-
-  clearNewImagePreview();
-
-
-  // ===================================================
-  // DEBUG
-  // ===================================================
-
-  console.log(
-    "FORM CATEGORY ID:",
-    form.value.categoryId
-  );
-
-  console.log(
-    "CATEGORIES:",
-    categories.value
-  );
-
-  console.log(
-    "FORM:",
-    form.value
-  );
-
-}
-
-
-// =====================================================
-// IMAGE CHANGE
-// =====================================================
-
-function handleImageChange(event) {
-
-  const file =
-    event.target.files?.[0];
-
-
-  if (!file) {
-
-    newImage.value =
-      null;
-
-    clearNewImagePreview();
-
-    return;
-
-  }
-
-
-  // ===================================================
-  // VALIDATE TYPE
-  // ===================================================
-
-  if (
-    !file.type.startsWith(
-      "image/"
-    )
-  ) {
-
-    errorMessage.value =
-      "Please select a valid image file.";
-
-    event.target.value =
+    fileInput.value.value =
       "";
 
-    newImage.value =
-      null;
-
-    clearNewImagePreview();
-
-    return;
-
   }
 
-
-  // ===================================================
-  // VALIDATE SIZE
-  // ===================================================
-
-  const maxSize =
-    5 * 1024 * 1024;
-
-
-  if (
-    file.size > maxSize
-  ) {
-
-    errorMessage.value =
-      "Image size must be less than 5MB.";
-
-    event.target.value =
-      "";
-
-    newImage.value =
-      null;
-
-    clearNewImagePreview();
-
-    return;
-
-  }
-
-
-  // ===================================================
-  // SET NEW IMAGE
-  // ===================================================
-
-  errorMessage.value =
-    "";
-
-  newImage.value =
-    file;
-
-
-  clearNewImagePreview();
-
-
-  newImagePreview.value =
-    URL.createObjectURL(
-      file
-    );
-
-
-  console.log(
-    "NEW IMAGE:",
-    file
-  );
-
-}
-
-
-// =====================================================
-// IMAGE ERROR
-// =====================================================
-
-function handleImageError() {
-
-  console.warn(
-    "Failed to load current book image:",
-    currentImage.value
-  );
-
-}
-
-
-// =====================================================
-// FETCH CATEGORIES
-// =====================================================
-
-async function fetchCategories() {
-
-  categoryLoading.value =
-    true;
-
-
-  try {
-
-    const response =
-      await getCategories();
-
-
-    console.log(
-      "CATEGORY RESPONSE:",
-      response
-    );
-
-
-    let data = [];
-
-
-    // =================================================
-    // RESPONSE ARRAY
-    // =================================================
-
-    if (
-      Array.isArray(response)
-    ) {
-
-      data =
-        response;
-
-    }
-
-
-    // =================================================
-    // RESPONSE { data: [] }
-    // =================================================
-
-    else if (
-      Array.isArray(
-        response?.data
-      )
-    ) {
-
-      data =
-        response.data;
-
-    }
-
-
-    // =================================================
-    // RESPONSE { data: { data: [] } }
-    // =================================================
-
-    else if (
-      Array.isArray(
-        response?.data?.data
-      )
-    ) {
-
-      data =
-        response.data.data;
-
-    }
-
-
-    // =================================================
-    // NORMALIZE CATEGORY
-    // =================================================
-
-    categories.value =
-      data
-        .filter(
-          category =>
-            category &&
-            category.id !== undefined &&
-            category.id !== null
-        )
-        .map(
-          category => ({
-
-            ...category,
-
-            id:
-              String(
-                category.id
-              )
-
-          })
-        );
-
-
-    console.log(
-      "NORMALIZED CATEGORIES:",
-      categories.value
-    );
-
-
-  }
-  catch (error) {
-
-    console.error(
-      "Failed to load categories:",
-      error
-    );
-
-
-    errorMessage.value =
-      error?.message ||
-      "Failed to load categories.";
-
-  }
-  finally {
-
-    categoryLoading.value =
-      false;
-
-  }
-
-}
-
-
-// =====================================================
-// UPDATE BOOK
-// =====================================================
-
-async function updateBook() {
 
   errorMessage.value =
     "";
@@ -1336,1526 +1412,825 @@ async function updateBook() {
   successMessage.value =
     "";
 
+}
 
-  // ===================================================
-  // VALIDATION
-  // ===================================================
 
-  if (!form.value.id) {
+/* =========================================================
+   CANCEL
+========================================================= */
 
-    errorMessage.value =
-      "Book ID is missing.";
+function handleCancel() {
 
+  if (submitting.value) {
     return;
-
   }
 
-
-  if (
-    !form.value.title ||
-    !form.value.title.trim()
-  ) {
-
-    errorMessage.value =
-      "Book title is required.";
-
-    return;
-
-  }
-
-
-  if (
-    !form.value.author ||
-    !form.value.author.trim()
-  ) {
-
-    errorMessage.value =
-      "Author is required.";
-
-    return;
-
-  }
-
-
-  if (
-    !form.value.categoryId
-  ) {
-
-    errorMessage.value =
-      "Please select a category.";
-
-    return;
-
-  }
-
-
-  if (
-    form.value.quantity === null ||
-    form.value.quantity === undefined ||
-    Number(form.value.quantity) < 0
-  ) {
-
-    errorMessage.value =
-      "Quantity cannot be negative.";
-
-    return;
-
-  }
-
-
-  if (
-    form.value.pages !== null &&
-    form.value.pages !== undefined &&
-    Number(form.value.pages) < 0
-  ) {
-
-    errorMessage.value =
-      "Pages cannot be negative.";
-
-    return;
-
-  }
-
-
-  if (
-    form.value.publicationYear !== null &&
-    form.value.publicationYear !== undefined &&
-    Number(form.value.publicationYear) < 0
-  ) {
-
-    errorMessage.value =
-      "Publication year cannot be negative.";
-
-    return;
-
-  }
-
-
-  // ===================================================
-  // START SAVING
-  // ===================================================
-
-  saving.value =
-    true;
-
-
-  try {
-
-    // =================================================
-    // PAYLOAD
-    // =================================================
-
-    const payload = {
-
-      title:
-        form.value.title.trim(),
-
-      description:
-        form.value.description
-          ? form.value.description.trim()
-          : "",
-
-      author:
-        form.value.author.trim(),
-
-      isbn:
-        form.value.isbn
-          ? form.value.isbn.trim()
-          : "",
-
-      categoryId:
-        Number(
-          form.value.categoryId
-        ),
-
-      qty:
-        Number(
-          form.value.quantity
-        ),
-
-      status:
-        form.value.status,
-
-      language:
-        form.value.language || null,
-
-      pages:
-        form.value.pages !== null &&
-        form.value.pages !== undefined
-          ? Number(form.value.pages)
-          : null,
-
-      publicationYear:
-  form.value.publicationYear !== null &&
-  form.value.publicationYear !== undefined &&
-  form.value.publicationYear !== ""
-    ? form.value.publicationYear
-    : null,
-
-      file:
-        newImage.value || null
-
-    };
-
-
-    // =================================================
-    // DEBUG
-    // =================================================
-
-    console.log(
-      "================================"
-    );
-
-    console.log(
-      "UPDATE BOOK ID:",
-      form.value.id
-    );
-
-    console.log(
-      "UPDATE PAYLOAD:",
-      payload
-    );
-
-    console.log(
-      "CATEGORY ID:",
-      payload.categoryId
-    );
-
-    console.log(
-      "OLD IMAGE:",
-      currentImage.value
-    );
-
-    console.log(
-      "NEW IMAGE:",
-      payload.file
-    );
-
-    console.log(
-      "================================"
-    );
-
-
-    // =================================================
-    // CALL API
-    // =================================================
-
-    const response =
-      await updateBookApi(
-        form.value.id,
-        payload
-      );
-
-
-    console.log(
-      "UPDATE BOOK RESPONSE:",
-      response
-    );
-
-
-    // =================================================
-    // GET UPDATED BOOK
-    // =================================================
-
-    const responseBook =
-      response?.data ||
-      response;
-
-
-    // =================================================
-    // UPDATED BOOK
-    // =================================================
-
-    const updatedBook = {
-
-      ...(originalBook.value || {}),
-
-      ...form.value,
-
-      qty:
-        form.value.quantity,
-
-      categoryId:
-        Number(
-          form.value.categoryId
-        ),
-
-      image:
-        responseBook?.image ||
-        originalBook.value?.image ||
-        currentImage.value,
-
-      imageUrl:
-        responseBook?.image ||
-        originalBook.value?.image ||
-        currentImage.value
-
-    };
-
-
-    // =================================================
-    // SUCCESS
-    // =================================================
-
-    successMessage.value =
-      "Book updated successfully!";
-
-
-    // =================================================
-    // SEND UPDATED BOOK TO PARENT
-    // =================================================
-
-    emit(
-      "updated",
-      updatedBook
-    );
-
-
-    // =================================================
-    // CLOSE
-    // =================================================
-
-    setTimeout(() => {
-
-      emit(
-        "close"
-      );
-
-    }, 800);
-
-
-  }
-  catch (error) {
-
-    console.error(
-      "UPDATE BOOK ERROR:",
-      error
-    );
-
-
-    errorMessage.value =
-      error?.message ||
-      "Failed to update book.";
-
-  }
-  finally {
-
-    saving.value =
-      false;
-
-  }
+  emit("cancel");
 
 }
 
 
-// =====================================================
-// BACK
-// =====================================================
-
-function goBack() {
-
-  if (
-    saving.value
-  ) {
-
-    return;
-
-  }
-
-
-  emit(
-    "close"
-  );
-
-}
-
-
-// =====================================================
-// WATCH BOOK
-// =====================================================
+/* =========================================================
+   WATCH BOOK
+========================================================= */
 
 watch(
-
-  () =>
-    props.book,
+  () => props.book,
 
   (newBook) => {
 
     if (newBook) {
 
-      loadBook(
-        newBook
-      );
-
-    }
-    else {
-
-      resetForm();
+      loadBook(newBook);
 
     }
 
   },
 
   {
-    immediate: true
-
-  }
-
-);
-
-
-// =====================================================
-// MOUNT
-// =====================================================
-
-onMounted(
-  async () => {
-
-    loading.value =
-      true;
-
-
-    try {
-
-      // =================================================
-      // FIRST LOAD CATEGORIES
-      // =================================================
-
-      await fetchCategories();
-
-
-      // =================================================
-      // THEN LOAD BOOK
-      // =================================================
-
-      if (
-        props.book
-      ) {
-
-        loadBook(
-          props.book
-        );
-
-      }
-      else {
-
-        errorMessage.value =
-          "Book information not found.";
-
-      }
-
-    }
-    catch (error) {
-
-      console.error(
-        "EDIT BOOK LOAD ERROR:",
-        error
-      );
-
-
-      errorMessage.value =
-        error?.message ||
-        "Failed to load book information.";
-
-    }
-    finally {
-
-      loading.value =
-        false;
-
-    }
-
+    immediate: true,
+    deep: true
   }
 );
 
 
-// =====================================================
-// BEFORE UNMOUNT
-// =====================================================
+/* =========================================================
+   MOUNT
+========================================================= */
 
-onBeforeUnmount(() => {
+onMounted(() => {
 
-  clearNewImagePreview();
+  fetchCategories();
 
 });
 
+
+/* =========================================================
+   CLEANUP
+========================================================= */
+
+onBeforeUnmount(() => {
+
+  if (
+    imagePreview.value &&
+    imagePreview.value.startsWith("blob:")
+  ) {
+
+    URL.revokeObjectURL(
+      imagePreview.value
+    );
+
+  }
+
+});
 </script>
 
 
 <style scoped>
-
-/* =====================================================
+/* =========================================================
    PAGE
-===================================================== */
+========================================================= */
 
 .edit-book-page {
+  min-height: 100vh;
 
-  min-height:
-    calc(100vh - 70px);
+  padding: 40px;
 
-  padding:
-    30px;
+  background: #f8fafc;
 
-  background:
-    #f8f9fc;
-
-  font-family:
-    Arial,
-    sans-serif;
-
-  box-sizing:
-    border-box;
-
+  box-sizing: border-box;
 }
 
 
-/* =====================================================
+/* =========================================================
    HEADER
-===================================================== */
+========================================================= */
 
 .page-header {
+  max-width: 1100px;
 
-  display:
-    flex;
+  margin: 0 auto 25px;
 
-  align-items:
-    center;
+  display: flex;
 
-  justify-content:
-    space-between;
+  align-items: center;
 
-  gap:
-    20px;
+  justify-content: space-between;
 
-  margin-bottom:
-    25px;
-
+  gap: 20px;
 }
 
 
-.page-header h1 {
+.page-header h2 {
+  margin: 0;
 
-  margin:
-    0;
+  color: #0f172a;
 
-  color:
-    #172033;
+  font-size: 28px;
 
-  font-size:
-    28px;
-
-  font-weight:
-    700;
-
+  font-weight: 700;
 }
 
 
 .page-header p {
+  margin: 6px 0 0;
 
-  margin:
-    6px 0 0;
+  color: #64748b;
 
-  color:
-    #7b8497;
-
-  font-size:
-    14px;
-
+  font-size: 14px;
 }
 
 
-/* =====================================================
+/* =========================================================
    BACK BUTTON
-===================================================== */
+========================================================= */
 
 .back-btn {
+  border: 1px solid #dbeafe;
 
-  display:
-    flex;
+  background: #ffffff;
 
-  align-items:
-    center;
+  color: #2563eb;
 
-  gap:
-    6px;
+  padding: 10px 17px;
 
-  padding:
-    11px 18px;
+  border-radius: 10px;
 
-  border:
-    1px solid #dfe3eb;
+  display: flex;
 
-  border-radius:
-    8px;
+  align-items: center;
 
-  background:
-    white;
+  gap: 8px;
 
-  color:
-    #667085;
+  font-size: 14px;
 
-  font-size:
-    14px;
+  font-weight: 600;
 
-  font-weight:
-    600;
+  cursor: pointer;
 
-  cursor:
-    pointer;
-
-  transition:
-    0.2s ease;
-
+  transition: 0.2s ease;
 }
 
 
-.back-btn:hover {
-
-  background:
-    #f1f2f6;
-
-  border-color:
-    #cfd4df;
-
+.back-btn:hover:not(:disabled) {
+  background: #eff6ff;
 }
 
 
 .back-btn:disabled {
+  opacity: 0.6;
 
-  opacity:
-    0.6;
-
-  cursor:
-    not-allowed;
-
+  cursor: not-allowed;
 }
 
 
-/* =====================================================
+/* =========================================================
    ALERT
-===================================================== */
+========================================================= */
 
-.alert {
+.alert-message {
+  max-width: 1100px;
 
-  display:
-    flex;
+  margin: 0 auto 20px;
 
-  align-items:
-    center;
+  padding: 13px 16px;
 
-  gap:
-    10px;
+  border-radius: 10px;
 
-  margin-bottom:
-    20px;
+  display: flex;
 
-  padding:
-    13px 16px;
+  align-items: center;
 
-  border-radius:
-    8px;
+  gap: 10px;
 
-  font-size:
-    14px;
-
+  font-size: 14px;
 }
 
 
-.error-message {
+.alert-message.error {
+  color: #b91c1c;
 
-  border:
-    1px solid #fecaca;
+  background: #fef2f2;
 
-  background:
-    #fef2f2;
-
-  color:
-    #dc2626;
-
+  border: 1px solid #fecaca;
 }
 
 
-.success-message {
+.alert-message.success {
+  color: #15803d;
 
-  border:
-    1px solid #bbf7d0;
+  background: #f0fdf4;
 
-  background:
-    #f0fdf4;
-
-  color:
-    #16a34a;
-
+  border: 1px solid #bbf7d0;
 }
 
 
-.alert-icon {
+/* =========================================================
+   FORM
+========================================================= */
 
-  font-weight:
-    700;
+.book-form {
+  max-width: 1100px;
 
+  margin: 0 auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
 }
 
 
-/* =====================================================
-   LOADING
-===================================================== */
-
-.loading-box {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  gap:
-    12px;
-
-  min-height:
-    250px;
-
-  background:
-    white;
-
-  border:
-    1px solid #e5e8ef;
-
-  border-radius:
-    12px;
-
-  color:
-    #667085;
-
-  font-size:
-    14px;
-
-}
-
-
-.spinner {
-
-  width:
-    20px;
-
-  height:
-    20px;
-
-  border:
-    3px solid #e5e7eb;
-
-  border-top-color:
-    #5b3df5;
-
-  border-radius:
-    50%;
-
-  animation:
-    spin 0.8s linear infinite;
-
-}
-
-
-@keyframes spin {
-
-  from {
-
-    transform:
-      rotate(0deg);
-
-  }
-
-  to {
-
-    transform:
-      rotate(360deg);
-
-  }
-
-}
-
-
-/* =====================================================
+/* =========================================================
    FORM CARD
-===================================================== */
+========================================================= */
 
 .form-card {
+  background: #ffffff;
 
-  width:
-    100%;
+  border: 1px solid #e2e8f0;
 
-  max-width:
-    1000px;
+  border-radius: 16px;
 
-  box-sizing:
-    border-box;
-
-  padding:
-    30px;
-
-  background:
-    white;
-
-  border:
-    1px solid #e5e8ef;
-
-  border-radius:
-    12px;
+  padding: 25px;
 
   box-shadow:
-    0 2px 5px
-    rgba(0, 0, 0, 0.02);
-
+    0 4px 15px
+    rgba(15, 23, 42, 0.04);
 }
 
 
-/* =====================================================
-   FORM ROW
-===================================================== */
+/* =========================================================
+   SECTION HEADER
+========================================================= */
 
-.form-row {
+.section-header {
+  display: flex;
 
-  display:
-    grid;
+  align-items: center;
+
+  gap: 13px;
+
+  margin-bottom: 24px;
+
+  padding-bottom: 18px;
+
+  border-bottom: 1px solid #f1f5f9;
+}
+
+
+.section-icon {
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 11px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 19px;
+}
+
+
+.section-header h3 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 18px;
+
+  font-weight: 700;
+}
+
+
+.section-header p {
+  margin: 3px 0 0;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.form-grid {
+  display: grid;
 
   grid-template-columns:
-    1fr 1fr;
+    repeat(2, minmax(0, 1fr));
 
-  gap:
-    20px;
-
-  margin-bottom:
-    20px;
-
+  gap: 20px;
 }
 
 
-/* =====================================================
+.full-width {
+  grid-column: 1 / -1;
+}
+
+
+/* =========================================================
    FORM GROUP
-===================================================== */
+========================================================= */
 
 .form-group {
+  display: flex;
 
-  display:
-    flex;
+  flex-direction: column;
 
-  flex-direction:
-    column;
-
-  gap:
-    8px;
-
+  gap: 7px;
 }
 
-
-.form-group.full {
-
-  margin-bottom:
-    20px;
-
-}
-
-
-/* =====================================================
-   LABEL
-===================================================== */
 
 .form-group label {
+  color: #334155;
 
-  color:
-    #344054;
+  font-size: 14px;
 
-  font-size:
-    14px;
-
-  font-weight:
-    600;
-
+  font-weight: 600;
 }
 
 
-.required {
-
-  color:
-    #ef4444;
-
-  margin-left:
-    2px;
-
+.form-group label span {
+  color: #ef4444;
 }
 
 
-/* =====================================================
-   INPUT / SELECT / TEXTAREA
-===================================================== */
+/* =========================================================
+   INPUT
+========================================================= */
 
 .form-group input,
 .form-group select,
 .form-group textarea {
+  width: 100%;
 
-  width:
-    100%;
+  box-sizing: border-box;
 
-  box-sizing:
-    border-box;
+  border: 1px solid #cbd5e1;
 
-  padding:
-    12px 14px;
+  border-radius: 10px;
 
-  border:
-    1px solid #dfe3eb;
+  background: #ffffff;
 
-  border-radius:
-    8px;
+  color: #0f172a;
 
-  outline:
-    none;
+  font-family: inherit;
 
-  background:
-    white;
+  font-size: 14px;
 
-  color:
-    #172033;
-
-  font-family:
-    Arial,
-    sans-serif;
-
-  font-size:
-    14px;
+  outline: none;
 
   transition:
-    0.2s ease;
-
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
+.form-group input,
+.form-group select {
+  height: 44px;
 
-  color:
-    #98a2b3;
+  padding: 0 13px;
+}
 
+
+.form-group textarea {
+  min-height: 140px;
+
+  padding: 12px 13px;
+
+  resize: vertical;
 }
 
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-
-  border-color:
-    #5b3df5;
+  border-color: #60a5fa;
 
   box-shadow:
     0 0 0 3px
-    rgba(91, 61, 245, 0.08);
-
+    rgba(96, 165, 250, 0.12);
 }
 
 
-/* =====================================================
-   FILE INPUT
-===================================================== */
-
-.form-group input[type="file"] {
-
-  padding:
-    10px;
-
-  cursor:
-    pointer;
-
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #94a3b8;
 }
 
 
-.form-group input[type="file"]::file-selector-button {
+.form-group select:disabled {
+  background: #f8fafc;
 
-  margin-right:
-    10px;
+  color: #64748b;
 
-  padding:
-    8px 12px;
+  cursor: not-allowed;
+}
 
-  border:
-    none;
 
-  border-radius:
-    6px;
+/* =========================================================
+   HINT
+========================================================= */
+
+.field-hint {
+  color: #94a3b8;
+
+  font-size: 12px;
+}
+
+
+.field-hint.warning {
+  color: #d97706;
+}
+
+
+/* =========================================================
+   IMAGE UPLOAD
+========================================================= */
+
+.image-upload-area {
+  width: 100%;
+}
+
+
+.upload-box {
+  min-height: 230px;
+
+  border: 2px dashed #cbd5e1;
+
+  border-radius: 14px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+
+.upload-box:hover {
+  border-color: #60a5fa;
+
+  background: #f8fbff;
+}
+
+
+.upload-icon {
+  width: 56px;
+
+  height: 56px;
+
+  margin-bottom: 12px;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 25px;
+}
+
+
+.upload-box h4 {
+  margin: 0;
+
+  color: #334155;
+
+  font-size: 15px;
+
+  font-weight: 600;
+}
+
+
+.upload-box p {
+  margin: 7px 0 3px;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+
+.upload-box span {
+  color: #94a3b8;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   IMAGE PREVIEW
+========================================================= */
+
+.image-preview {
+  position: relative;
+
+  width: 190px;
+
+  height: 250px;
+
+  margin: 0 auto;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  background: #f1f5f9;
+
+  border: 1px solid #e2e8f0;
+}
+
+
+.image-preview img {
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+
+/* =========================================================
+   REMOVE IMAGE
+========================================================= */
+
+.remove-image-btn {
+  position: absolute;
+
+  top: 10px;
+
+  right: 10px;
+
+  width: 34px;
+
+  height: 34px;
+
+  border: none;
+
+  border-radius: 50%;
 
   background:
-    #5b3df5;
+    rgba(15, 23, 42, 0.75);
 
-  color:
-    white;
+  color: #ffffff;
 
-  cursor:
-    pointer;
+  display: flex;
 
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
 }
 
 
-/* =====================================================
-   SELECT
-===================================================== */
-
-.form-group select {
-
-  cursor:
-    pointer;
-
+.remove-image-btn:hover {
+  background: #dc2626;
 }
 
 
-/* =====================================================
-   TEXTAREA
-===================================================== */
-
-.form-group textarea {
-
-  resize:
-    vertical;
-
-  min-height:
-    130px;
-
-}
-
-
-/* =====================================================
-   HELPER TEXT
-===================================================== */
-
-.helper-text {
-
-  color:
-    #667085;
-
-  font-size:
-    12px;
-
-}
-
-
-.helper-error {
-
-  color:
-    #ef4444;
-
-  font-size:
-    12px;
-
-}
-
-
-/* =====================================================
-   CURRENT IMAGE
-===================================================== */
-
-.current-image-section {
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  gap:
-    8px;
-
-  margin-bottom:
-    8px;
-
-}
-
-
-.image-label {
-
-  color:
-    #667085;
-
-  font-size:
-    12px;
-
-  font-weight:
-    600;
-
-}
-
-
-.image-preview-wrapper {
-
-  width:
-    150px;
-
-  height:
-    190px;
-
-  overflow:
-    hidden;
-
-  border:
-    1px solid #e5e7eb;
-
-  border-radius:
-    8px;
-
-  background:
-    #f8f9fc;
-
-}
-
-
-.current-image {
-
-  width:
-    100%;
-
-  height:
-    100%;
-
-  object-fit:
-    cover;
-
-}
-
-
-/* =====================================================
-   NEW IMAGE INFO
-===================================================== */
-
-.new-image-info {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    6px;
-
-  padding:
-    10px 12px;
-
-  background:
-    #f5f3ff;
-
-  border:
-    1px solid #ddd6fe;
-
-  border-radius:
-    8px;
-
-  color:
-    #6d28d9;
-
-  font-size:
-    13px;
-
-}
-
-
-.new-image-info strong {
-
-  overflow:
-    hidden;
-
-  text-overflow:
-    ellipsis;
-
-  white-space:
-    nowrap;
-
-}
-
-
-/* =====================================================
-   NEW IMAGE PREVIEW
-===================================================== */
-
-.new-image-preview-wrapper {
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  gap:
-    8px;
-
-  margin-top:
-    8px;
-
-}
-
-
-.new-image-preview {
-
-  width:
-    150px;
-
-  height:
-    190px;
-
-  object-fit:
-    cover;
-
-  border:
-    1px solid #ddd6fe;
-
-  border-radius:
-    8px;
-
-}
-
-
-/* =====================================================
-   BOOK INFO
-===================================================== */
-
-.book-info {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  flex-wrap:
-    wrap;
-
-  gap:
-    25px;
-
-  margin-bottom:
-    20px;
-
-  padding:
-    12px 15px;
-
-  background:
-    #f8f9fc;
-
-  border:
-    1px solid #edf0f5;
-
-  border-radius:
-    8px;
-
-}
-
-
-.info-item {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    10px;
-
-}
-
-
-.info-label {
-
-  color:
-    #8a92a3;
-
-  font-size:
-    13px;
-
-}
-
-
-.info-item strong {
-
-  color:
-    #344054;
-
-  font-size:
-    13px;
-
-}
-
-
-/* =====================================================
+/* =========================================================
    ACTIONS
-===================================================== */
+========================================================= */
 
 .form-actions {
+  display: flex;
 
-  display:
-    flex;
+  justify-content: flex-end;
 
-  align-items:
-    center;
+  gap: 12px;
 
-  justify-content:
-    flex-end;
-
-  gap:
-    12px;
-
-  padding-top:
-    20px;
-
-  border-top:
-    1px solid #edf0f5;
-
+  padding-bottom: 30px;
 }
 
 
-/* =====================================================
-   CANCEL
-===================================================== */
+.cancel-btn,
+.submit-btn {
+  min-width: 120px;
+
+  height: 44px;
+
+  padding: 0 18px;
+
+  border-radius: 10px;
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
 
 .cancel-btn {
+  border: 1px solid #cbd5e1;
 
-  padding:
-    12px 22px;
+  background: #ffffff;
 
-  border:
-    1px solid #dfe3eb;
-
-  border-radius:
-    8px;
-
-  background:
-    white;
-
-  color:
-    #667085;
-
-  font-size:
-    14px;
-
-  font-weight:
-    600;
-
-  cursor:
-    pointer;
-
-  transition:
-    0.2s ease;
-
+  color: #475569;
 }
 
 
-.cancel-btn:hover {
-
-  background:
-    #f1f2f6;
-
+.cancel-btn:hover:not(:disabled) {
+  background: #f8fafc;
 }
 
 
-.cancel-btn:disabled {
+.submit-btn {
+  border: 1px solid #2563eb;
 
-  opacity:
-    0.6;
+  background: #2563eb;
 
-  cursor:
-    not-allowed;
-
+  color: #ffffff;
 }
 
 
-/* =====================================================
-   SAVE
-===================================================== */
-
-.save-btn {
-
-  min-width:
-    145px;
-
-  padding:
-    12px 22px;
-
-  border:
-    none;
-
-  border-radius:
-    8px;
-
-  background:
-    #5b3df5;
-
-  color:
-    white;
-
-  font-size:
-    14px;
-
-  font-weight:
-    600;
-
-  cursor:
-    pointer;
-
-  transition:
-    0.2s ease;
-
+.submit-btn:hover:not(:disabled) {
+  background: #1d4ed8;
 }
 
 
-.save-btn:hover {
+.cancel-btn:disabled,
+.submit-btn:disabled {
+  opacity: 0.6;
 
-  background:
-    #4930d5;
-
+  cursor: not-allowed;
 }
 
 
-.save-btn:disabled {
+/* =========================================================
+   LOADING SPIN
+========================================================= */
 
-  opacity:
-    0.6;
-
-  cursor:
-    not-allowed;
-
-}
-
-
-/* =====================================================
-   BUTTON CONTENT
-===================================================== */
-
-.button-content {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  gap:
-    7px;
-
-}
-
-
-/* =====================================================
-   BUTTON SPINNER
-===================================================== */
-
-.button-spinner {
-
-  width:
-    14px;
-
-  height:
-    14px;
-
-  border:
-    2px solid
-    rgba(255, 255, 255, 0.4);
-
-  border-top-color:
-    white;
-
-  border-radius:
-    50%;
-
+.spin {
   animation:
-    spin 0.7s linear infinite;
+    spin 1s linear infinite;
+}
+
+
+@keyframes spin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 
 }
 
 
-/* =====================================================
-   RESPONSIVE
-===================================================== */
+/* =========================================================
+   TABLET
+========================================================= */
 
 @media (max-width: 768px) {
 
   .edit-book-page {
-
-    padding:
-      20px;
-
+    padding: 25px 18px;
   }
 
 
   .page-header {
-
-    flex-direction:
-      column;
-
-    align-items:
-      flex-start;
-
+    align-items: flex-start;
   }
 
 
-  .back-btn {
-
-    width:
-      100%;
-
-    justify-content:
-      center;
-
+  .page-header h2 {
+    font-size: 24px;
   }
 
 
   .form-card {
-
-    padding:
-      20px;
-
+    padding: 20px;
   }
 
 
-  .form-row {
-
-    grid-template-columns:
-      1fr;
-
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 
 
-  .book-info {
-
-    flex-direction:
-      column;
-
-    align-items:
-      flex-start;
-
-    gap:
-      10px;
-
-  }
-
-
-  .form-actions {
-
-    flex-direction:
-      column-reverse;
-
-  }
-
-
-  .cancel-btn,
-  .save-btn {
-
-    width:
-      100%;
-
+  .full-width {
+    grid-column: auto;
   }
 
 }
 
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 550px) {
+
+  .edit-book-page {
+    padding: 18px 12px;
+  }
+
+
+  .page-header {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+
+  .back-btn {
+    justify-content: center;
+  }
+
+
+  .page-header h2 {
+    font-size: 22px;
+  }
+
+
+  .form-card {
+    padding: 16px;
+
+    border-radius: 13px;
+  }
+
+
+  .section-header {
+    margin-bottom: 18px;
+  }
+
+
+  .section-icon {
+    width: 38px;
+
+    height: 38px;
+  }
+
+
+  .section-header h3 {
+    font-size: 16px;
+  }
+
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
+
+
+  .image-preview {
+    width: 160px;
+
+    height: 215px;
+  }
+
+}
 </style>

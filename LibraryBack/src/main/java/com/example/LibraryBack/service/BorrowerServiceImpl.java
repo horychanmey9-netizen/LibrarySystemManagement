@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -32,9 +33,24 @@ public class BorrowerServiceImpl implements BorrowerService {
 
     // =========================================================
     // CREATE BORROW REQUEST
+    //
     // User clicks Borrow
-    // Status = PENDING
-    // Quantity DOES NOT decrease here
+    //
+    // IMPORTANT RULE:
+    // The same USER cannot borrow the same BOOK again
+    // while the previous borrowing is still active.
+    //
+    // Active statuses:
+    // PENDING
+    // BORROWED
+    // RETURN_REQUESTED
+    // OVERDUE
+    //
+    // RETURNED is NOT active.
+    // After RETURNED, user can borrow the same book again.
+    //
+    // Quantity DOES NOT decrease here.
+    // Quantity decreases only when ADMIN accepts.
     // =========================================================
     @Override
     @Transactional
@@ -46,7 +62,6 @@ public class BorrowerServiceImpl implements BorrowerService {
                 new NotException("User not found")
         );
 
-
         Book book = bookRepository.findById(
                 borrowerRequest.getBookId()
         ).orElseThrow(() ->
@@ -54,37 +69,99 @@ public class BorrowerServiceImpl implements BorrowerService {
         );
 
 
-        // Check book quantity
+        // =====================================================
+        // CHECK IF BOOK IS AVAILABLE
+        // =====================================================
         if (book.getQty() <= 0) {
+
             throw new NotException(
                     "This book is currently unavailable"
             );
         }
 
 
-        // Create borrower only ONCE
+        // =====================================================
+        // CHECK EXISTING ACTIVE BORROWING
+        //
+        // Same User
+        // +
+        // Same Book
+        // +
+        // Active Status
+        //
+        // => Cannot create another request
+        // =====================================================
+
+        List<BorrowingStatus> activeStatuses = List.of(
+
+                BorrowingStatus.PENDING,
+
+                BorrowingStatus.BORROWED,
+
+                BorrowingStatus.RETURN_REQUESTED,
+
+                BorrowingStatus.OVERDUE
+
+        );
+
+
+        boolean alreadyBorrowing =
+                borrowerRepository.existsByUserIdAndBookIdAndStatusIn(
+                        user.getId(),
+                        book.getId(),
+                        activeStatuses
+                );
+
+
+        if (alreadyBorrowing) {
+
+            throw new NotException(
+                    "You cannot borrow this book again until you return it."
+            );
+        }
+
+
+        // =====================================================
+        // CREATE NEW BORROWER
+        // =====================================================
+
         Borrower borrower =
-                borrowerMapper.toEntity(borrowerRequest);
+                borrowerMapper.toEntity(
+                        borrowerRequest
+                );
 
 
         borrower.setUser(user);
 
         borrower.setBook(book);
 
-        // Always PENDING when user requests
+
+        // =====================================================
+        // ALWAYS PENDING WHEN USER REQUESTS
+        // =====================================================
+
         borrower.setStatus(
                 BorrowingStatus.PENDING
         );
 
-        // Default fine
+
+        // =====================================================
+        // DEFAULT FINE
+        // =====================================================
+
         borrower.setFine(
                 BigDecimal.ZERO
         );
 
 
-        // Save request
+        // =====================================================
+        // SAVE REQUEST
+        // =====================================================
+
         Borrower savedBorrower =
-                borrowerRepository.save(borrower);
+                borrowerRepository.save(
+                        borrower
+                );
 
 
         return borrowerMapper.toResponse(
@@ -118,7 +195,6 @@ public class BorrowerServiceImpl implements BorrowerService {
     }
 
 
-    // =========================================================
     @Override
     @Transactional
     public BorrowerResponse accept(Long id) {
@@ -131,53 +207,88 @@ public class BorrowerServiceImpl implements BorrowerService {
                                 )
                         );
 
-        // Only PENDING can be accepted
-        if (borrower.getStatus() != BorrowingStatus.PENDING) {
+
+        // =====================================================
+        // ONLY PENDING CAN BE ACCEPTED
+        // =====================================================
+        if (borrower.getStatus()
+                != BorrowingStatus.PENDING) {
+
             throw new NotException(
                     "Only PENDING requests can be accepted"
             );
         }
 
         Book book = borrower.getBook();
-
         if (book == null) {
             throw new NotException(
                     "Book not found"
             );
         }
 
-        // Check quantity again
+
+        // =====================================================
+        // CHECK QUANTITY AGAIN
+        // =====================================================
         if (book.getQty() <= 0) {
             throw new NotException(
                     "Book is no longer available"
             );
         }
 
-        // Decrease quantity ONLY when admin accepts
-        book.setQty(book.getQty() - 1);
+
+        // =====================================================
+        // DECREASE QUANTITY
+        // =====================================================
+        book.setQty(
+                book.getQty() - 1
+        );
+
 
         bookRepository.save(book);
 
-        // Change status
-        borrower.setStatus(BorrowingStatus.BORROWED);
 
-        // Make sure fine is not null
+        // =====================================================
+        // PENDING -> BORROWED
+        // =====================================================
+        borrower.setStatus(
+                BorrowingStatus.BORROWED
+        );
+
+
+        // =====================================================
+        // MAKE SURE FINE IS NOT NULL
+        // =====================================================
         if (borrower.getFine() == null) {
-            borrower.setFine(BigDecimal.ZERO);
+
+            borrower.setFine(
+                    BigDecimal.ZERO
+            );
         }
 
-        // Save borrowing
-        Borrower updatedBorrower =
-                borrowerRepository.save(borrower);
 
-        // Send Telegram notification
+        // =====================================================
+        // SAVE BORROWING
+        // =====================================================
+        Borrower updatedBorrower =
+                borrowerRepository.save(
+                        borrower
+                );
+
+
+        // =====================================================
+        // TELEGRAM NOTIFICATION
+        // =====================================================
         telegramNotificationService.sendBorrowAcceptedNotification(
                 borrower.getUser().getId(),
                 book.getTitle(),
                 borrower.getDueDate()
         );
 
-        return borrowerMapper.toResponse(updatedBorrower);
+
+        return borrowerMapper.toResponse(
+                updatedBorrower
+        );
     }
 
     @Override
@@ -193,7 +304,9 @@ public class BorrowerServiceImpl implements BorrowerService {
                         );
 
 
-        // Only PENDING can be rejected
+        // =====================================================
+        // ONLY PENDING CAN BE REJECTED
+        // =====================================================
         if (borrower.getStatus()
                 != BorrowingStatus.PENDING) {
 
@@ -203,13 +316,17 @@ public class BorrowerServiceImpl implements BorrowerService {
         }
 
 
-        // Change status to REJECTED
+        // =====================================================
+        // PENDING -> REJECTED
+        // =====================================================
         borrower.setStatus(
                 BorrowingStatus.REJECTED
         );
 
 
-        // Make sure fine is not null
+        // =====================================================
+        // MAKE SURE FINE IS NOT NULL
+        // =====================================================
         if (borrower.getFine() == null) {
 
             borrower.setFine(
@@ -218,8 +335,9 @@ public class BorrowerServiceImpl implements BorrowerService {
         }
 
 
-        // IMPORTANT:
-        // Do NOT change book quantity
+        // =====================================================
+        // DO NOT CHANGE BOOK QUANTITY
+        // =====================================================
         Borrower updatedBorrower =
                 borrowerRepository.save(
                         borrower
@@ -234,7 +352,8 @@ public class BorrowerServiceImpl implements BorrowerService {
 
     // =========================================================
     // UPDATE BORROWING
-    // Admin
+    //
+    // ADMIN
     // =========================================================
     @Override
     @Transactional
@@ -311,6 +430,8 @@ public class BorrowerServiceImpl implements BorrowerService {
                 updatedBorrower
         );
     }
+
+
     @Override
     @Transactional
     public void delete(Long id) {
@@ -328,6 +449,7 @@ public class BorrowerServiceImpl implements BorrowerService {
                 borrower
         );
     }
+
 
     @Override
     @Transactional
@@ -349,21 +471,31 @@ public class BorrowerServiceImpl implements BorrowerService {
             );
         }
 
-        // Only change status
+
+        // =====================================================
+        // BORROWED -> RETURN_REQUESTED
+        // =====================================================
         borrower.setStatus(
                 BorrowingStatus.RETURN_REQUESTED
         );
 
-        // DO NOT increase book quantity here
-        // DO NOT set returnDate here
+
+        // =====================================================
+        // DO NOT INCREASE QUANTITY HERE
+        // DO NOT SET RETURN DATE HERE
+        // =====================================================
 
         Borrower updatedBorrower =
-                borrowerRepository.save(borrower);
+                borrowerRepository.save(
+                        borrower
+                );
+
 
         return borrowerMapper.toResponse(
                 updatedBorrower
         );
     }
+
 
 
     @Override
@@ -386,22 +518,36 @@ public class BorrowerServiceImpl implements BorrowerService {
             );
         }
 
+
         Book book = borrower.getBook();
 
+
         if (book == null) {
+
             throw new NotException(
                     "Book not found"
             );
         }
 
-        // Increase quantity only after admin accepts
-        book.setQty(book.getQty() + 1);
+
+        // =====================================================
+        // INCREASE QUANTITY
+        //
+        // The book is physically returned.
+        // =====================================================
+        book.setQty(
+                book.getQty() + 1
+        );
+
 
         bookRepository.save(book);
 
-        // Set actual return date
+
+        // =====================================================
+        // SET ACTUAL RETURN DATE
+        // =====================================================
         borrower.setReturnDate(
-                java.time.LocalDate.now()
+                LocalDate.now()
         );
 
         borrower.setStatus(
@@ -409,11 +555,16 @@ public class BorrowerServiceImpl implements BorrowerService {
         );
 
         if (borrower.getFine() == null) {
-            borrower.setFine(BigDecimal.ZERO);
-        }
 
+            borrower.setFine(
+                    BigDecimal.ZERO
+            );
+        }
         Borrower updatedBorrower =
-                borrowerRepository.save(borrower);
+                borrowerRepository.save(
+                        borrower
+                );
+
 
         return borrowerMapper.toResponse(
                 updatedBorrower

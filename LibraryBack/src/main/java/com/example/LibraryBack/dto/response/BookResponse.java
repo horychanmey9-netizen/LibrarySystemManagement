@@ -25,6 +25,7 @@ public class BookResponse {
     private Status status;
     private long categoryId;
     private String category;
+    private String publishYear;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

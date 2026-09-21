@@ -11,10 +11,54 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface BookMapper {
+
+    // =====================================================
+    // REQUEST -> ENTITY
+    // =====================================================
+
+    @Mapping(
+            target = "publishYear",
+            source = "publishYear"
+    )
     Book toEntity(BookRequest bookRequest);
-    @Mapping(target = "categoryId", source = "category.id")
-    @Mapping(target = "category", source = "category.name")
+
+
+    // =====================================================
+    // ENTITY -> RESPONSE
+    // =====================================================
+
+    @Mapping(
+            target = "categoryId",
+            source = "category.id"
+    )
+    @Mapping(
+            target = "category",
+            source = "category.name"
+    )
+    @Mapping(
+            target = "publishYear",
+            source = "publishYear"
+    )
     BookResponse bookResponse(Book book);
+
+
+    // =====================================================
+    // LIST ENTITY -> RESPONSE
+    // =====================================================
+
     List<BookResponse> toResponseList(List<Book> books);
-    void updateBook(BookRequest bookRequest, @MappingTarget Book book);
+
+
+    // =====================================================
+    // UPDATE ENTITY
+    // =====================================================
+
+    @Mapping(
+            target = "publishYear",
+            source = "publishYear"
+    )
+    void updateBook(
+            BookRequest bookRequest,
+            @MappingTarget Book book
+    );
 }

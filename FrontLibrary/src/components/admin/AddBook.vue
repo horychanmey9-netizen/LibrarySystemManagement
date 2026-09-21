@@ -1,18 +1,26 @@
+
 <template>
+
   <div class="add-book-page">
 
-    <!-- ================= HEADER ================= -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
     <div class="page-header">
 
       <div>
-        <h1>Add New Book</h1>
-        <p>Add a new book to the library</p>
+        <h2>Add New Book</h2>
+
+        <p>
+          Add a new book to the library collection.
+        </p>
       </div>
 
       <button
         type="button"
         class="back-btn"
-        @click="closePage"
+        @click="handleCancel"
       >
         <i class="bi bi-arrow-left"></i>
         Back
@@ -21,361 +29,503 @@
     </div>
 
 
-    <!-- ================= ERROR ================= -->
+    <!-- =====================================================
+         ERROR MESSAGE
+    ====================================================== -->
+
     <div
       v-if="errorMessage"
-      class="error-message"
+      class="alert-message error"
     >
-      <i class="bi bi-exclamation-circle"></i>
-      {{ errorMessage }}
+
+      <i class="bi bi-exclamation-circle-fill"></i>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
     </div>
 
 
-    <!-- ================= SUCCESS ================= -->
+    <!-- =====================================================
+         SUCCESS MESSAGE
+    ====================================================== -->
+
     <div
       v-if="successMessage"
-      class="success-message"
+      class="alert-message success"
     >
-      <i class="bi bi-check-circle"></i>
-      {{ successMessage }}
+
+      <i class="bi bi-check-circle-fill"></i>
+
+      <span>
+        {{ successMessage }}
+      </span>
+
     </div>
 
 
-    <!-- ================= FORM ================= -->
+    <!-- =====================================================
+         FORM
+    ====================================================== -->
+
     <form
       class="book-form"
-      @submit.prevent="submitBook"
+      @submit.prevent="submitForm"
     >
 
-      <!-- TITLE -->
-      <div class="form-group">
+      <!-- ===================================================
+           BOOK INFORMATION
+      ==================================================== -->
 
-        <label>
-          Book Title
-          <span>*</span>
-        </label>
+      <section class="form-card">
 
-        <input
-          v-model="form.title"
-          type="text"
-          placeholder="Enter book title"
-          required
-        />
+        <div class="section-header">
 
-      </div>
+          <div class="section-icon">
+            <i class="bi bi-book"></i>
+          </div>
 
+          <div>
 
-      <!-- AUTHOR -->
-      <div class="form-group">
+            <h3>
+              Book Information
+            </h3>
 
-        <label>
-          Author
-          <span>*</span>
-        </label>
+            <p>
+              Enter the basic information about the book.
+            </p>
 
-        <input
-          v-model="form.author"
-          type="text"
-          placeholder="Enter author name"
-          required
-        />
+          </div>
 
-      </div>
+        </div>
 
 
-      <!-- ISBN -->
-      <div class="form-group">
+        <!-- =================================================
+             FORM GRID
+        ================================================== -->
 
-        <label>
-          ISBN
-          <span>*</span>
-        </label>
+        <div class="form-grid">
 
-        <input
-          v-model="form.isbn"
-          type="text"
-          placeholder="Enter ISBN"
-          required
-        />
+          <!-- BOOK TITLE -->
 
-      </div>
+          <div class="form-group">
+
+            <label for="title">
+
+              Book Title
+
+              <span>*</span>
+
+            </label>
+
+            <input
+              id="title"
+              v-model="form.title"
+              type="text"
+              placeholder="Enter book title"
+              required
+            />
+
+          </div>
 
 
-      <!-- CATEGORY -->
-      <div class="form-group">
+          <!-- AUTHOR -->
 
-        <label>
-          Category
-          <span>*</span>
-        </label>
+          <div class="form-group">
 
-        <select
-          v-model="form.categoryId"
-          :disabled="loadingCategories"
-          required
-        >
+            <label for="author">
 
-          <option value="">
-            {{
-              loadingCategories
-                ? "Loading categories..."
-                : "Select category"
-            }}
-          </option>
+              Author
 
-          <option
-            v-for="category in categories"
-            :key="category.id"
-            :value="category.id"
+              <span>*</span>
+
+            </label>
+
+            <input
+              id="author"
+              v-model="form.author"
+              type="text"
+              placeholder="Enter author name"
+              required
+            />
+
+          </div>
+
+
+          <!-- ISBN -->
+
+          <div class="form-group">
+
+            <label for="isbn">
+
+              ISBN
+
+              <span>*</span>
+
+            </label>
+
+            <input
+              id="isbn"
+              v-model="form.isbn"
+              type="text"
+              placeholder="Enter ISBN"
+              required
+            />
+
+          </div>
+
+
+          <!-- CATEGORY -->
+
+          <div class="form-group">
+
+            <label for="category">
+
+              Category
+
+              <span>*</span>
+
+            </label>
+
+            <select
+              id="category"
+              v-model="form.categoryId"
+              required
+            >
+
+              <option value="">
+                Select category
+              </option>
+
+              <option
+                v-for="category in categories"
+                :key="category.id"
+                :value="category.id"
+              >
+                {{ category.name }}
+              </option>
+
+            </select>
+
+
+            <small
+              v-if="loadingCategories"
+              class="field-hint"
+            >
+              Loading categories...
+            </small>
+
+
+            <small
+              v-else-if="categories.length === 0"
+              class="field-hint warning"
+            >
+              No categories found.
+            </small>
+
+          </div>
+
+
+          <!-- LANGUAGE -->
+
+          <div class="form-group">
+
+            <label for="language">
+
+              Language
+
+              <span>*</span>
+
+            </label>
+
+            <select
+              id="language"
+              v-model="form.language"
+              required
+            >
+
+              <option value="">
+                Select language
+              </option>
+
+              <option value="Khmer">
+                Khmer
+              </option>
+
+              <option value="French">
+                French
+              </option>
+
+              <option value="English">
+                English
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- QUANTITY -->
+
+          <div class="form-group">
+
+            <label for="qty">
+
+              Quantity
+
+              <span>*</span>
+
+            </label>
+
+            <input
+              id="qty"
+              v-model.number="form.qty"
+              type="number"
+              min="1"
+              placeholder="Enter quantity"
+              required
+            />
+
+          </div>
+
+
+          <!-- PAGES -->
+
+          <div class="form-group">
+
+            <label for="pages">
+              Pages
+            </label>
+
+            <input
+              id="pages"
+              v-model.number="form.pages"
+              type="number"
+              min="1"
+              placeholder="Enter number of pages"
+            />
+
+          </div>
+
+
+          <!-- PUBLICATION DATE -->
+
+          <div class="form-group">
+
+            <label for="publishYear">
+
+              Publication Date
+
+              <span>*</span>
+
+            </label>
+
+            <input
+              id="publishYear"
+              v-model="form.publishYear"
+              type="date"
+              :min="minPublicationDate"
+              :max="maxPublicationDate"
+              required
+            />
+
+            <small class="field-hint">
+              Example: 2026-09-21
+            </small>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           BOOK DESCRIPTION
+      ==================================================== -->
+
+      <section class="form-card">
+
+        <div class="section-header">
+
+          <div class="section-icon">
+            <i class="bi bi-card-text"></i>
+          </div>
+
+          <div>
+
+            <h3>
+              Description
+            </h3>
+
+            <p>
+              Add a short description about the book.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="description">
+            Description
+          </label>
+
+          <textarea
+            id="description"
+            v-model="form.description"
+            rows="6"
+            placeholder="Enter book description..."
+          ></textarea>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           BOOK IMAGE
+      ==================================================== -->
+
+      <section class="form-card">
+
+        <div class="section-header">
+
+          <div class="section-icon">
+            <i class="bi bi-image"></i>
+          </div>
+
+          <div>
+
+            <h3>
+              Book Cover
+            </h3>
+
+            <p>
+              Upload a cover image for the book.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="image-upload-area">
+
+          <!-- IMAGE PREVIEW -->
+
+          <div
+            v-if="imagePreview"
+            class="image-preview"
           >
-            {{ category.name }}
-          </option>
 
-        </select>
-
-
-        <small
-          v-if="loadingCategories"
-          class="help-text"
-        >
-          Loading categories...
-        </small>
+            <img
+              :src="imagePreview"
+              alt="Book cover preview"
+            />
 
 
-        <small
-          v-if="
-            !loadingCategories &&
-            categories.length === 0
-          "
-          class="warning-text"
-        >
-          No categories found.
-        </small>
+            <button
+              type="button"
+              class="remove-image-btn"
+              @click="removeImage"
+            >
 
-      </div>
+              <i class="bi bi-x-lg"></i>
 
+            </button>
 
-      <!-- QUANTITY -->
-      <div class="form-group">
-
-        <label>
-          Quantity
-          <span>*</span>
-        </label>
-
-        <input
-          v-model.number="form.qty"
-          type="number"
-          min="1"
-          placeholder="Enter quantity"
-          required
-        />
-
-      </div>
+          </div>
 
 
-      <!-- PAGES -->
-      <div class="form-group">
+          <!-- UPLOAD -->
 
-        <label>
-          Pages
-        </label>
+          <label
+            v-else
+            for="bookImage"
+            class="upload-box"
+          >
 
-        <input
-          v-model.number="form.pages"
-          type="number"
-          min="1"
-          placeholder="Enter number of pages"
-        />
+            <div class="upload-icon">
 
-      </div>
+              <i class="bi bi-cloud-arrow-up"></i>
+
+            </div>
 
 
-      <!-- =====================================================
-           PUBLICATION DATE
-           DATE PICKER - NOT DROPDOWN
-      ====================================================== -->
-      <div class="form-group">
+            <h4>
+              Upload Book Cover
+            </h4>
 
-        <label>
-          Publication Year
-          <span>*</span>
-        </label>
 
-        <div class="date-input-wrapper">
+            <p>
+              Click to choose an image
+            </p>
 
-          <i class="bi bi-calendar3 date-icon"></i>
+
+            <span>
+              PNG, JPG or JPEG
+            </span>
+
+          </label>
+
 
           <input
-            v-model="form.publicationDate"
-            type="date"
-            :min="minPublicationDate"
-            :max="maxPublicationDate"
-            required
+            id="bookImage"
+            ref="fileInput"
+            type="file"
+            accept="image/png,image/jpeg,image/jpg"
+            hidden
+            @change="handleImageChange"
           />
 
         </div>
 
-        <small class="help-text">
-          Select the publication date from the calendar.
-        </small>
-
-      </div>
+      </section>
 
 
-      <!-- LANGUAGE -->
-      <div class="form-group">
+      <!-- ===================================================
+           FORM ACTIONS
+      ==================================================== -->
 
-        <label>
-          Language
-          <span>*</span>
-        </label>
-
-        <select
-          v-model="form.language"
-          required
-        >
-
-          <option value="">
-            Select language
-          </option>
-
-          <option value="Khmer">
-            Khmer
-          </option>
-
-          <option value="French">
-            French
-          </option>
-
-          <option value="English">
-            English
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <!-- DESCRIPTION -->
-      <div class="form-group full-width">
-
-        <label>
-          Description
-        </label>
-
-        <textarea
-          v-model="form.description"
-          rows="5"
-          placeholder="Enter book description"
-        ></textarea>
-
-      </div>
-
-
-      <!-- IMAGE -->
-      <div class="form-group full-width">
-
-        <label>
-          Book Image
-          <span>*</span>
-        </label>
-
-        <input
-          type="file"
-          accept="image/*"
-          @change="handleImageChange"
-          required
-        />
-
-        <small class="help-text">
-          Please select a book cover image.
-        </small>
-
-
-        <!-- IMAGE PREVIEW -->
-        <div
-          v-if="imagePreview"
-          class="image-preview"
-        >
-
-          <img
-            :src="imagePreview"
-            alt="Book Preview"
-          />
-
-          <button
-            type="button"
-            class="remove-image"
-            @click="removeImage"
-          >
-            <i class="bi bi-x"></i>
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <!-- CATEGORY PREVIEW -->
-      <div
-        v-if="selectedCategory"
-        class="category-preview"
-      >
-
-        <div class="category-icon">
-
-          {{
-            getInitial(
-              selectedCategory.name
-            )
-          }}
-
-        </div>
-
-        <div>
-
-          <p class="preview-label">
-            Selected Category
-          </p>
-
-          <p class="preview-name">
-            {{ selectedCategory.name }}
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <!-- BUTTONS -->
       <div class="form-actions">
 
         <button
           type="button"
           class="cancel-btn"
-          @click="closePage"
-          :disabled="saving"
+          :disabled="submitting"
+          @click="handleCancel"
         >
+
           Cancel
+
         </button>
 
 
         <button
           type="submit"
-          class="save-btn"
-          :disabled="saving"
+          class="submit-btn"
+          :disabled="submitting"
         >
 
           <i
-            v-if="saving"
-            class="bi bi-arrow-repeat spinning"
+            v-if="submitting"
+            class="bi bi-arrow-repeat spin"
           ></i>
 
+          <i
+            v-else
+            class="bi bi-plus-lg"
+          ></i>
+
+
           {{
-            saving
-              ? "Saving..."
-              : "Save Book"
+            submitting
+              ? "Adding Book..."
+              : "Add Book"
           }}
 
         </button>
@@ -385,68 +535,45 @@
     </form>
 
   </div>
+
 </template>
 
 
 <script setup>
 
 import {
-  ref,
   computed,
   onMounted,
+  ref,
   onBeforeUnmount
 } from "vue";
 
-import {
-  getCategories
-} from "../../service/categoryService";
 
 import {
   createBook
 } from "../../service/bookService";
 
 
-// =====================================================
-// EMITS
-// =====================================================
+import {
+  getCategories
+} from "../../service/categoryService";
+
+
+
+/* =========================================================
+   EMITS
+========================================================= */
 
 const emit = defineEmits([
-  "close",
-  "saved"
+  "saved",
+  "close"
 ]);
 
 
-// =====================================================
-// CATEGORIES
-// =====================================================
 
-const categories = ref([]);
-
-const loadingCategories = ref(false);
-
-
-// =====================================================
-// DATE
-// =====================================================
-
-// Current year
-const currentYear =
-  new Date().getFullYear();
-
-
-// Minimum date
-const minPublicationDate =
-  "1900-01-01";
-
-
-// Maximum date = today
-const maxPublicationDate =
-  new Date().toISOString().split("T")[0];
-
-
-// =====================================================
-// FORM
-// =====================================================
+/* =========================================================
+   FORM
+========================================================= */
 
 const form = ref({
 
@@ -462,147 +589,183 @@ const form = ref({
 
   pages: null,
 
-  // Date selected from calendar
-  publicationDate: "",
+  publishYear: "",
 
   language: "",
 
   description: "",
 
-  // New book is always Available
+  /*
+   * Status is automatically Available.
+   * It is not displayed in the form.
+   */
+
   status: "Available"
 
 });
 
 
-// =====================================================
-// IMAGE
-// =====================================================
 
-const imageFile = ref(null);
+/* =========================================================
+   STATE
+========================================================= */
 
-const imagePreview = ref("");
+const categories = ref([]);
 
+const loadingCategories = ref(false);
 
-// =====================================================
-// STATE
-// =====================================================
-
-const saving = ref(false);
+const submitting = ref(false);
 
 const errorMessage = ref("");
 
 const successMessage = ref("");
 
+const selectedImage = ref(null);
 
-// =====================================================
-// FETCH CATEGORIES
-// =====================================================
+const imagePreview = ref("");
+
+const fileInput = ref(null);
+
+
+
+/* =========================================================
+   DATE LIMITS
+========================================================= */
+
+const today = new Date();
+
+
+const currentDate = computed(() => {
+
+  const year =
+    today.getFullYear();
+
+
+  const month =
+    String(
+      today.getMonth() + 1
+    ).padStart(2, "0");
+
+
+  const day =
+    String(
+      today.getDate()
+    ).padStart(2, "0");
+
+
+  return `${year}-${month}-${day}`;
+
+});
+
+
+const minPublicationDate =
+  "1900-01-01";
+
+
+const maxPublicationDate =
+  computed(() => {
+
+    return currentDate.value;
+
+  });
+
+
+
+/* =========================================================
+   FETCH CATEGORIES
+========================================================= */
 
 async function fetchCategories() {
 
   loadingCategories.value = true;
-
-  errorMessage.value = "";
 
   try {
 
     const response =
       await getCategories();
 
-    console.log(
-      "CATEGORY RESPONSE:",
-      response
-    );
+
+    let categoryData = [];
 
 
     if (
-      response &&
-      Array.isArray(response.data)
-    ) {
-
-      categories.value =
-        response.data;
-
-    } else if (
       Array.isArray(response)
     ) {
 
-      categories.value =
+      categoryData =
         response;
 
-    } else {
+    }
 
-      categories.value = [];
+    else if (
+      Array.isArray(
+        response?.data
+      )
+    ) {
+
+      categoryData =
+        response.data;
+
+    }
+
+    else if (
+      Array.isArray(
+        response?.data?.data
+      )
+    ) {
+
+      categoryData =
+        response.data.data;
+
+    }
+
+    else if (
+      Array.isArray(
+        response?.result
+      )
+    ) {
+
+      categoryData =
+        response.result;
 
     }
 
 
-    console.log(
-      "CATEGORIES:",
-      categories.value
-    );
+    categories.value =
+      categoryData;
 
-  } catch (error) {
+  }
+
+  catch (error) {
 
     console.error(
-      "Fetch categories error:",
+      "Failed to fetch categories:",
       error
     );
 
+
+    categories.value = [];
+
+
     errorMessage.value =
-      "Failed to load categories.";
+      "Failed to load categories. Please try again.";
 
-  } finally {
+  }
 
-    loadingCategories.value = false;
+  finally {
+
+    loadingCategories.value =
+      false;
 
   }
 
 }
 
 
-// =====================================================
-// SELECTED CATEGORY
-// =====================================================
 
-const selectedCategory =
-  computed(() => {
-
-    if (!form.value.categoryId) {
-      return null;
-    }
-
-    return categories.value.find(
-      category =>
-        String(category.id) ===
-        String(form.value.categoryId)
-    );
-
-  });
-
-
-// =====================================================
-// CATEGORY INITIAL
-// =====================================================
-
-function getInitial(name) {
-
-  if (!name) {
-    return "?";
-  }
-
-  return name
-    .trim()
-    .charAt(0)
-    .toUpperCase();
-
-}
-
-
-// =====================================================
-// IMAGE CHANGE
-// =====================================================
+/* =========================================================
+   IMAGE CHANGE
+========================================================= */
 
 function handleImageChange(event) {
 
@@ -612,65 +775,70 @@ function handleImageChange(event) {
 
   if (!file) {
 
-    imageFile.value = null;
-
-    imagePreview.value = "";
-
     return;
 
   }
 
 
-  // ===================================================
-  // CHECK IMAGE TYPE
-  // ===================================================
+  errorMessage.value = "";
 
-  if (!file.type.startsWith("image/")) {
+
+  const allowedTypes = [
+
+    "image/jpeg",
+
+    "image/jpg",
+
+    "image/png"
+
+  ];
+
+
+  if (
+    !allowedTypes.includes(
+      file.type
+    )
+  ) {
 
     errorMessage.value =
-      "Please select a valid image file.";
+      "Please select a PNG, JPG, or JPEG image.";
+
 
     event.target.value = "";
 
-    imageFile.value = null;
-
-    imagePreview.value = "";
 
     return;
 
   }
 
 
-  // ===================================================
-  // CHECK IMAGE SIZE
-  // ===================================================
+  const maxSize =
+    5 * 1024 * 1024;
 
-  if (file.size > 5 * 1024 * 1024) {
+
+  if (
+    file.size > maxSize
+  ) {
 
     errorMessage.value =
       "Image size must be less than 5MB.";
 
+
     event.target.value = "";
 
-    imageFile.value = null;
-
-    imagePreview.value = "";
 
     return;
 
   }
 
 
-  errorMessage.value = "";
+  selectedImage.value =
+    file;
 
-  imageFile.value = file;
 
-
-  // ===================================================
-  // REMOVE OLD PREVIEW URL
-  // ===================================================
-
-  if (imagePreview.value) {
+  if (
+    imagePreview.value
+  ) {
 
     URL.revokeObjectURL(
       imagePreview.value
@@ -679,29 +847,24 @@ function handleImageChange(event) {
   }
 
 
-  // ===================================================
-  // CREATE NEW PREVIEW
-  // ===================================================
-
   imagePreview.value =
-    URL.createObjectURL(file);
-
-
-  console.log(
-    "BOOK IMAGE:",
-    imageFile.value
-  );
+    URL.createObjectURL(
+      file
+    );
 
 }
 
 
-// =====================================================
-// REMOVE IMAGE
-// =====================================================
+
+/* =========================================================
+   REMOVE IMAGE
+========================================================= */
 
 function removeImage() {
 
-  if (imagePreview.value) {
+  if (
+    imagePreview.value
+  ) {
 
     URL.revokeObjectURL(
       imagePreview.value
@@ -709,211 +872,244 @@ function removeImage() {
 
   }
 
-  imageFile.value = null;
 
-  imagePreview.value = "";
-
-}
+  selectedImage.value =
+    null;
 
 
-// =====================================================
-// GET PUBLICATION YEAR
-// =====================================================
+  imagePreview.value =
+    "";
 
-function getPublicationYear() {
 
-  if (!form.value.publicationDate) {
-    return null;
+  if (
+    fileInput.value
+  ) {
+
+    fileInput.value.value =
+      "";
+
   }
 
-
-  /*
-   * Example:
-   *
-   * publicationDate = "2026-08-02"
-   *
-   * Result:
-   *
-   * publicationYear = 2026
-   */
-
-  const year =
-    Number(
-      form.value.publicationDate.substring(
-        0,
-        4
-      )
-    );
-
-
-  return year;
-
 }
 
 
-// =====================================================
-// SUBMIT BOOK
-// =====================================================
 
-async function submitBook() {
+/* =========================================================
+   VALIDATE FORM
+========================================================= */
+
+function validateForm() {
 
   errorMessage.value = "";
 
-  successMessage.value = "";
 
+  /* TITLE */
 
-  // ===================================================
-  // VALIDATION
-  // ===================================================
-
-  if (!form.value.title.trim()) {
+  if (
+    !form.value.title.trim()
+  ) {
 
     errorMessage.value =
-      "Book title is required.";
+      "Please enter the book title.";
 
-    return;
+    return false;
 
   }
 
 
-  if (!form.value.author.trim()) {
+  /* AUTHOR */
+
+  if (
+    !form.value.author.trim()
+  ) {
 
     errorMessage.value =
-      "Author is required.";
+      "Please enter the author name.";
 
-    return;
+    return false;
 
   }
 
 
-  if (!form.value.isbn.trim()) {
+  /* ISBN */
+
+  if (
+    !form.value.isbn.trim()
+  ) {
 
     errorMessage.value =
-      "ISBN is required.";
+      "Please enter the ISBN.";
 
-    return;
+    return false;
 
   }
 
 
-  if (!form.value.categoryId) {
+  /* CATEGORY */
+
+  if (
+
+    form.value.categoryId === ""
+
+    ||
+
+    form.value.categoryId === null
+
+    ||
+
+    form.value.categoryId === undefined
+
+  ) {
 
     errorMessage.value =
       "Please select a category.";
 
-    return;
+    return false;
 
   }
 
 
-  // ===================================================
-  // QUANTITY
-  // ===================================================
+  /* LANGUAGE */
 
   if (
-    !form.value.qty ||
-    Number(form.value.qty) < 1
+    !form.value.language
+  ) {
+
+    errorMessage.value =
+      "Please select a language.";
+
+    return false;
+
+  }
+
+
+  /* QUANTITY */
+
+  if (
+
+    form.value.qty === null
+
+    ||
+
+    form.value.qty === undefined
+
+    ||
+
+    Number(
+      form.value.qty
+    ) < 1
+
   ) {
 
     errorMessage.value =
       "Quantity must be at least 1.";
 
-    return;
+    return false;
 
   }
 
 
-  // ===================================================
-  // PAGES
-  // ===================================================
+  /* PAGES */
 
   if (
-    form.value.pages !== null &&
-    form.value.pages !== "" &&
-    Number(form.value.pages) < 1
+
+    form.value.pages !== null
+
+    &&
+
+    form.value.pages !== ""
+
+    &&
+
+    Number(
+      form.value.pages
+    ) < 1
+
   ) {
 
     errorMessage.value =
-      "Pages must be at least 1.";
+      "Pages must be greater than 0.";
 
-    return;
+    return false;
 
   }
 
 
-  // ===================================================
-  // PUBLICATION DATE
-  // ===================================================
+  /* PUBLICATION DATE */
 
-  if (!form.value.publicationDate) {
+  if (
+    !form.value.publishYear
+  ) {
 
     errorMessage.value =
       "Please select the publication date.";
 
-    return;
+    return false;
 
   }
 
 
-  // Get year from selected date
-  const publicationYear =
-    getPublicationYear();
-
-
   if (
-    !publicationYear ||
-    publicationYear < 1900 ||
-    publicationYear > currentYear
+
+    !/^\d{4}-\d{2}-\d{2}$/.test(
+      form.value.publishYear
+    )
+
   ) {
 
     errorMessage.value =
       "Please select a valid publication date.";
 
-    return;
+    return false;
 
   }
 
 
-  // ===================================================
-  // LANGUAGE
-  // ===================================================
+  if (
 
-  if (!form.value.language) {
+    form.value.publishYear >
+    maxPublicationDate.value
+
+  ) {
 
     errorMessage.value =
-      "Please select a language.";
+      "Publication date cannot be in the future.";
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+
+/* =========================================================
+   SUBMIT FORM
+========================================================= */
+
+async function submitForm() {
+
+  successMessage.value = "";
+
+  errorMessage.value = "";
+
+
+  if (
+    !validateForm()
+  ) {
 
     return;
 
   }
 
 
-  // ===================================================
-  // IMAGE REQUIRED
-  // ===================================================
-
-  if (!imageFile.value) {
-
-    errorMessage.value =
-      "Book image is required.";
-
-    return;
-
-  }
-
-
-  // ===================================================
-  // START SAVING
-  // ===================================================
-
-  saving.value = true;
+  submitting.value = true;
 
 
   try {
-
-    // =================================================
-    // CREATE REQUEST DATA
-    // =================================================
 
     const bookRequest = {
 
@@ -922,75 +1118,92 @@ async function submitBook() {
           form.value.categoryId
         ),
 
+
       title:
         form.value.title.trim(),
+
 
       qty:
         Number(
           form.value.qty
         ),
 
+
       description:
         form.value.description.trim(),
+
 
       author:
         form.value.author.trim(),
 
+
       pages:
-        form.value.pages !== null &&
+
+        form.value.pages !== null
+
+        &&
+
         form.value.pages !== ""
-          ? Number(form.value.pages)
+
+          ? Number(
+              form.value.pages
+            )
+
           : null,
 
-      // ===============================================
-      // SEND ONLY YEAR TO BACKEND
-      // ===============================================
-
-      publicationYear:
-        publicationYear,
 
       isbn:
         form.value.isbn.trim(),
 
+
       language:
         form.value.language,
 
-      // Always Available
+
+      /*
+       * Automatically Available.
+       * No status input is shown.
+       */
+
       status:
-        "Available"
+        "Available",
+
+
+      publishYear:
+        String(
+          form.value.publishYear
+        )
 
     };
 
 
     console.log(
-      "SELECTED PUBLICATION DATE:",
-      form.value.publicationDate
+      "========== BOOK REQUEST =========="
     );
 
-    console.log(
-      "PUBLICATION YEAR:",
-      publicationYear
-    );
 
     console.log(
-      "BOOK REQUEST TO BACKEND:",
+      "Book Request:",
       bookRequest
     );
 
+
     console.log(
-      "BOOK IMAGE:",
-      imageFile.value
+      "Publish Year:",
+      bookRequest.publishYear,
+      typeof bookRequest.publishYear
     );
 
 
-    // =================================================
-    // CALL BACKEND
-    // =================================================
+    console.log(
+      "=================================="
+    );
+
 
     const response =
       await createBook(
         bookRequest,
-        imageFile.value
+        selectedImage.value
       );
 
 
@@ -1000,164 +1213,169 @@ async function submitBook() {
     );
 
 
-    // =================================================
-    // SUCCESS
-    // =================================================
-
     successMessage.value =
-      "Book created successfully!";
+      "Book added successfully.";
 
 
-    // =================================================
-    // GET CREATED BOOK
-    // =================================================
-
-    const createdBook =
-      response?.data || response;
-
-
-    // =================================================
-    // ADD CATEGORY INFORMATION
-    // =================================================
-
-    const newBook = {
-
-      ...createdBook,
-
-      categoryId:
-        Number(
-          form.value.categoryId
-        ),
-
-      category:
-        selectedCategory.value?.name || "",
-
-      quantity:
-        Number(
-          form.value.qty
-        ),
-
-      qty:
-        Number(
-          form.value.qty
-        ),
-
-      publicationYear:
-        publicationYear,
-
-      status:
-        "Available",
-
-      language:
-        form.value.language
-
-    };
-
-
-    console.log(
-      "NEW BOOK:",
-      newBook
-    );
-
-
-    // =================================================
-    // SEND TO PARENT
-    // =================================================
+    /*
+     * Notify parent that book was saved.
+     */
 
     emit(
       "saved",
-      newBook
+      {
+
+        ...bookRequest,
+
+        publishYear:
+          bookRequest.publishYear,
+
+        image:
+          response?.image
+          ||
+
+          response?.data?.image
+          ||
+
+          ""
+
+      }
     );
 
 
-  } catch (error) {
+    /*
+     * Reset form after successful save.
+     */
+
+    resetForm();
+
+  }
+
+  catch (error) {
 
     console.error(
-      "Save book error:",
+      "Failed to add book:",
       error
     );
 
 
-    // =================================================
-    // ERROR HANDLING
-    // =================================================
+    errorMessage.value =
+      error?.message
+      ||
 
-    if (
-      error?.response?.data
-    ) {
+      error?.response?.data?.message
+      ||
 
-      const backendError =
-        error.response.data;
+      error?.response?.data?.msg
+      ||
 
+      "Failed to add book. Please try again.";
 
-      if (
-        typeof backendError ===
-        "string"
-      ) {
+  }
 
-        errorMessage.value =
-          backendError;
+  finally {
 
-      } else {
-
-        errorMessage.value =
-          backendError.msg ||
-          backendError.message ||
-          backendError.error ||
-          "Failed to create book.";
-
-      }
-
-    } else {
-
-      errorMessage.value =
-        error?.message ||
-        "Failed to create book.";
-
-    }
-
-  } finally {
-
-    saving.value = false;
+    submitting.value =
+      false;
 
   }
 
 }
 
 
-// =====================================================
-// CLOSE
-// =====================================================
 
-function closePage() {
+/* =========================================================
+   RESET FORM
+========================================================= */
+
+function resetForm() {
+
+  form.value = {
+
+    title: "",
+
+    author: "",
+
+    isbn: "",
+
+    categoryId: "",
+
+    qty: 1,
+
+    pages: null,
+
+    publishYear: "",
+
+    language: "",
+
+    description: "",
+
+    status: "Available"
+
+  };
+
+
+  removeImage();
+
+
+  errorMessage.value =
+    "";
+
+}
+
+
+
+/* =========================================================
+   BACK / CANCEL
+========================================================= */
+
+function handleCancel() {
+
+  /*
+   * Do not close while submitting.
+   */
+
+  if (
+    submitting.value
+  ) {
+
+    return;
+
+  }
+
+
+  /*
+   * Tell Books.vue to return
+   * to the Book List.
+   */
 
   emit("close");
 
 }
 
 
-// =====================================================
-// LOAD
-// =====================================================
+
+/* =========================================================
+   MOUNT
+========================================================= */
 
 onMounted(() => {
-
-  // New book is always Available
-  form.value.status =
-    "Available";
 
   fetchCategories();
 
 });
 
 
-// =====================================================
-// CLEANUP
-// =====================================================
+
+/* =========================================================
+   CLEANUP
+========================================================= */
 
 onBeforeUnmount(() => {
 
-  if (imagePreview.value) {
+  if (
+    imagePreview.value
+  ) {
 
     URL.revokeObjectURL(
       imagePreview.value
@@ -1172,309 +1390,384 @@ onBeforeUnmount(() => {
 
 <style scoped>
 
+/* =========================================================
+   PAGE
+========================================================= */
+
 .add-book-page {
 
-  min-height:
-    calc(100vh - 70px);
+  min-height: 100vh;
 
-  padding:
-    30px;
+  background: #f8fafc;
 
-  background:
-    #f8fafc;
-
-  box-sizing:
-    border-box;
+  box-sizing: border-box;
 
 }
 
 
-/* =====================================================
+
+/* =========================================================
    HEADER
-===================================================== */
+========================================================= */
 
 .page-header {
 
-  display:
-    flex;
+  max-width: 1100px;
 
-  justify-content:
-    space-between;
+  margin: 0 auto 25px;
 
-  align-items:
-    center;
+  display: flex;
 
-  margin-bottom:
-    25px;
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
 
 }
 
 
-.page-header h1 {
+.page-header h2 {
 
-  margin:
-    0;
+  margin: 0;
 
-  font-size:
-    28px;
+  color: #0f172a;
 
-  font-weight:
-    700;
+  font-size: 28px;
 
-  color:
-    #172033;
+  font-weight: 700;
 
 }
 
 
 .page-header p {
 
-  margin:
-    6px 0 0;
+  margin: 6px 0 0;
 
-  color:
-    #7b8497;
+  color: #64748b;
 
-  font-size:
-    14px;
+  font-size: 14px;
 
 }
 
 
-/* =====================================================
-   BACK
-===================================================== */
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
 
 .back-btn {
 
-  display:
-    flex;
+  border: 1px solid #dbeafe;
 
-  align-items:
-    center;
+  background: #ffffff;
 
-  gap:
-    8px;
+  color: #2563eb;
 
-  padding:
-    10px 18px;
+  padding: 10px 17px;
 
-  border:
-    1px solid #dfe3eb;
+  border-radius: 10px;
 
-  background:
-    white;
+  display: flex;
 
-  color:
-    #374151;
+  align-items: center;
 
-  border-radius:
-    8px;
+  gap: 8px;
 
-  cursor:
-    pointer;
+  font-size: 14px;
 
-  font-weight:
-    600;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
 
 }
 
 
 .back-btn:hover {
 
-  background:
-    #f3f4f6;
+  background: #eff6ff;
+
+  border-color: #bfdbfe;
 
 }
 
 
-/* =====================================================
-   ERROR
-===================================================== */
 
-.error-message {
+/* =========================================================
+   ALERT
+========================================================= */
 
-  display:
-    flex;
+.alert-message {
 
-  align-items:
-    center;
+  max-width: 1100px;
 
-  gap:
-    8px;
+  margin: 0 auto 20px;
 
-  margin-bottom:
-    20px;
+  padding: 13px 16px;
 
-  padding:
-    13px 16px;
+  border-radius: 10px;
 
-  background:
-    #fef2f2;
+  display: flex;
 
-  color:
-    #dc2626;
+  align-items: center;
 
-  border:
-    1px solid #fecaca;
+  gap: 10px;
 
-  border-radius:
-    8px;
+  font-size: 14px;
 
 }
 
 
-/* =====================================================
-   SUCCESS
-===================================================== */
+.alert-message.error {
 
-.success-message {
+  color: #b91c1c;
 
-  display:
-    flex;
+  background: #fef2f2;
 
-  align-items:
-    center;
-
-  gap:
-    8px;
-
-  margin-bottom:
-    20px;
-
-  padding:
-    13px 16px;
-
-  background:
-    #ecfdf5;
-
-  color:
-    #15803d;
-
-  border:
-    1px solid #bbf7d0;
-
-  border-radius:
-    8px;
+  border: 1px solid #fecaca;
 
 }
 
 
-/* =====================================================
+.alert-message.success {
+
+  color: #15803d;
+
+  background: #f0fdf4;
+
+  border: 1px solid #bbf7d0;
+
+}
+
+
+
+/* =========================================================
    FORM
-===================================================== */
+========================================================= */
 
 .book-form {
 
-  display:
-    grid;
+  max-width: 1100px;
 
-  grid-template-columns:
-    1fr 1fr;
+  margin: 0 auto;
 
-  gap:
-    22px;
+  display: flex;
 
-  padding:
-    30px;
+  flex-direction: column;
 
-  background:
-    white;
-
-  border:
-    1px solid #e5e7eb;
-
-  border-radius:
-    12px;
-
-  box-shadow:
-    0 2px 8px
-    rgba(0, 0, 0, 0.04);
+  gap: 20px;
 
 }
 
+
+
+/* =========================================================
+   FORM CARD
+========================================================= */
+
+.form-card {
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 16px;
+
+  padding: 25px;
+
+  box-shadow:
+    0 4px 15px rgba(
+      15,
+      23,
+      42,
+      0.04
+    );
+
+}
+
+
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+.section-header {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  margin-bottom: 24px;
+
+  padding-bottom: 18px;
+
+  border-bottom:
+    1px solid #f1f5f9;
+
+}
+
+
+.section-icon {
+
+  width: 42px;
+
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border-radius: 11px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 19px;
+
+}
+
+
+.section-header h3 {
+
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 18px;
+
+  font-weight: 700;
+
+}
+
+
+.section-header p {
+
+  margin: 3px 0 0;
+
+  color: #64748b;
+
+  font-size: 13px;
+
+}
+
+
+
+/* =========================================================
+   FORM GRID
+========================================================= */
+
+.form-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 20px;
+
+}
+
+
+
+/* =========================================================
+   FORM GROUP
+========================================================= */
 
 .form-group {
 
-  display:
-    flex;
+  display: flex;
 
-  flex-direction:
-    column;
+  flex-direction: column;
 
-}
+  gap: 7px;
 
-
-.form-group.full-width {
-
-  grid-column:
-    1 / -1;
+  min-width: 0;
 
 }
 
 
 .form-group label {
 
-  margin-bottom:
-    8px;
+  color: #334155;
 
-  font-size:
-    14px;
+  font-size: 14px;
 
-  font-weight:
-    600;
-
-  color:
-    #374151;
+  font-weight: 600;
 
 }
 
 
 .form-group label span {
 
-  color:
-    #dc2626;
+  color: #ef4444;
 
 }
 
 
-/* =====================================================
+
+/* =========================================================
    INPUT / SELECT / TEXTAREA
-===================================================== */
+========================================================= */
 
 .form-group input,
 .form-group select,
 .form-group textarea {
 
-  width:
-    100%;
+  width: 100%;
 
-  box-sizing:
-    border-box;
-
-  padding:
-    11px 13px;
+  box-sizing: border-box;
 
   border:
-    1px solid #d1d5db;
+    1px solid #cbd5e1;
 
-  border-radius:
-    8px;
+  border-radius: 10px;
 
-  background:
-    white;
+  background: #ffffff;
 
-  color:
-    #374151;
+  color: #0f172a;
 
-  outline:
-    none;
+  font-family: inherit;
 
-  font-size:
-    14px;
+  font-size: 14px;
+
+  outline: none;
 
   transition:
-    0.2s;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+}
+
+
+.form-group input,
+.form-group select {
+
+  height: 44px;
+
+  padding: 0 13px;
+
+}
+
+
+.form-group textarea {
+
+  padding: 12px 13px;
+
+  resize: vertical;
+
+  min-height: 140px;
 
 }
 
@@ -1483,435 +1776,297 @@ onBeforeUnmount(() => {
 .form-group select:focus,
 .form-group textarea:focus {
 
-  border-color:
-    #2563eb;
+  border-color: #60a5fa;
 
   box-shadow:
     0 0 0 3px
-    rgba(37, 99, 235, 0.1);
+    rgba(
+      96,
+      165,
+      250,
+      0.12
+    );
 
 }
 
 
-.form-group textarea {
+.form-group input::placeholder,
+.form-group textarea::placeholder {
 
-  resize:
-    vertical;
-
-}
-
-
-/* =====================================================
-   SELECT
-===================================================== */
-
-.form-group select {
-
-  cursor:
-    pointer;
-
-  appearance:
-    auto;
+  color: #94a3b8;
 
 }
 
 
-/* =====================================================
-   DATE PICKER
-===================================================== */
+.form-group select:disabled {
 
-.date-input-wrapper {
+  background: #f8fafc;
 
-  position:
-    relative;
+  color: #64748b;
 
-  width:
-    100%;
+  cursor: not-allowed;
 
 }
 
 
-.date-input-wrapper input[type="date"] {
 
-  width:
-    100%;
+/* =========================================================
+   FIELD HINT
+========================================================= */
 
-  height:
-    44px;
+.field-hint {
 
-  padding:
-    11px 45px 11px 42px;
+  color: #94a3b8;
+
+  font-size: 12px;
+
+}
+
+
+.field-hint.warning {
+
+  color: #d97706;
+
+}
+
+
+
+/* =========================================================
+   IMAGE UPLOAD
+========================================================= */
+
+.image-upload-area {
+
+  width: 100%;
+
+}
+
+
+.upload-box {
+
+  min-height: 230px;
 
   border:
-    1px solid #d1d5db;
+    2px dashed #cbd5e1;
 
-  border-radius:
-    8px;
+  border-radius: 14px;
 
-  background:
-    white;
+  display: flex;
 
-  color:
-    #374151;
+  flex-direction: column;
 
-  font-size:
-    14px;
+  align-items: center;
 
-  cursor:
-    pointer;
+  justify-content: center;
 
-}
+  text-align: center;
 
+  cursor: pointer;
 
-.date-input-wrapper input[type="date"]:focus {
-
-  border-color:
-    #2563eb;
-
-  box-shadow:
-    0 0 0 3px
-    rgba(37, 99, 235, 0.1);
-
-  outline:
-    none;
+  transition: 0.2s ease;
 
 }
 
 
-/*
-  Calendar icon
-*/
+.upload-box:hover {
 
-.date-icon {
+  border-color: #60a5fa;
 
-  position:
-    absolute;
-
-  left:
-    14px;
-
-  top:
-    50%;
-
-  transform:
-    translateY(-50%);
-
-  color:
-    #6366f1;
-
-  font-size:
-    18px;
-
-  pointer-events:
-    none;
-
-  z-index:
-    2;
+  background: #f8fbff;
 
 }
 
 
-/*
-  Browser calendar button
+.upload-icon {
 
-  This keeps the native calendar popup.
-*/
+  width: 56px;
 
-.date-input-wrapper
-input[type="date"]::-webkit-calendar-picker-indicator {
+  height: 56px;
 
-  position:
-    absolute;
+  margin-bottom: 12px;
 
-  right:
-    12px;
+  border-radius: 50%;
 
-  width:
-    20px;
+  background: #eff6ff;
 
-  height:
-    20px;
+  color: #2563eb;
 
-  cursor:
-    pointer;
+  display: flex;
 
-  opacity:
-    1;
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 25px;
 
 }
 
 
-/* =====================================================
-   HELP
-===================================================== */
+.upload-box h4 {
 
-.help-text {
+  margin: 0;
 
-  margin-top:
-    6px;
+  color: #334155;
 
-  color:
-    #6b7280;
+  font-size: 15px;
 
-  font-size:
-    12px;
+  font-weight: 600;
 
 }
 
 
-.warning-text {
+.upload-box p {
 
-  margin-top:
-    6px;
+  margin: 7px 0 3px;
 
-  color:
-    #dc2626;
+  color: #64748b;
 
-  font-size:
-    12px;
+  font-size: 13px;
 
 }
 
 
-/* =====================================================
+.upload-box span {
+
+  color: #94a3b8;
+
+  font-size: 12px;
+
+}
+
+
+
+/* =========================================================
    IMAGE PREVIEW
-===================================================== */
+========================================================= */
 
 .image-preview {
 
-  position:
-    relative;
+  position: relative;
 
-  width:
-    180px;
+  width: 190px;
 
-  height:
-    240px;
+  height: 250px;
 
-  margin-top:
-    15px;
+  margin: 0 auto;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  background: #f1f5f9;
 
   border:
-    1px solid #e5e7eb;
-
-  border-radius:
-    10px;
-
-  overflow:
-    hidden;
-
-  background:
-    #f8fafc;
+    1px solid #e2e8f0;
 
 }
 
 
 .image-preview img {
 
-  width:
-    100%;
+  width: 100%;
 
-  height:
-    100%;
+  height: 100%;
 
-  object-fit:
-    cover;
+  object-fit: cover;
+
+  display: block;
 
 }
 
 
-.remove-image {
+.remove-image-btn {
 
-  position:
-    absolute;
+  position: absolute;
 
-  top:
-    8px;
+  top: 10px;
 
-  right:
-    8px;
+  right: 10px;
 
-  width:
-    32px;
+  width: 34px;
 
-  height:
-    32px;
+  height: 34px;
 
-  display:
-    flex;
+  border: none;
 
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  border:
-    none;
-
-  border-radius:
-    50%;
+  border-radius: 50%;
 
   background:
-    #dc2626;
+    rgba(
+      15,
+      23,
+      42,
+      0.75
+    );
 
-  color:
-    white;
+  color: #ffffff;
 
-  cursor:
-    pointer;
+  display: flex;
 
-  font-size:
-    16px;
+  align-items: center;
 
-}
+  justify-content: center;
 
+  cursor: pointer;
 
-.remove-image:hover {
-
-  background:
-    #b91c1c;
-
-}
-
-
-/* =====================================================
-   CATEGORY PREVIEW
-===================================================== */
-
-.category-preview {
-
-  grid-column:
-    1 / -1;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    12px;
-
-  padding:
-    14px;
-
-  background:
-    #eff6ff;
-
-  border:
-    1px solid #bfdbfe;
-
-  border-radius:
-    10px;
+  transition: 0.2s ease;
 
 }
 
 
-.category-icon {
+.remove-image-btn:hover {
 
-  width:
-    42px;
-
-  height:
-    42px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  border-radius:
-    8px;
-
-  background:
-    #2563eb;
-
-  color:
-    white;
-
-  font-weight:
-    700;
+  background: #dc2626;
 
 }
 
 
-.preview-label {
 
-  margin:
-    0;
-
-  font-size:
-    12px;
-
-  color:
-    #6b7280;
-
-}
-
-
-.preview-name {
-
-  margin:
-    3px 0 0;
-
-  font-size:
-    15px;
-
-  font-weight:
-    600;
-
-  color:
-    #1f2937;
-
-}
-
-
-/* =====================================================
-   ACTIONS
-===================================================== */
+/* =========================================================
+   FORM ACTIONS
+========================================================= */
 
 .form-actions {
 
-  grid-column:
-    1 / -1;
+  display: flex;
 
-  display:
-    flex;
+  justify-content: flex-end;
 
-  justify-content:
-    flex-end;
+  gap: 12px;
 
-  gap:
-    12px;
-
-  padding-top:
-    20px;
-
-  border-top:
-    1px solid #e5e7eb;
+  padding-bottom: 30px;
 
 }
 
 
 .cancel-btn,
-.save-btn {
+.submit-btn {
 
-  padding:
-    11px 22px;
+  min-width: 120px;
 
-  border-radius:
-    8px;
+  height: 44px;
 
-  font-weight:
-    600;
+  padding: 0 18px;
 
-  cursor:
-    pointer;
+  border-radius: 10px;
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
 
 }
 
@@ -1919,78 +2074,59 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .cancel-btn {
 
   border:
-    1px solid #d1d5db;
+    1px solid #cbd5e1;
 
-  background:
-    white;
+  background: #ffffff;
 
-  color:
-    #374151;
+  color: #475569;
 
 }
 
 
-.cancel-btn:hover {
+.cancel-btn:hover:not(:disabled) {
 
-  background:
-    #f3f4f6;
+  background: #f8fafc;
+
+  border-color: #94a3b8;
 
 }
 
 
-.save-btn {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  gap:
-    8px;
-
-  min-width:
-    130px;
+.submit-btn {
 
   border:
-    none;
+    1px solid #2563eb;
 
-  background:
-    #2563eb;
+  background: #2563eb;
 
-  color:
-    white;
+  color: #ffffff;
 
 }
 
 
-.save-btn:hover {
+.submit-btn:hover:not(:disabled) {
 
-  background:
-    #1d4ed8;
-
-}
-
-
-.save-btn:disabled {
-
-  background:
-    #93c5fd;
-
-  cursor:
-    not-allowed;
+  background: #1d4ed8;
 
 }
 
 
-/* =====================================================
-   SPINNING
-===================================================== */
+.cancel-btn:disabled,
+.submit-btn:disabled {
 
-.spinning {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+
+}
+
+
+
+/* =========================================================
+   SPIN
+========================================================= */
+
+.spin {
 
   animation:
     spin 1s linear infinite;
@@ -2001,28 +2137,33 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @keyframes spin {
 
   from {
+
     transform:
       rotate(0deg);
+
   }
 
   to {
+
     transform:
       rotate(360deg);
+
   }
 
 }
 
 
-/* =====================================================
-   RESPONSIVE
-===================================================== */
+
+/* =========================================================
+   TABLET
+========================================================= */
 
 @media (max-width: 768px) {
 
   .add-book-page {
 
     padding:
-      20px;
+      25px 18px;
 
   }
 
@@ -2032,53 +2173,63 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     align-items:
       flex-start;
 
-    gap:
-      15px;
+  }
+
+
+  .page-header h2 {
+
+    font-size: 24px;
 
   }
 
 
-  .book-form {
+  .form-card {
+
+    padding: 20px;
+
+  }
+
+
+  .form-grid {
 
     grid-template-columns:
-      1fr;
-
-    padding:
-      20px;
-
-  }
-
-
-  .form-group.full-width,
-  .category-preview,
-  .form-actions {
-
-    grid-column:
-      1;
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
 
   }
 
 }
 
 
-/* =====================================================
-   SMALL MOBILE
-===================================================== */
 
-@media (max-width: 500px) {
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 550px) {
+
+  .add-book-page {
+
+    padding:
+      18px 12px;
+
+  }
+
 
   .page-header {
 
     flex-direction:
       column;
 
+    align-items:
+      stretch;
+
   }
 
 
   .back-btn {
-
-    width:
-      100%;
 
     justify-content:
       center;
@@ -2086,19 +2237,75 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
 
+  .page-header h2 {
+
+    font-size: 22px;
+
+  }
+
+
+  .form-card {
+
+    padding: 16px;
+
+    border-radius: 13px;
+
+  }
+
+
+  .section-header {
+
+    margin-bottom: 18px;
+
+  }
+
+
+  .section-icon {
+
+    width: 38px;
+
+    height: 38px;
+
+  }
+
+
+  .section-header h3 {
+
+    font-size: 16px;
+
+  }
+
+
+  .form-grid {
+
+    grid-template-columns: 1fr;
+
+    gap: 16px;
+
+  }
+
+
   .form-actions {
 
     flex-direction:
-      column;
+      column-reverse;
 
   }
 
 
   .cancel-btn,
-  .save-btn {
+  .submit-btn {
 
-    width:
-      100%;
+    width: 100%;
+
+  }
+
+
+  .image-preview {
+
+    width: 160px;
+
+    height: 215px;
 
   }
 
