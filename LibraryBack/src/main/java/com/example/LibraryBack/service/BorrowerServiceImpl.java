@@ -2,6 +2,7 @@ package com.example.LibraryBack.service;
 
 import com.example.LibraryBack.dto.request.BorrowerRequest;
 import com.example.LibraryBack.dto.response.BorrowerResponse;
+import com.example.LibraryBack.dto.response.FineResponse;
 import com.example.LibraryBack.entity.Book;
 import com.example.LibraryBack.entity.Borrower;
 import com.example.LibraryBack.entity.User;
@@ -29,6 +30,7 @@ public class BorrowerServiceImpl implements BorrowerService {
     private final BookRepository bookRepository;
     private final BorrowerMapper borrowerMapper;
     private final TelegramNotificationService telegramNotificationService;
+    private final FineService fineService;
 
 
     // =========================================================
@@ -47,31 +49,39 @@ public class BorrowerServiceImpl implements BorrowerService {
     // OVERDUE
     //
     // RETURNED is NOT active.
-    // After RETURNED, user can borrow the same book again.
     //
     // Quantity DOES NOT decrease here.
     // Quantity decreases only when ADMIN accepts.
     // =========================================================
     @Override
     @Transactional
-    public BorrowerResponse create(BorrowerRequest borrowerRequest) {
+    public BorrowerResponse create(
+            BorrowerRequest borrowerRequest
+    ) {
 
-        User user = userRepository.findById(
-                borrowerRequest.getUserId()
-        ).orElseThrow(() ->
-                new NotException("User not found")
-        );
+        User user =
+                userRepository.findById(
+                        borrowerRequest.getUserId()
+                ).orElseThrow(() ->
+                        new NotException(
+                                "User not found"
+                        )
+                );
 
-        Book book = bookRepository.findById(
-                borrowerRequest.getBookId()
-        ).orElseThrow(() ->
-                new NotException("Book not found")
-        );
+        Book book =
+                bookRepository.findById(
+                        borrowerRequest.getBookId()
+                ).orElseThrow(() ->
+                        new NotException(
+                                "Book not found"
+                        )
+                );
 
 
         // =====================================================
         // CHECK IF BOOK IS AVAILABLE
         // =====================================================
+
         if (book.getQty() <= 0) {
 
             throw new NotException(
@@ -82,35 +92,24 @@ public class BorrowerServiceImpl implements BorrowerService {
 
         // =====================================================
         // CHECK EXISTING ACTIVE BORROWING
-        //
-        // Same User
-        // +
-        // Same Book
-        // +
-        // Active Status
-        //
-        // => Cannot create another request
         // =====================================================
 
-        List<BorrowingStatus> activeStatuses = List.of(
-
-                BorrowingStatus.PENDING,
-
-                BorrowingStatus.BORROWED,
-
-                BorrowingStatus.RETURN_REQUESTED,
-
-                BorrowingStatus.OVERDUE
-
-        );
+        List<BorrowingStatus> activeStatuses =
+                List.of(
+                        BorrowingStatus.PENDING,
+                        BorrowingStatus.BORROWED,
+                        BorrowingStatus.RETURN_REQUESTED,
+                        BorrowingStatus.OVERDUE
+                );
 
 
         boolean alreadyBorrowing =
-                borrowerRepository.existsByUserIdAndBookIdAndStatusIn(
-                        user.getId(),
-                        book.getId(),
-                        activeStatuses
-                );
+                borrowerRepository
+                        .existsByUserIdAndBookIdAndStatusIn(
+                                user.getId(),
+                                book.getId(),
+                                activeStatuses
+                        );
 
 
         if (alreadyBorrowing) {
@@ -168,6 +167,11 @@ public class BorrowerServiceImpl implements BorrowerService {
                 savedBorrower
         );
     }
+
+
+    // =========================================================
+    // GET ALL BORROWINGS
+    // =========================================================
     @Override
     public List<BorrowerResponse> getData() {
 
@@ -177,6 +181,10 @@ public class BorrowerServiceImpl implements BorrowerService {
                 .toList();
     }
 
+
+    // =========================================================
+    // GET BORROWING BY ID
+    // =========================================================
     @Override
     public BorrowerResponse getById(Long id) {
 
@@ -195,6 +203,12 @@ public class BorrowerServiceImpl implements BorrowerService {
     }
 
 
+    // =========================================================
+    // ADMIN ACCEPT BORROW
+    //
+    // PENDING -> BORROWED
+    // Book quantity -1
+    // =========================================================
     @Override
     @Transactional
     public BorrowerResponse accept(Long id) {
@@ -211,6 +225,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // ONLY PENDING CAN BE ACCEPTED
         // =====================================================
+
         if (borrower.getStatus()
                 != BorrowingStatus.PENDING) {
 
@@ -219,8 +234,12 @@ public class BorrowerServiceImpl implements BorrowerService {
             );
         }
 
+
         Book book = borrower.getBook();
+
+
         if (book == null) {
+
             throw new NotException(
                     "Book not found"
             );
@@ -230,7 +249,9 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // CHECK QUANTITY AGAIN
         // =====================================================
+
         if (book.getQty() <= 0) {
+
             throw new NotException(
                     "Book is no longer available"
             );
@@ -240,6 +261,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // DECREASE QUANTITY
         // =====================================================
+
         book.setQty(
                 book.getQty() - 1
         );
@@ -251,6 +273,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // PENDING -> BORROWED
         // =====================================================
+
         borrower.setStatus(
                 BorrowingStatus.BORROWED
         );
@@ -259,6 +282,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // MAKE SURE FINE IS NOT NULL
         // =====================================================
+
         if (borrower.getFine() == null) {
 
             borrower.setFine(
@@ -270,6 +294,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // SAVE BORROWING
         // =====================================================
+
         Borrower updatedBorrower =
                 borrowerRepository.save(
                         borrower
@@ -279,11 +304,13 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // TELEGRAM NOTIFICATION
         // =====================================================
-        telegramNotificationService.sendBorrowAcceptedNotification(
-                borrower.getUser().getId(),
-                book.getTitle(),
-                borrower.getDueDate()
-        );
+
+        telegramNotificationService
+                .sendBorrowAcceptedNotification(
+                        borrower.getUser().getId(),
+                        book.getTitle(),
+                        borrower.getDueDate()
+                );
 
 
         return borrowerMapper.toResponse(
@@ -291,6 +318,14 @@ public class BorrowerServiceImpl implements BorrowerService {
         );
     }
 
+
+    // =========================================================
+    // ADMIN REJECT BORROW
+    //
+    // PENDING -> REJECTED
+    //
+    // Book quantity DOES NOT change.
+    // =========================================================
     @Override
     @Transactional
     public BorrowerResponse reject(Long id) {
@@ -307,6 +342,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // ONLY PENDING CAN BE REJECTED
         // =====================================================
+
         if (borrower.getStatus()
                 != BorrowingStatus.PENDING) {
 
@@ -319,6 +355,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // PENDING -> REJECTED
         // =====================================================
+
         borrower.setStatus(
                 BorrowingStatus.REJECTED
         );
@@ -327,6 +364,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // MAKE SURE FINE IS NOT NULL
         // =====================================================
+
         if (borrower.getFine() == null) {
 
             borrower.setFine(
@@ -338,6 +376,7 @@ public class BorrowerServiceImpl implements BorrowerService {
         // =====================================================
         // DO NOT CHANGE BOOK QUANTITY
         // =====================================================
+
         Borrower updatedBorrower =
                 borrowerRepository.save(
                         borrower
@@ -432,6 +471,9 @@ public class BorrowerServiceImpl implements BorrowerService {
     }
 
 
+    // =========================================================
+    // DELETE BORROWING
+    // =========================================================
     @Override
     @Transactional
     public void delete(Long id) {
@@ -451,6 +493,15 @@ public class BorrowerServiceImpl implements BorrowerService {
     }
 
 
+    // =========================================================
+    // USER REQUEST RETURN
+    //
+    // BORROWED -> RETURN_REQUESTED
+    //
+    // OVERDUE -> RETURN_REQUESTED
+    //
+    // Book quantity DOES NOT increase here.
+    // =========================================================
     @Override
     @Transactional
     public BorrowerResponse returnBook(Long id) {
@@ -463,27 +514,33 @@ public class BorrowerServiceImpl implements BorrowerService {
                                 )
                         );
 
+
+        // =====================================================
+        // ALLOW BORROWED AND OVERDUE
+        // =====================================================
+
         if (borrower.getStatus()
-                != BorrowingStatus.BORROWED) {
+                != BorrowingStatus.BORROWED
+                &&
+                borrower.getStatus()
+                        != BorrowingStatus.OVERDUE) {
 
             throw new NotException(
-                    "Only BORROWED books can be returned"
+                    "Only BORROWED or OVERDUE books can be returned"
             );
         }
 
 
         // =====================================================
-        // BORROWED -> RETURN_REQUESTED
+        // BORROWED / OVERDUE
+        //        ↓
+        // RETURN_REQUESTED
         // =====================================================
+
         borrower.setStatus(
                 BorrowingStatus.RETURN_REQUESTED
         );
 
-
-        // =====================================================
-        // DO NOT INCREASE QUANTITY HERE
-        // DO NOT SET RETURN DATE HERE
-        // =====================================================
 
         Borrower updatedBorrower =
                 borrowerRepository.save(
@@ -497,7 +554,22 @@ public class BorrowerServiceImpl implements BorrowerService {
     }
 
 
-
+    // =========================================================
+    // ADMIN ACCEPT RETURN
+    //
+    // RETURN_REQUESTED
+    //        ↓
+    // Fine processing
+    //        ↓
+    // Book quantity +1
+    //        ↓
+    // RETURNED
+    //
+    // IMPORTANT:
+    // Admin accepting return means:
+    // 1. Book received
+    // 2. Fine payment received if overdue
+    // =========================================================
     @Override
     @Transactional
     public BorrowerResponse acceptReturn(Long id) {
@@ -510,6 +582,11 @@ public class BorrowerServiceImpl implements BorrowerService {
                                 )
                         );
 
+
+        // =====================================================
+        // ONLY RETURN_REQUESTED CAN BE ACCEPTED
+        // =====================================================
+
         if (borrower.getStatus()
                 != BorrowingStatus.RETURN_REQUESTED) {
 
@@ -519,8 +596,28 @@ public class BorrowerServiceImpl implements BorrowerService {
         }
 
 
-        Book book = borrower.getBook();
+        User user =
+                borrower.getUser();
 
+        Book book =
+                borrower.getBook();
+
+
+        // =====================================================
+        // CHECK USER
+        // =====================================================
+
+        if (user == null) {
+
+            throw new NotException(
+                    "User not found"
+            );
+        }
+
+
+        // =====================================================
+        // CHECK BOOK
+        // =====================================================
 
         if (book == null) {
 
@@ -531,35 +628,98 @@ public class BorrowerServiceImpl implements BorrowerService {
 
 
         // =====================================================
-        // INCREASE QUANTITY
+        // ACTUAL RETURN DATE
+        // =====================================================
+
+        LocalDate returnedDate =
+                LocalDate.now();
+
+
+        // =====================================================
+        // PROCESS FINE
         //
-        // The book is physically returned.
+        // If Fine exists:
+        //      Calculate final amount
+        //      Set PAID
+        //
+        // If Fine does not exist:
+        //      If overdue:
+        //          Create Fine
+        //          Set PAID
+        //
+        //      If on time:
+        //          No Fine
+        //
+        // IMPORTANT:
+        // No try/catch here.
+        //
+        // This avoids the transaction rollback problem.
         // =====================================================
-        book.setQty(
-                book.getQty() + 1
-        );
 
-
-        bookRepository.save(book);
+        FineResponse paidFine =
+                fineService.payByBorrowing(
+                        user.getId(),
+                        book.getId(),
+                        borrower.getDueDate(),
+                        returnedDate
+                );
 
 
         // =====================================================
-        // SET ACTUAL RETURN DATE
+        // SAVE FINE AMOUNT TO BORROWER
         // =====================================================
-        borrower.setReturnDate(
-                LocalDate.now()
-        );
 
-        borrower.setStatus(
-                BorrowingStatus.RETURNED
-        );
+        if (paidFine != null
+                && paidFine.getTotalAmount() != null) {
 
-        if (borrower.getFine() == null) {
+            borrower.setFine(
+                    paidFine.getTotalAmount()
+            );
+
+        } else {
 
             borrower.setFine(
                     BigDecimal.ZERO
             );
         }
+
+
+        // =====================================================
+        // INCREASE BOOK QUANTITY
+        // =====================================================
+
+        book.setQty(
+                book.getQty() + 1
+        );
+
+
+        bookRepository.save(
+                book
+        );
+
+
+        // =====================================================
+        // SET RETURN DATE
+        // =====================================================
+
+        borrower.setReturnDate(
+                returnedDate
+        );
+
+
+        // =====================================================
+        // RETURN_REQUESTED -> RETURNED
+        // =====================================================
+
+        borrower.setStatus(
+                BorrowingStatus.RETURNED
+        );
+
+
+        // =====================================================
+        // SAVE BORROWING
+        // =====================================================
+
         Borrower updatedBorrower =
                 borrowerRepository.save(
                         borrower

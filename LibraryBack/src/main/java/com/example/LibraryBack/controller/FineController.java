@@ -59,20 +59,6 @@ public class FineController {
         );
     }
 
-    @PutMapping("/payFine/{id}/pay")
-    @PreAuthorize("hasRole('USER')")
-    public ApiResponse<FineResponse> payFine(
-            @PathVariable Long id) {
-
-        FineResponse response = fineService.pay(id);
-
-        return new ApiResponse<>(
-                "Fine paid successfully",
-                200,
-                response
-        );
-    }
-
     @PutMapping("/updateFine/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<FineResponse> updateFine(

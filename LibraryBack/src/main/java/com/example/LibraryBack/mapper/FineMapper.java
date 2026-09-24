@@ -22,6 +22,7 @@ public interface FineMapper {
     @Mapping(source = "user.name", target = "userName")
     @Mapping(source = "book.id", target = "bookId")
     @Mapping(source = "book.title", target = "bookTitle")
+    @Mapping(source = "book.image", target = "image")
     FineResponse toResponse(Fine fine);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

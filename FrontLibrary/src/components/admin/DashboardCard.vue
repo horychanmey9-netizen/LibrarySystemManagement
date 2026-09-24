@@ -158,7 +158,7 @@ function formatMoney(value) {
   const amount =
     Number(value) || 0;
 
-  return `$${amount.toLocaleString(
+  return `៛${amount.toLocaleString(
     "en-US",
     {
       minimumFractionDigits: 2,
@@ -530,7 +530,7 @@ async function fetchTotalFines() {
 
 
     stats.value[4].value =
-      "$0.00";
+      "0.00៛";
 
   } finally {
 

@@ -1,70 +1,113 @@
 <template>
+
   <div class="my-fines-page">
 
     <!-- ================= HEADER ================= -->
+
     <div class="page-header">
+
       <div>
-        <h1>My Fines</h1>
+
+        <h1>
+          My Fines
+        </h1>
 
         <p>
           View your fines and payment status
         </p>
+
       </div>
+
     </div>
 
 
     <!-- ================= SUMMARY ================= -->
+
     <div class="summary-grid">
 
-      <!-- Total Fines -->
+      <!-- ================= TOTAL FINES ================= -->
+
       <div class="summary-card">
 
-        <div class="summary-icon total-icon">
+        <div
+          class="summary-icon total-icon"
+        >
+
           <i class="bi bi-cash-coin"></i>
+
         </div>
 
+
         <div class="summary-content">
-          <span>Total Fines</span>
+
+          <span>
+            Total Fines
+          </span>
 
           <strong>
-            ${{ totalFines.toFixed(2) }}
+            {{ totalFines.toFixed(2) }}៛
           </strong>
+
         </div>
 
       </div>
 
 
-      <!-- Unpaid Fines -->
+      <!-- ================= UNPAID ================= -->
+
       <div class="summary-card">
 
-        <div class="summary-icon unpaid-icon">
-          <i class="bi bi-exclamation-triangle"></i>
+        <div
+          class="summary-icon unpaid-icon"
+        >
+
+          <i
+            class="bi bi-exclamation-triangle"
+          ></i>
+
         </div>
 
+
         <div class="summary-content">
-          <span>Unpaid Fines</span>
+
+          <span>
+            Unpaid Fines
+          </span>
 
           <strong>
-            ${{ unpaidFines.toFixed(2) }}
+            {{ unpaidFines.toFixed(2) }}៛
           </strong>
+
         </div>
 
       </div>
 
 
-      <!-- Paid Fines -->
+      <!-- ================= PAID ================= -->
+
       <div class="summary-card">
 
-        <div class="summary-icon paid-icon">
-          <i class="bi bi-check-circle"></i>
+        <div
+          class="summary-icon paid-icon"
+        >
+
+          <i
+            class="bi bi-check-circle"
+          ></i>
+
         </div>
 
+
         <div class="summary-content">
-          <span>Paid Fines</span>
+
+          <span>
+            Paid Fines
+          </span>
 
           <strong>
-            ${{ paidFines.toFixed(2) }}
+            {{ paidFines.toFixed(2) }}៛
           </strong>
+
         </div>
 
       </div>
@@ -73,36 +116,53 @@
 
 
     <!-- ================= FINE HISTORY ================= -->
+
     <section class="fines-section">
 
       <div class="section-header">
 
         <div>
-          <h2>Fine History</h2>
+
+          <h2>
+            Fine History
+          </h2>
 
           <p>
             Fines from your borrowed books
           </p>
+
         </div>
 
+
         <span class="record-count">
+
           {{ fines.length }} records
+
         </span>
 
       </div>
 
 
       <!-- ================= LOADING ================= -->
+
       <div
         v-if="loading"
         class="empty-state"
       >
 
-        <div class="empty-icon loading-icon">
+        <div
+          class="empty-icon loading-icon"
+        >
+
           <i class="bi bi-arrow-repeat"></i>
+
         </div>
 
-        <h3>Loading Fines...</h3>
+
+        <h3>
+          Loading Fines...
+        </h3>
+
 
         <p>
           Please wait while we load your fine history.
@@ -112,32 +172,47 @@
 
 
       <!-- ================= ERROR ================= -->
+
       <div
         v-else-if="error"
         class="empty-state"
       >
 
-        <div class="empty-icon error-icon">
-          <i class="bi bi-exclamation-circle"></i>
+        <div
+          class="empty-icon error-icon"
+        >
+
+          <i
+            class="bi bi-exclamation-circle"
+          ></i>
+
         </div>
 
-        <h3>Unable to Load Fines</h3>
+
+        <h3>
+          Unable to Load Fines
+        </h3>
+
 
         <p>
           {{ error }}
         </p>
 
+
         <button
           class="retry-button"
           @click="fetchMyFines"
         >
+
           Try Again
+
         </button>
 
       </div>
 
 
       <!-- ================= FINE CARDS ================= -->
+
       <div
         v-else-if="fines.length > 0"
         class="fine-list"
@@ -153,16 +228,23 @@
 
 
       <!-- ================= EMPTY STATE ================= -->
+
       <div
         v-else
         class="empty-state"
       >
 
         <div class="empty-icon">
+
           <i class="bi bi-cash-stack"></i>
+
         </div>
 
-        <h3>No Fines</h3>
+
+        <h3>
+          No Fines
+        </h3>
+
 
         <p>
           You don't have any library fines.
@@ -173,16 +255,18 @@
     </section>
 
   </div>
+
 </template>
 
 
 <script>
 
-import FineCard from "../../components/user/FineTemp.vue";
+import FineCard
+  from "../../components/user/FineTemp.vue";
 
 import {
   getMyFines
-} from "../../service/userfineService";
+} from "../../service/fineService";
 
 
 export default {
@@ -201,9 +285,23 @@ export default {
 
     return {
 
+      // =============================================
+      // FINE DATA
+      // =============================================
+
       fines: [],
 
+
+      // =============================================
+      // LOADING
+      // =============================================
+
       loading: false,
+
+
+      // =============================================
+      // ERROR
+      // =============================================
 
       error: null
 
@@ -212,6 +310,10 @@ export default {
   },
 
 
+  // ===============================================
+  // MOUNTED
+  // ===============================================
+
   mounted() {
 
     this.fetchMyFines();
@@ -219,7 +321,16 @@ export default {
   },
 
 
+  // ===============================================
+  // COMPUTED
+  // ===============================================
+
   computed: {
+
+
+    // =============================================
+    // TOTAL FINES
+    // =============================================
 
     totalFines() {
 
@@ -227,8 +338,11 @@ export default {
 
         (total, fine) => {
 
-          return total + Number(
-            fine.amount || 0
+          return (
+            total +
+            Number(
+              fine.totalAmount || 0
+            )
           );
 
         },
@@ -240,6 +354,10 @@ export default {
     },
 
 
+    // =============================================
+    // UNPAID FINES
+    // =============================================
+
     unpaidFines() {
 
       return this.fines
@@ -247,8 +365,11 @@ export default {
         .filter(
 
           fine =>
-            String(fine.status)
-              .toUpperCase() === "UNPAID"
+
+            String(
+              fine.status || ""
+            ).toUpperCase() ===
+            "UNPAID"
 
         )
 
@@ -256,8 +377,11 @@ export default {
 
           (total, fine) => {
 
-            return total + Number(
-              fine.amount || 0
+            return (
+              total +
+              Number(
+                fine.totalAmount || 0
+              )
             );
 
           },
@@ -269,6 +393,10 @@ export default {
     },
 
 
+    // =============================================
+    // PAID FINES
+    // =============================================
+
     paidFines() {
 
       return this.fines
@@ -276,8 +404,11 @@ export default {
         .filter(
 
           fine =>
-            String(fine.status)
-              .toUpperCase() === "PAID"
+
+            String(
+              fine.status || ""
+            ).toUpperCase() ===
+            "PAID"
 
         )
 
@@ -285,8 +416,11 @@ export default {
 
           (total, fine) => {
 
-            return total + Number(
-              fine.amount || 0
+            return (
+              total +
+              Number(
+                fine.totalAmount || 0
+              )
             );
 
           },
@@ -300,7 +434,16 @@ export default {
   },
 
 
+  // ===============================================
+  // METHODS
+  // ===============================================
+
   methods: {
+
+
+    // =============================================
+    // FETCH MY FINES
+    // =============================================
 
     async fetchMyFines() {
 
@@ -316,7 +459,8 @@ export default {
         );
 
 
-        const data = await getMyFines();
+        const data =
+          await getMyFines();
 
 
         console.log(
@@ -324,6 +468,10 @@ export default {
           data
         );
 
+
+        // =========================================
+        // CHECK DATA
+        // =========================================
 
         if (!Array.isArray(data)) {
 
@@ -339,9 +487,14 @@ export default {
         }
 
 
+        // =========================================
+        // FORMAT DATA
+        // =========================================
+
         this.fines = data.map(
 
-          fine => this.formatFine(fine)
+          fine =>
+            this.formatFine(fine)
 
         );
 
@@ -363,7 +516,9 @@ export default {
 
 
         this.error =
-          error.message ||
+
+          error?.message ||
+
           "Unable to load fines.";
 
 
@@ -381,80 +536,165 @@ export default {
     },
 
 
+    // =============================================
+    // FORMAT FINE
+    // =============================================
+
     formatFine(fine) {
 
       return {
 
+        // =========================================
+        // FINE ID
+        // =========================================
+
         id:
-          fine.id,
+          fine?.id || null,
+
+
+        // =========================================
+        // USER
+        // =========================================
+
+        userId:
+          fine?.userId || null,
+
+
+        userName:
+          fine?.userName ||
+          "Unknown User",
+
+
+        // =========================================
+        // BOOK
+        // =========================================
 
         bookId:
-          fine.bookId,
+          fine?.bookId || null,
+
 
         title:
-          fine.title ||
-          fine.bookTitle ||
+          fine?.bookTitle ||
+          fine?.title ||
           "Unknown Book",
 
+
         author:
-          fine.author ||
-          fine.bookAuthor ||
+          fine?.author ||
+          fine?.bookAuthor ||
           "Unknown Author",
 
+
         image:
-          fine.image ||
-          fine.bookImage ||
+          fine?.image ||
+          fine?.bookImage ||
           null,
+
 
         category:
-          fine.category ||
-          fine.categoryName ||
+          fine?.category ||
+          fine?.categoryName ||
           null,
+
 
         isbn:
-          fine.isbn ||
-          fine.bookIsbn ||
+          fine?.isbn ||
+          fine?.bookIsbn ||
           null,
 
+
+        // =========================================
+        // DUE DATE
+        // =========================================
+
         dueDate:
+
           this.formatDate(
-            fine.dueDate
+            fine?.dueDate
           ),
+
+
+        // =========================================
+        // RETURNED DATE
+        // =========================================
 
         returnedDate:
+
           this.formatDate(
 
-            fine.returnedDate ||
-            fine.returnDate
+            fine?.returnedDate ||
+
+            fine?.returnDate
 
           ),
 
-        lateDays:
+
+        // =========================================
+        // LATE DAYS
+        // =========================================
+
+        daysLate:
+
           Number(
-
-            fine.lateDays ||
-            fine.lateDay ||
-            0
-
+            fine?.daysLate || 0
           ),
 
-        amount:
+
+        // =========================================
+        // TOTAL AMOUNT
+        // =========================================
+
+        totalAmount:
+
           Number(
-
-            fine.amount ||
-            fine.fine ||
-            0
-
+            fine?.totalAmount || 0
           ),
+
+
+        // =========================================
+        // STATUS
+        // =========================================
 
         status:
-          fine.status ||
-          "Unpaid"
+
+          fine?.status ||
+          "UNPAID",
+
+
+        // =========================================
+        // PAID AT
+        // =========================================
+
+        paidAt:
+
+          fine?.paidAt || null,
+
+
+        // =========================================
+        // CREATED AT
+        // =========================================
+
+        createdAt:
+
+          fine?.createdAt || null,
+
+
+        // =========================================
+        // UPDATED AT
+        // =========================================
+
+        updatedAt:
+
+          fine?.updatedAt || null
 
       };
 
     },
 
+
+    // =============================================
+    // FORMAT DATE
+    // =============================================
 
     formatDate(date) {
 
@@ -465,8 +705,24 @@ export default {
       }
 
 
-      return String(date)
-        .split("T")[0];
+      const value =
+        String(date);
+
+
+      // =========================================
+      // ISO DATE
+      // =========================================
+
+      if (
+        value.includes("T")
+      ) {
+
+        return value.split("T")[0];
+
+      }
+
+
+      return value;
 
     }
 
@@ -600,7 +856,9 @@ export default {
 }
 
 
-/* Total */
+/* ==================================================
+   TOTAL
+================================================== */
 
 .total-icon {
 
@@ -611,7 +869,9 @@ export default {
 }
 
 
-/* Unpaid */
+/* ==================================================
+   UNPAID
+================================================== */
 
 .unpaid-icon {
 
@@ -622,7 +882,9 @@ export default {
 }
 
 
-/* Paid */
+/* ==================================================
+   PAID
+================================================== */
 
 .paid-icon {
 
@@ -1007,7 +1269,7 @@ export default {
   }
 
 
-  /* Third card takes full row */
+  /* Third card full width */
 
   .summary-card:nth-child(3) {
 

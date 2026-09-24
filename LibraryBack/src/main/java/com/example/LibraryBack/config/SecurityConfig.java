@@ -26,7 +26,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/book/**").permitAll()
                         .requestMatchers("/api/category/**").hasRole("ADMIN")
                         .requestMatchers("/api/fine/**").hasRole("ADMIN")
-                        .requestMatchers("/api/borrowing/**").permitAll()
+                        .requestMatchers("/api/borrowing/**").authenticated()
                         .requestMatchers("/api/notification/**").permitAll()
                         .requestMatchers("/api/favorite/**").permitAll()
                         .requestMatchers("/api/telegram/**").permitAll()

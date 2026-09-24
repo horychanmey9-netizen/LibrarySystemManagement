@@ -1,159 +1,150 @@
+
 <template>
 
-  <aside
-    class="sidebar"
-    :class="{ 'sidebar-open': isOpen }"
-  >
+  <!-- =====================================================
+       SIDEBAR WRAPPER
+  ====================================================== -->
+  <div class="sidebar-wrapper">
 
-    <!-- =========================
-         Logo
-    ========================== -->
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+    <aside
+      class="sidebar"
+      :class="{ 'sidebar-open': isOpen }"
+    >
 
-    <div class="logo-section">
+      <!-- =========================
+           Logo
+      ========================== -->
+      <div class="logo-section">
 
-      <div class="logo-icon">
-        <img
-          :src="logo"
-          alt="Library Logo"
-          class="logo-image"
-        />
+        <div class="logo-icon">
+          <img
+            :src="logo"
+            alt="Library Logo"
+            class="logo-image"
+          />
+        </div>
+
+        <div class="logo-text">
+
+          <h1>
+            Library
+          </h1>
+
+          <span>
+            Management System
+          </span>
+
+        </div>
+
+        <!-- Mobile Close -->
+        <button
+          type="button"
+          class="mobile-close"
+          title="Close Menu"
+          @click="closeSidebar"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+
       </div>
-
-      <div class="logo-text">
-
-        <h1>
-          Library
-        </h1>
-
-        <span>
-          Management System
-        </span>
-
-      </div>
-
-
-      <!-- Mobile Close -->
-
-      <button
-        type="button"
-        class="mobile-close"
-        title="Close Menu"
-        @click="closeSidebar"
-      >
-
-        <i class="bi bi-x-lg"></i>
-
-      </button>
-
-    </div>
-
-
-    <!-- =========================
-         Navigation
-    ========================== -->
-
-    <nav class="navigation">
-
-      <!-- Main Menu -->
-
-      <RouterLink
-        v-for="item in mainMenu"
-        :key="item.to"
-        :to="item.to"
-        class="nav-item"
-        active-class="active"
-        @click="closeSidebarOnMobile"
-      >
-
-        <span class="icon">
-
-          <i
-            :class="item.icon"
-          ></i>
-
-        </span>
-
-        <span>
-          {{ item.label }}
-        </span>
-
-      </RouterLink>
 
 
       <!-- =========================
-           Management
+           Navigation
       ========================== -->
+      <nav class="navigation">
 
-      <p class="menu-title">
-        MANAGEMENT
-      </p>
+        <!-- Main Menu -->
+        <RouterLink
+          v-for="item in mainMenu"
+          :key="item.to"
+          :to="item.to"
+          class="nav-item"
+          active-class="active"
+          @click="closeSidebarOnMobile"
+        >
 
+          <span class="icon">
+            <i :class="item.icon"></i>
+          </span>
 
-      <RouterLink
-        v-for="item in managementMenu"
-        :key="item.to"
-        :to="item.to"
-        class="nav-item"
-        active-class="active"
-        @click="closeSidebarOnMobile"
-      >
+          <span>
+            {{ item.label }}
+          </span>
 
-        <span class="icon">
-
-          <i
-            :class="item.icon"
-          ></i>
-
-        </span>
-
-        <span>
-          {{ item.label }}
-        </span>
-
-      </RouterLink>
-
-    </nav>
+        </RouterLink>
 
 
-    <!-- =========================
-         Bottom Logout
-    ========================== -->
-
-    <div class="sidebar-bottom">
-
-      <button
-        type="button"
-        class="logout-button"
-        title="Logout"
-        @click="logout"
-      >
-
-        <span class="logout-icon">
-
-          <i class="bi bi-box-arrow-right"></i>
-
-        </span>
-
-        <span class="logout-text">
-          Logout
-        </span>
-
-      </button>
-
-    </div>
-
-  </aside>
+        <!-- =========================
+             Management
+        ========================== -->
+        <p class="menu-title">
+          MANAGEMENT
+        </p>
 
 
-  <!-- =========================
-       Mobile Overlay
-  ========================== -->
+        <RouterLink
+          v-for="item in managementMenu"
+          :key="item.to"
+          :to="item.to"
+          class="nav-item"
+          active-class="active"
+          @click="closeSidebarOnMobile"
+        >
 
-  <div
-    v-if="isOpen"
-    class="sidebar-overlay"
-    @click="closeSidebar"
-  ></div>
+          <span class="icon">
+            <i :class="item.icon"></i>
+          </span>
+
+          <span>
+            {{ item.label }}
+          </span>
+
+        </RouterLink>
+
+      </nav>
+
+
+      <!-- =========================
+           Bottom Logout
+      ========================== -->
+      <div class="sidebar-bottom">
+
+        <button
+          type="button"
+          class="logout-button"
+          title="Logout"
+          @click="logout"
+        >
+
+          <span class="logout-icon">
+            <i class="bi bi-box-arrow-right"></i>
+          </span>
+
+          <span class="logout-text">
+            Logout
+          </span>
+
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         Mobile Overlay
+    ====================================================== -->
+    <div
+      v-if="isOpen"
+      class="sidebar-overlay"
+      @click="closeSidebar"
+    ></div>
+
+  </div>
 
 </template>
 
@@ -262,10 +253,6 @@ function handleToggleSidebar() {
 
 onMounted(() => {
 
-  // ====================================
-  // SIDEBAR TOGGLE
-  // ====================================
-
   window.addEventListener(
     "toggle-admin-sidebar",
     handleToggleSidebar
@@ -309,56 +296,33 @@ const mainMenu = [
 
   {
     label: "Dashboard",
-
     to: "/admin/dashboard",
-
     icon: "bi bi-grid"
   },
 
-
   {
     label: "Books",
-
     to: "/admin/books",
-
     icon: "bi bi-book"
   },
 
-
   {
     label: "Categories",
-
     to: "/admin/categories",
-
     icon: "bi bi-tags"
   },
 
-
   {
     label: "Borrowing",
-
     to: "/admin/borrowing",
-
     icon: "bi bi-journal-arrow-down"
   },
-
 
   {
     label: "Borrower",
-
     to: "/admin/borrower",
-
     icon: "bi bi-journal-arrow-down"
-  },
-
-
-  // {
-  //   label: "Returns",
-
-  //   to: "/admin/returns",
-
-  //   icon: "bi bi-arrow-return-left"
-  // }
+  }
 
 ];
 
@@ -368,6 +332,7 @@ const mainMenu = [
 // ========================================
 
 const managementMenu = [
+
   {
     label: "Users",
     to: "/admin/users",
@@ -385,12 +350,24 @@ const managementMenu = [
     to: "/admin/adminsettings",
     icon: "bi bi-gear"
   }
+
 ];
 
 </script>
 
 
 <style scoped>
+
+/* ========================================
+   SIDEBAR WRAPPER
+======================================== */
+
+.sidebar-wrapper {
+
+  position: relative;
+
+}
+
 
 /* ========================================
    SIDEBAR
@@ -482,6 +459,13 @@ const managementMenu = [
   object-fit: contain;
 
   display: block;
+
+}
+
+
+.logo-text {
+
+  min-width: 0;
 
 }
 

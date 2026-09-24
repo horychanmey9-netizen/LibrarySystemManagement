@@ -1,3 +1,4 @@
+
 <template>
   <div class="fines-page">
 
@@ -20,6 +21,7 @@
       class="error-message"
     >
       <i class="bi bi-exclamation-circle"></i>
+
       <span>{{ error }}</span>
 
       <button
@@ -39,6 +41,7 @@
       class="loading-container"
     >
       <div class="spinner"></div>
+
       <p>Loading fines...</p>
     </div>
 
@@ -61,7 +64,10 @@
 
           <div class="summary-content">
             <p>Total Fines</p>
-            <h2>${{ totalFines.toFixed(2) }}</h2>
+
+            <h2>
+              ៛{{ formatAmount(totalFines) }}
+            </h2>
           </div>
         </div>
 
@@ -74,7 +80,10 @@
 
           <div class="summary-content">
             <p>Unpaid</p>
-            <h2>${{ unpaidFines.toFixed(2) }}</h2>
+
+            <h2>
+              ៛{{ formatAmount(unpaidFines) }}
+            </h2>
           </div>
         </div>
 
@@ -87,7 +96,10 @@
 
           <div class="summary-content">
             <p>Paid</p>
-            <h2>${{ paidFines.toFixed(2) }}</h2>
+
+            <h2>
+              ៛{{ formatAmount(paidFines) }}
+            </h2>
           </div>
         </div>
 
@@ -100,7 +112,10 @@
 
           <div class="summary-content">
             <p>Total Late Days</p>
-            <h2>{{ totalLateDays }}</h2>
+
+            <h2>
+              {{ totalLateDays }}
+            </h2>
           </div>
         </div>
 
@@ -114,6 +129,7 @@
 
         <!-- Search -->
         <div class="search-box">
+
           <i class="bi bi-search"></i>
 
           <input
@@ -121,17 +137,22 @@
             type="text"
             placeholder="Search by user or book..."
           />
+
         </div>
 
 
         <!-- Status -->
         <div class="status-filter">
-          <label for="status">Status:</label>
+
+          <label for="status">
+            Status:
+          </label>
 
           <select
             id="status"
             v-model="selectedStatus"
           >
+
             <option value="All">
               All
             </option>
@@ -143,7 +164,9 @@
             <option value="Unpaid">
               Unpaid
             </option>
+
           </select>
+
         </div>
 
       </div>
@@ -176,10 +199,21 @@
 
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
 
-import FineTable from "@/components/admin/fines/FineTable.vue";
-import FineDetails from "@/components/admin/fines/FineDetails.vue";
+import {
+  ref,
+  computed,
+  onMounted
+} from "vue";
+
+
+import FineTable
+  from "@/components/admin/fines/FineTable.vue";
+
+
+import FineDetails
+  from "@/components/admin/fines/FineDetails.vue";
+
 
 import {
   getFines,
@@ -189,7 +223,7 @@ import {
 
 
 // ======================================================
-// State
+// STATE
 // ======================================================
 
 const fines = ref([]);
@@ -206,353 +240,829 @@ const error = ref("");
 
 
 // ======================================================
-// Fetch Fines
+// FORMAT AMOUNT
 // ======================================================
 
-const fetchFines = async () => {
-  loading.value = true;
-  error.value = "";
-
-  try {
-    const data = await getFines();
-
-    console.log("Fine API Response:", data);
-
-    /*
-     * Support both:
-     *
-     * [
-     *   {...},
-     *   {...}
-     * ]
-     *
-     * and
-     *
-     * {
-     *   data: [...]
-     * }
-     */
-
-    if (Array.isArray(data)) {
-      fines.value = data;
-    } else if (Array.isArray(data?.data)) {
-      fines.value = data.data;
-    } else if (Array.isArray(data?.content)) {
-      fines.value = data.content;
-    } else {
-      fines.value = [];
-    }
-
-  } catch (err) {
-    console.error("Error fetching fines:", err);
-
-    error.value =
-      err?.message ||
-      "Failed to load fines.";
-  } finally {
-    loading.value = false;
-  }
-};
-
-
-// ======================================================
-// Search + Status Filter
-// ======================================================
-
-const filteredFines = computed(() => {
-  const keyword = search.value
-    .trim()
-    .toLowerCase();
-
-  return fines.value.filter((fine) => {
-
-    /*
-     * Support possible backend field names.
-     */
-
-    const userName =
-      fine.user ||
-      fine.userName ||
-      fine.borrowerName ||
-      fine.name ||
-      "";
-
-    const bookTitle =
-      fine.book ||
-      fine.bookTitle ||
-      fine.title ||
-      "";
-
-    const status =
-      fine.status ||
-      "";
-
-
-    const matchesSearch =
-      !keyword ||
-      String(userName)
-        .toLowerCase()
-        .includes(keyword) ||
-      String(bookTitle)
-        .toLowerCase()
-        .includes(keyword);
-
-
-    const matchesStatus =
-      selectedStatus.value === "All" ||
-      String(status).toLowerCase() ===
-        selectedStatus.value.toLowerCase();
-
-
-    return matchesSearch && matchesStatus;
-  });
-});
-
-
-// ======================================================
-// Helper - Get Amount
-// ======================================================
-
-const getFineAmount = (fine) => {
-  const amount =
-    fine.amount ??
-    fine.fine ??
-    fine.totalFine ??
-    fine.fineAmount ??
-    0;
+const formatAmount = (amount) => {
 
   const number = Number(amount);
 
-  return Number.isFinite(number)
-    ? number
-    : 0;
+  if (!Number.isFinite(number)) {
+    return "0.00";
+  }
+
+  return number.toLocaleString(
+    "en-US",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }
+  );
+
 };
 
 
 // ======================================================
-// Helper - Get Late Days
+// GET SAFE AMOUNT
+// ======================================================
+
+const getFineAmount = (fine) => {
+
+  if (!fine) {
+    return 0;
+  }
+
+
+  let amount =
+    fine.totalAmount ??
+    fine.amount ??
+    fine.fineAmount ??
+    fine.totalFine ??
+    fine.fine ??
+    0;
+
+
+  // -----------------------------------------------
+  // Number
+  // -----------------------------------------------
+
+  if (typeof amount === "number") {
+
+    return Number.isFinite(amount)
+      ? amount
+      : 0;
+
+  }
+
+
+  // -----------------------------------------------
+  // String
+  // -----------------------------------------------
+
+  if (typeof amount === "string") {
+
+    const cleanedAmount =
+      amount
+        .replace(/,/g, "")
+        .replace(/[៛$]/g, "")
+        .trim();
+
+
+    const number =
+      Number(cleanedAmount);
+
+
+    return Number.isFinite(number)
+      ? number
+      : 0;
+
+  }
+
+
+  // -----------------------------------------------
+  // Object
+  // -----------------------------------------------
+
+  if (
+    typeof amount === "object" &&
+    amount !== null
+  ) {
+
+    const value =
+      amount.value ??
+      amount.amount ??
+      amount.totalAmount ??
+      0;
+
+
+    const number =
+      Number(value);
+
+
+    return Number.isFinite(number)
+      ? number
+      : 0;
+
+  }
+
+
+  return 0;
+
+};
+
+
+// ======================================================
+// GET LATE DAYS
 // ======================================================
 
 const getLateDays = (fine) => {
+
+  if (!fine) {
+    return 0;
+  }
+
+
   const days =
     fine.daysLate ??
     fine.lateDays ??
     fine.overdueDays ??
     0;
 
-  const number = Number(days);
+
+  const number =
+    Number(days);
+
 
   return Number.isFinite(number)
     ? number
     : 0;
+
 };
 
 
 // ======================================================
-// Statistics
+// GET USER NAME
 // ======================================================
 
-const totalFines = computed(() => {
-  return fines.value.reduce(
-    (total, fine) => {
-      return total + getFineAmount(fine);
-    },
-    0
+const getUserName = (fine) => {
+
+  if (!fine) {
+    return "";
+  }
+
+
+  const user =
+    fine.user ||
+    fine.borrower ||
+    fine.member ||
+    fine.account ||
+    null;
+
+
+  return (
+    fine.userName ??
+    fine.borrowerName ??
+    fine.memberName ??
+    fine.name ??
+    user?.userName ??
+    user?.username ??
+    user?.name ??
+    user?.fullName ??
+    user?.firstName ??
+    ""
   );
-});
 
-
-const unpaidFines = computed(() => {
-  return fines.value
-    .filter((fine) => {
-      return String(fine.status || "")
-        .toLowerCase() === "unpaid";
-    })
-    .reduce(
-      (total, fine) => {
-        return total + getFineAmount(fine);
-      },
-      0
-    );
-});
-
-
-const paidFines = computed(() => {
-  return fines.value
-    .filter((fine) => {
-      return String(fine.status || "")
-        .toLowerCase() === "paid";
-    })
-    .reduce(
-      (total, fine) => {
-        return total + getFineAmount(fine);
-      },
-      0
-    );
-});
-
-
-const totalLateDays = computed(() => {
-  return fines.value.reduce(
-    (total, fine) => {
-      return total + getLateDays(fine);
-    },
-    0
-  );
-});
-
-
-// ======================================================
-// View Fine
-// ======================================================
-
-const viewFine = async (fine) => {
-  selectedFine.value = fine;
 };
 
 
 // ======================================================
-// Close Details
+// GET BOOK TITLE
+// ======================================================
+
+const getBookTitle = (fine) => {
+
+  if (!fine) {
+    return "";
+  }
+
+
+  const book =
+    fine.book ||
+    fine.borrowing?.book ||
+    fine.borrower?.book ||
+    null;
+
+
+  return (
+    fine.bookTitle ??
+    fine.title ??
+    book?.title ??
+    book?.bookTitle ??
+    ""
+  );
+
+};
+
+
+// ======================================================
+// GET STATUS
+// ======================================================
+
+const getFineStatus = (fine) => {
+
+  if (!fine) {
+    return "";
+  }
+
+
+  return String(
+    fine.status ??
+    fine.paymentStatus ??
+    ""
+  ).trim();
+
+};
+
+
+// ======================================================
+// NORMALIZE FINE
+// ======================================================
+
+const normalizeFine = (fine) => {
+
+  const amount =
+    getFineAmount(fine);
+
+
+  const lateDays =
+    getLateDays(fine);
+
+
+  const userName =
+    getUserName(fine);
+
+
+  const bookTitle =
+    getBookTitle(fine);
+
+
+  const status =
+    getFineStatus(fine);
+
+
+  return {
+
+    ...fine,
+
+    // -----------------------------------------------
+    // Standard fields used by FineTable
+    // -----------------------------------------------
+
+    userName:
+      userName || "Unknown User",
+
+    bookTitle:
+      bookTitle || "Unknown Book",
+
+    totalAmount:
+      amount,
+
+    daysLate:
+      lateDays,
+
+    status:
+      status || "UNPAID"
+
+  };
+
+};
+
+
+// ======================================================
+// FETCH FINES
+// ======================================================
+
+const fetchFines = async () => {
+
+  loading.value = true;
+
+  error.value = "";
+
+
+  try {
+
+    const data =
+      await getFines();
+
+
+    console.log(
+      "Fine API Response:",
+      data
+    );
+
+
+    // ==================================================
+    // FIND ARRAY
+    // ==================================================
+
+    let fineList = [];
+
+
+    if (
+      Array.isArray(data)
+    ) {
+
+      fineList = data;
+
+    }
+
+    else if (
+      Array.isArray(data?.data)
+    ) {
+
+      fineList = data.data;
+
+    }
+
+    else if (
+      Array.isArray(data?.content)
+    ) {
+
+      fineList = data.content;
+
+    }
+
+    else if (
+      Array.isArray(data?.data?.content)
+    ) {
+
+      fineList =
+        data.data.content;
+
+    }
+
+
+    // ==================================================
+    // NORMALIZE
+    // ==================================================
+
+    fines.value =
+      fineList.map(
+        normalizeFine
+      );
+
+
+    console.log(
+      "Normalized Fines:",
+      fines.value
+    );
+
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "Error fetching fines:",
+      err
+    );
+
+
+    error.value =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Failed to load fines.";
+
+  }
+
+  finally {
+
+    loading.value = false;
+
+  }
+
+};
+
+
+// ======================================================
+// SEARCH + STATUS FILTER
+// ======================================================
+
+const filteredFines =
+  computed(() => {
+
+    const keyword =
+      search.value
+        .trim()
+        .toLowerCase();
+
+
+    return fines.value.filter(
+      (fine) => {
+
+        const userName =
+          String(
+            getUserName(fine)
+          )
+            .toLowerCase();
+
+
+        const bookTitle =
+          String(
+            getBookTitle(fine)
+          )
+            .toLowerCase();
+
+
+        const status =
+          getFineStatus(
+            fine
+          )
+            .toLowerCase();
+
+
+        // ---------------------------------------------
+        // Search
+        // ---------------------------------------------
+
+        const matchesSearch =
+          !keyword ||
+          userName.includes(keyword) ||
+          bookTitle.includes(keyword);
+
+
+        // ---------------------------------------------
+        // Status
+        // ---------------------------------------------
+
+        const matchesStatus =
+          selectedStatus.value === "All" ||
+          status ===
+            selectedStatus.value
+              .toLowerCase();
+
+
+        return (
+          matchesSearch &&
+          matchesStatus
+        );
+
+      }
+    );
+
+  });
+
+
+// ======================================================
+// TOTAL FINES
+// ======================================================
+
+const totalFines =
+  computed(() => {
+
+    return fines.value.reduce(
+      (total, fine) => {
+
+        return (
+          total +
+          getFineAmount(fine)
+        );
+
+      },
+      0
+    );
+
+  });
+
+
+// ======================================================
+// UNPAID FINES
+// ======================================================
+
+const unpaidFines =
+  computed(() => {
+
+    return fines.value
+      .filter((fine) => {
+
+        const status =
+          getFineStatus(
+            fine
+          ).toLowerCase();
+
+
+        return (
+          status === "unpaid"
+        );
+
+      })
+      .reduce(
+        (total, fine) => {
+
+          return (
+            total +
+            getFineAmount(fine)
+          );
+
+        },
+        0
+      );
+
+  });
+
+
+// ======================================================
+// PAID FINES
+// ======================================================
+
+const paidFines =
+  computed(() => {
+
+    return fines.value
+      .filter((fine) => {
+
+        const status =
+          getFineStatus(
+            fine
+          ).toLowerCase();
+
+
+        return (
+          status === "paid"
+        );
+
+      })
+      .reduce(
+        (total, fine) => {
+
+          return (
+            total +
+            getFineAmount(fine)
+          );
+
+        },
+        0
+      );
+
+  });
+
+
+// ======================================================
+// TOTAL LATE DAYS
+// ======================================================
+
+const totalLateDays =
+  computed(() => {
+
+    return fines.value.reduce(
+      (total, fine) => {
+
+        return (
+          total +
+          getLateDays(fine)
+        );
+
+      },
+      0
+    );
+
+  });
+
+
+// ======================================================
+// VIEW FINE
+// ======================================================
+
+const viewFine = (fine) => {
+
+  selectedFine.value = {
+    ...normalizeFine(fine)
+  };
+
+};
+
+
+// ======================================================
+// CLOSE DETAILS
 // ======================================================
 
 const closeDetails = () => {
-  selectedFine.value = null;
+
+  selectedFine.value =
+    null;
+
 };
 
 
 // ======================================================
-// Mark Fine As Paid
+// MARK FINE AS PAID
 // ======================================================
 
-const markAsPaid = async (fine) => {
+const markAsPaid =
+  async (fine) => {
 
-  if (!fine?.id) {
-    alert("Fine ID not found.");
-    return;
-  }
+    if (!fine?.id) {
 
+      alert(
+        "Fine ID not found."
+      );
 
-  if (
-    !confirm(
-      "Are you sure you want to mark this fine as paid?"
-    )
-  ) {
-    return;
-  }
+      return;
 
-
-  try {
-
-    await markFineAsPaid(fine.id);
-
-    /*
-     * Update local data after successful API request.
-     */
-
-    fine.status = "Paid";
-
-    /*
-     * If FineDetails is currently showing
-     * this fine, update it too.
-     */
-
-    if (
-      selectedFine.value &&
-      selectedFine.value.id === fine.id
-    ) {
-      selectedFine.value = {
-        ...selectedFine.value,
-        status: "Paid"
-      };
-    }
-
-    alert("Fine marked as paid successfully.");
-
-  } catch (err) {
-
-    console.error(
-      "Error marking fine as paid:",
-      err
-    );
-
-    alert(
-      err?.message ||
-      "Failed to mark fine as paid."
-    );
-  }
-};
-
-
-// ======================================================
-// Delete Fine
-// ======================================================
-
-const deleteFine = async (id) => {
-
-  if (!id) {
-    alert("Fine ID not found.");
-    return;
-  }
-
-
-  if (
-    !confirm(
-      "Are you sure you want to delete this fine?"
-    )
-  ) {
-    return;
-  }
-
-
-  try {
-
-    await deleteFineApi(id);
-
-    /*
-     * Remove from frontend after successful delete.
-     */
-
-    fines.value = fines.value.filter(
-      (fine) => fine.id !== id
-    );
-
-
-    /*
-     * Close details if deleted fine
-     * is currently selected.
-     */
-
-    if (
-      selectedFine.value &&
-      selectedFine.value.id === id
-    ) {
-      selectedFine.value = null;
     }
 
 
-    alert("Fine deleted successfully.");
+    // ==================================================
+    // ALREADY PAID
+    // ==================================================
 
-  } catch (err) {
+    if (
+      getFineStatus(fine)
+        .toLowerCase() ===
+      "paid"
+    ) {
 
-    console.error(
-      "Error deleting fine:",
-      err
-    );
+      alert(
+        "This fine is already paid."
+      );
 
-    alert(
-      err?.message ||
-      "Failed to delete fine."
-    );
-  }
-};
+      return;
+
+    }
+
+
+    // ==================================================
+    // CONFIRM
+    // ==================================================
+
+    if (
+      !confirm(
+        "Are you sure you want to mark this fine as paid?"
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    try {
+
+      await markFineAsPaid(
+        fine.id
+      );
+
+
+      // ==================================================
+      // UPDATE LOCAL
+      // ==================================================
+
+      fine.status =
+        "PAID";
+
+
+      fine.paidAt =
+        new Date()
+          .toISOString();
+
+
+      // ==================================================
+      // UPDATE DETAILS
+      // ==================================================
+
+      if (
+        selectedFine.value &&
+        selectedFine.value.id ===
+          fine.id
+      ) {
+
+        selectedFine.value = {
+
+          ...selectedFine.value,
+
+          status:
+            "PAID",
+
+          paidAt:
+            fine.paidAt
+
+        };
+
+      }
+
+
+      alert(
+        "Fine marked as paid successfully."
+      );
+
+
+      // ==================================================
+      // REFRESH
+      // ==================================================
+
+      await fetchFines();
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "Error marking fine as paid:",
+        err
+      );
+
+
+      alert(
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to mark fine as paid."
+      );
+
+    }
+
+  };
 
 
 // ======================================================
-// Load Data When Page Opens
+// DELETE FINE
+// ======================================================
+
+const deleteFine =
+  async (id) => {
+
+    if (!id) {
+
+      alert(
+        "Fine ID not found."
+      );
+
+      return;
+
+    }
+
+
+    // ==================================================
+    // CONFIRM
+    // ==================================================
+
+    if (
+      !confirm(
+        "Are you sure you want to delete this fine?"
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    try {
+
+      await deleteFineApi(
+        id
+      );
+
+
+      // ==================================================
+      // REMOVE
+      // ==================================================
+
+      fines.value =
+        fines.value.filter(
+          (fine) =>
+            fine.id !== id
+        );
+
+
+      // ==================================================
+      // CLOSE DETAILS
+      // ==================================================
+
+      if (
+        selectedFine.value &&
+        selectedFine.value.id ===
+          id
+      ) {
+
+        selectedFine.value =
+          null;
+
+      }
+
+
+      alert(
+        "Fine deleted successfully."
+      );
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "Error deleting fine:",
+        err
+      );
+
+
+      alert(
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to delete fine."
+      );
+
+    }
+
+  };
+
+
+// ======================================================
+// LOAD DATA
 // ======================================================
 
 onMounted(() => {
+
   fetchFines();
+
 });
 
 </script>
@@ -561,61 +1071,76 @@ onMounted(() => {
 <style scoped>
 
 /* ======================================================
-   Page
+   PAGE
 ====================================================== */
 
 .fines-page {
   min-height: 100vh;
+
   background: #f8fafc;
+
   padding: 60px;
 }
 
 
 /* ======================================================
-   Header
+   HEADER
 ====================================================== */
 
 .page-header {
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
+
   margin-bottom: 25px;
 }
 
 
 .page-header h1 {
   margin: 0;
+
   font-size: 28px;
+
   font-weight: 700;
+
   color: #1e293b;
 }
 
 
 .page-header p {
   margin: 6px 0 0;
+
   color: #64748b;
+
   font-size: 14px;
 }
 
 
 /* ======================================================
-   Error
+   ERROR
 ====================================================== */
 
 .error-message {
   display: flex;
+
   align-items: center;
+
   gap: 10px;
 
   padding: 14px 16px;
+
   margin-bottom: 20px;
 
   background: #fef2f2;
+
   border: 1px solid #fecaca;
 
   border-radius: 8px;
 
   color: #b91c1c;
+
   font-size: 14px;
 }
 
@@ -624,11 +1149,13 @@ onMounted(() => {
   margin-left: auto;
 
   border: none;
+
   background: transparent;
 
   color: #b91c1c;
 
   font-weight: 600;
+
   cursor: pointer;
 }
 
@@ -639,16 +1166,18 @@ onMounted(() => {
 
 
 /* ======================================================
-   Loading
+   LOADING
 ====================================================== */
 
 .loading-container {
   min-height: 300px;
 
   display: flex;
+
   flex-direction: column;
 
   align-items: center;
+
   justify-content: center;
 
   color: #64748b;
@@ -657,32 +1186,38 @@ onMounted(() => {
 
 .loading-container p {
   margin-top: 12px;
+
   font-size: 14px;
 }
 
 
 .spinner {
   width: 36px;
+
   height: 36px;
 
   border: 4px solid #e2e8f0;
+
   border-top-color: #2563eb;
 
   border-radius: 50%;
 
-  animation: spin 0.8s linear infinite;
+  animation:
+    spin 0.8s linear infinite;
 }
 
 
 @keyframes spin {
+
   to {
     transform: rotate(360deg);
   }
+
 }
 
 
 /* ======================================================
-   Summary Grid
+   SUMMARY GRID
 ====================================================== */
 
 .summary-grid {
@@ -698,35 +1233,43 @@ onMounted(() => {
 
 
 /* ======================================================
-   Summary Card
+   SUMMARY CARD
 ====================================================== */
 
 .summary-card {
   background: white;
 
   border: 1px solid #e2e8f0;
+
   border-radius: 12px;
 
   padding: 20px;
 
   display: flex;
+
   align-items: center;
 
   gap: 15px;
 
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04);
+    0 1px 2px
+    rgba(15, 23, 42, 0.04);
 }
 
 
 .summary-icon {
   width: 48px;
+
   height: 48px;
+
+  flex-shrink: 0;
 
   border-radius: 10px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   font-size: 21px;
@@ -735,24 +1278,28 @@ onMounted(() => {
 
 .total-icon {
   background: #eff6ff;
+
   color: #2563eb;
 }
 
 
 .unpaid-icon {
   background: #fef2f2;
+
   color: #dc2626;
 }
 
 
 .paid-icon {
   background: #f0fdf4;
+
   color: #16a34a;
 }
 
 
 .late-icon {
   background: #fff7ed;
+
   color: #ea580c;
 }
 
@@ -766,6 +1313,7 @@ onMounted(() => {
   margin: 0 0 5px;
 
   font-size: 13px;
+
   color: #64748b;
 }
 
@@ -774,20 +1322,24 @@ onMounted(() => {
   margin: 0;
 
   font-size: 22px;
+
   font-weight: 700;
 
   color: #1e293b;
+
+  word-break: break-word;
 }
 
 
 /* ======================================================
-   Toolbar
+   TOOLBAR
 ====================================================== */
 
 .toolbar {
   background: white;
 
   border: 1px solid #e2e8f0;
+
   border-radius: 10px;
 
   padding: 16px;
@@ -795,7 +1347,9 @@ onMounted(() => {
   margin-bottom: 20px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
 
   gap: 20px;
@@ -803,13 +1357,14 @@ onMounted(() => {
 
 
 /* ======================================================
-   Search
+   SEARCH
 ====================================================== */
 
 .search-box {
   position: relative;
 
   width: 100%;
+
   max-width: 420px;
 }
 
@@ -818,9 +1373,11 @@ onMounted(() => {
   position: absolute;
 
   left: 14px;
+
   top: 50%;
 
-  transform: translateY(-50%);
+  transform:
+    translateY(-50%);
 
   color: #94a3b8;
 
@@ -833,9 +1390,16 @@ onMounted(() => {
 
   box-sizing: border-box;
 
-  padding: 11px 14px 11px 40px;
+  padding:
+    11px
+    14px
+    11px
+    40px;
 
-  border: 1px solid #cbd5e1;
+  border:
+    1px solid
+    #cbd5e1;
+
   border-radius: 8px;
 
   outline: none;
@@ -852,7 +1416,8 @@ onMounted(() => {
   border-color: #2563eb;
 
   box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.1);
+    0 0 0 3px
+    rgba(37, 99, 235, 0.1);
 }
 
 
@@ -862,7 +1427,7 @@ onMounted(() => {
 
 
 /* ======================================================
-   Status Filter
+   STATUS FILTER
 ====================================================== */
 
 .status-filter {
@@ -888,9 +1453,14 @@ onMounted(() => {
 .status-filter select {
   min-width: 120px;
 
-  padding: 10px 12px;
+  padding:
+    10px
+    12px;
 
-  border: 1px solid #cbd5e1;
+  border:
+    1px solid
+    #cbd5e1;
+
   border-radius: 8px;
 
   background: white;
@@ -909,12 +1479,13 @@ onMounted(() => {
   border-color: #2563eb;
 
   box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.1);
+    0 0 0 3px
+    rgba(37, 99, 235, 0.1);
 }
 
 
 /* ======================================================
-   Responsive
+   RESPONSIVE
 ====================================================== */
 
 @media (max-width: 1100px) {
@@ -926,6 +1497,10 @@ onMounted(() => {
 
 }
 
+
+/* ======================================================
+   TABLET / MOBILE
+====================================================== */
 
 @media (max-width: 768px) {
 
@@ -946,6 +1521,7 @@ onMounted(() => {
 
   .toolbar {
     flex-direction: column;
+
     align-items: stretch;
   }
 
@@ -962,6 +1538,10 @@ onMounted(() => {
 }
 
 
+/* ======================================================
+   SMALL MOBILE
+====================================================== */
+
 @media (max-width: 520px) {
 
   .summary-grid {
@@ -971,6 +1551,25 @@ onMounted(() => {
 
   .fines-page {
     padding: 15px;
+  }
+
+
+  .summary-card {
+    padding: 16px;
+  }
+
+
+  .summary-icon {
+    width: 44px;
+
+    height: 44px;
+
+    font-size: 19px;
+  }
+
+
+  .summary-content h2 {
+    font-size: 20px;
   }
 
 }

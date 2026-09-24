@@ -1,3 +1,4 @@
+
 <template>
 
   <div class="table-card">
@@ -19,6 +20,7 @@
         </p>
 
       </div>
+
 
       <span class="fine-count">
         {{ fines.length }} records
@@ -69,7 +71,9 @@
             :key="fine.id"
           >
 
-            <!-- ID -->
+            <!-- =========================
+                 ID
+            ========================== -->
 
             <td>
 
@@ -80,18 +84,25 @@
             </td>
 
 
-            <!-- User -->
+            <!-- =========================
+                 User
+            ========================== -->
 
             <td>
 
               <div class="user-info">
 
                 <div class="avatar">
-                  {{ getInitials(fine.user) }}
+
+                  {{ getInitials(getUserName(fine)) }}
+
                 </div>
 
-                <span>
-                  {{ fine.user }}
+
+                <span class="user-name">
+
+                  {{ getUserName(fine) }}
+
                 </span>
 
               </div>
@@ -99,54 +110,74 @@
             </td>
 
 
-            <!-- Book -->
+            <!-- =========================
+                 Book
+            ========================== -->
 
             <td>
 
               <span class="book-name">
-                {{ fine.book }}
+
+                {{ getBookTitle(fine) }}
+
               </span>
 
             </td>
 
 
-            <!-- Days Late -->
+            <!-- =========================
+                 Days Late
+            ========================== -->
 
             <td>
 
               <span class="late-days">
-                {{ fine.daysLate }} days
+
+                {{ getLateDays(fine) }}
+
+                {{ getLateDays(fine) === 1 ? "day" : "days" }}
+
               </span>
 
             </td>
 
 
-            <!-- Amount -->
+            <!-- =========================
+                 Amount
+            ========================== -->
 
             <td>
 
               <strong class="amount">
-                ${{ Number(fine.amount).toFixed(2) }}
+
+                ៛{{ formatAmount(getFineAmount(fine)) }}
+
               </strong>
 
             </td>
 
 
-            <!-- Status -->
+            <!-- =========================
+                 Status
+            ========================== -->
 
             <td>
 
               <span
                 class="status-badge"
-                :class="fine.status.toLowerCase()"
+                :class="getStatusClass(fine)"
               >
-                {{ fine.status }}
+
+                {{ getStatus(fine) }}
+
               </span>
 
             </td>
 
 
-            <!-- Actions -->
+            <!-- =========================
+                 Actions
+            ========================== -->
 
             <td>
 
@@ -162,7 +193,9 @@
                   title="View Fine"
                   @click="viewFine(fine)"
                 >
+
                   <i class="bi bi-eye"></i>
+
                 </button>
 
 
@@ -174,10 +207,12 @@
                   type="button"
                   class="action-btn paid"
                   title="Mark as Paid"
-                  :disabled="fine.status === 'Paid'"
+                  :disabled="isPaid(fine)"
                   @click="markPaid(fine)"
                 >
+
                   <i class="bi bi-check-lg"></i>
+
                 </button>
 
 
@@ -191,7 +226,9 @@
                   title="Delete Fine"
                   @click="deleteFine(fine.id)"
                 >
+
                   <i class="bi bi-trash3"></i>
+
                 </button>
 
               </div>
@@ -213,12 +250,16 @@
             >
 
               <div class="empty-icon">
+
                 <i class="bi bi-cash-stack"></i>
+
               </div>
+
 
               <h3>
                 No fines found
               </h3>
+
 
               <p>
                 There are no fines matching your search.
@@ -241,23 +282,26 @@
 
 <script setup>
 
-/* =========================
-   Props
-========================= */
+/* ======================================================
+   PROPS
+====================================================== */
 
-defineProps({
+const props = defineProps({
 
   fines: {
+
     type: Array,
+
     default: () => []
+
   }
 
 });
 
 
-/* =========================
-   Events
-========================= */
+/* ======================================================
+   EVENTS
+====================================================== */
 
 const emit = defineEmits([
   "view",
@@ -266,11 +310,493 @@ const emit = defineEmits([
 ]);
 
 
-/* =========================
-   View Fine
-========================= */
+/* ======================================================
+   GET USER NAME
+====================================================== */
+
+function getUserName(fine) {
+
+  if (!fine) {
+    return "Unknown User";
+  }
+
+
+  /*
+   * Normal field from FinesManagement.vue
+   */
+
+  if (
+    fine.userName !== null &&
+    fine.userName !== undefined &&
+    String(fine.userName).trim() !== ""
+  ) {
+
+    return String(
+      fine.userName
+    );
+
+  }
+
+
+  /*
+   * Other possible backend fields
+   */
+
+  if (
+    fine.borrowerName !== null &&
+    fine.borrowerName !== undefined &&
+    String(fine.borrowerName).trim() !== ""
+  ) {
+
+    return String(
+      fine.borrowerName
+    );
+
+  }
+
+
+  /*
+   * Nested user object
+   */
+
+  if (fine.user) {
+
+    if (fine.user.userName) {
+      return String(
+        fine.user.userName
+      );
+    }
+
+
+    if (fine.user.username) {
+      return String(
+        fine.user.username
+      );
+    }
+
+
+    if (fine.user.name) {
+      return String(
+        fine.user.name
+      );
+    }
+
+
+    if (fine.user.fullName) {
+      return String(
+        fine.user.fullName
+      );
+    }
+
+  }
+
+
+  /*
+   * Nested borrower object
+   */
+
+  if (fine.borrower) {
+
+    if (fine.borrower.userName) {
+      return String(
+        fine.borrower.userName
+      );
+    }
+
+
+    if (fine.borrower.username) {
+      return String(
+        fine.borrower.username
+      );
+    }
+
+
+    if (fine.borrower.name) {
+      return String(
+        fine.borrower.name
+      );
+    }
+
+
+    if (fine.borrower.fullName) {
+      return String(
+        fine.borrower.fullName
+      );
+    }
+
+  }
+
+
+  return "Unknown User";
+
+}
+
+
+/* ======================================================
+   GET BOOK TITLE
+====================================================== */
+
+function getBookTitle(fine) {
+
+  if (!fine) {
+    return "Unknown Book";
+  }
+
+
+  /*
+   * Normal field
+   */
+
+  if (
+    fine.bookTitle !== null &&
+    fine.bookTitle !== undefined &&
+    String(fine.bookTitle).trim() !== ""
+  ) {
+
+    return String(
+      fine.bookTitle
+    );
+
+  }
+
+
+  /*
+   * Direct book field
+   */
+
+  if (
+    fine.book !== null &&
+    fine.book !== undefined
+  ) {
+
+    /*
+     * book is string
+     */
+
+    if (
+      typeof fine.book === "string"
+    ) {
+
+      return fine.book;
+
+    }
+
+
+    /*
+     * book is object
+     */
+
+    if (
+      typeof fine.book === "object"
+    ) {
+
+      if (fine.book.title) {
+        return String(
+          fine.book.title
+        );
+      }
+
+
+      if (fine.book.bookTitle) {
+        return String(
+          fine.book.bookTitle
+        );
+      }
+
+    }
+
+  }
+
+
+  /*
+   * Borrowing -> Book
+   */
+
+  if (
+    fine.borrowing?.book
+  ) {
+
+    if (
+      fine.borrowing.book.title
+    ) {
+
+      return String(
+        fine.borrowing.book.title
+      );
+
+    }
+
+
+    if (
+      fine.borrowing.book.bookTitle
+    ) {
+
+      return String(
+        fine.borrowing.book.bookTitle
+      );
+
+    }
+
+  }
+
+
+  /*
+   * Borrowing -> bookTitle
+   */
+
+  if (
+    fine.borrowing?.bookTitle
+  ) {
+
+    return String(
+      fine.borrowing.bookTitle
+    );
+
+  }
+
+
+  /*
+   * Fallback title
+   */
+
+  if (
+    fine.title
+  ) {
+
+    return String(
+      fine.title
+    );
+
+  }
+
+
+  return "Unknown Book";
+
+}
+
+
+/* ======================================================
+   GET FINE AMOUNT
+====================================================== */
+
+function getFineAmount(fine) {
+
+  if (!fine) {
+    return 0;
+  }
+
+
+  let amount =
+    fine.totalAmount ??
+    fine.amount ??
+    fine.fineAmount ??
+    fine.totalFine ??
+    fine.fine ??
+    0;
+
+
+  /*
+   * Number
+   */
+
+  if (
+    typeof amount === "number"
+  ) {
+
+    return Number.isFinite(amount)
+      ? amount
+      : 0;
+
+  }
+
+
+  /*
+   * String
+   */
+
+  if (
+    typeof amount === "string"
+  ) {
+
+    const cleaned =
+      amount
+        .replace(/,/g, "")
+        .replace(/[៛$]/g, "")
+        .trim();
+
+
+    if (!cleaned) {
+      return 0;
+    }
+
+
+    const number =
+      Number(cleaned);
+
+
+    return Number.isFinite(number)
+      ? number
+      : 0;
+
+  }
+
+
+  /*
+   * Object
+   */
+
+  if (
+    typeof amount === "object" &&
+    amount !== null
+  ) {
+
+    const value =
+      amount.value ??
+      amount.amount ??
+      amount.totalAmount ??
+      0;
+
+
+    const number =
+      Number(value);
+
+
+    return Number.isFinite(number)
+      ? number
+      : 0;
+
+  }
+
+
+  return 0;
+
+}
+
+
+/* ======================================================
+   FORMAT AMOUNT
+====================================================== */
+
+function formatAmount(amount) {
+
+  const number =
+    Number(amount);
+
+
+  if (
+    !Number.isFinite(number)
+  ) {
+
+    return "0.00";
+
+  }
+
+
+  return number.toLocaleString(
+    "en-US",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }
+  );
+
+}
+
+
+/* ======================================================
+   GET LATE DAYS
+====================================================== */
+
+function getLateDays(fine) {
+
+  if (!fine) {
+    return 0;
+  }
+
+
+  const days =
+    fine.daysLate ??
+    fine.lateDays ??
+    fine.overdueDays ??
+    0;
+
+
+  const number =
+    Number(days);
+
+
+  return Number.isFinite(number)
+    ? number
+    : 0;
+
+}
+
+
+/* ======================================================
+   GET STATUS
+====================================================== */
+
+function getStatus(fine) {
+
+  if (!fine) {
+    return "UNPAID";
+  }
+
+
+  const status =
+    fine.status ??
+    fine.paymentStatus ??
+    "UNPAID";
+
+
+  return String(
+    status
+  ).toUpperCase();
+
+}
+
+
+/* ======================================================
+   STATUS CLASS
+====================================================== */
+
+function getStatusClass(fine) {
+
+  const status =
+    getStatus(fine)
+      .toLowerCase();
+
+
+  return status;
+
+}
+
+
+/* ======================================================
+   CHECK PAID
+====================================================== */
+
+function isPaid(fine) {
+
+  return (
+    getStatus(fine)
+      .toLowerCase() ===
+    "paid"
+  );
+
+}
+
+
+/* ======================================================
+   VIEW FINE
+====================================================== */
 
 function viewFine(fine) {
+
+  if (!fine) {
+    return;
+  }
+
 
   emit(
     "view",
@@ -280,13 +806,25 @@ function viewFine(fine) {
 }
 
 
-/* =========================
-   Mark As Paid
-========================= */
+/* ======================================================
+   MARK AS PAID
+====================================================== */
 
 function markPaid(fine) {
 
-  if (!fine) return;
+  if (!fine) {
+    return;
+  }
+
+
+  if (
+    isPaid(fine)
+  ) {
+
+    return;
+
+  }
+
 
   emit(
     "mark-paid",
@@ -296,11 +834,16 @@ function markPaid(fine) {
 }
 
 
-/* =========================
-   Delete Fine
-========================= */
+/* ======================================================
+   DELETE FINE
+====================================================== */
 
 function deleteFine(id) {
+
+  if (!id) {
+    return;
+  }
+
 
   emit(
     "delete",
@@ -310,21 +853,34 @@ function deleteFine(id) {
 }
 
 
-/* =========================
-   User Initials
-========================= */
+/* ======================================================
+   USER INITIALS
+====================================================== */
 
 function getInitials(name) {
 
-  if (!name) return "";
+  if (
+    !name ||
+    name === "Unknown User"
+  ) {
 
-  return name
-    .split(" ")
+    return "?";
+
+  }
+
+
+  return String(name)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
     .map(
-      word => word[0]
+      word =>
+        word
+          .charAt(0)
+          .toUpperCase()
     )
-    .join("")
-    .toUpperCase();
+    .slice(0, 2)
+    .join("");
 
 }
 
@@ -333,9 +889,9 @@ function getInitials(name) {
 
 <style scoped>
 
-/* =========================
-   Card
-========================= */
+/* ======================================================
+   CARD
+====================================================== */
 
 .table-card {
 
@@ -343,16 +899,18 @@ function getInitials(name) {
 
   background: white;
 
-  border: 1px solid #e5e7eb;
+  border:
+    1px solid
+    #e5e7eb;
 
   border-radius: 10px;
 
 }
 
 
-/* =========================
-   Header
-========================= */
+/* ======================================================
+   HEADER
+====================================================== */
 
 .table-header {
 
@@ -365,7 +923,8 @@ function getInitials(name) {
   padding: 20px;
 
   border-bottom:
-    1px solid #e5e7eb;
+    1px solid
+    #e5e7eb;
 
 }
 
@@ -383,7 +942,8 @@ function getInitials(name) {
 
 .table-header p {
 
-  margin: 5px 0 0;
+  margin:
+    5px 0 0;
 
   color: #6b7280;
 
@@ -394,7 +954,9 @@ function getInitials(name) {
 
 .fine-count {
 
-  padding: 6px 10px;
+  padding:
+    6px
+    10px;
 
   border-radius: 6px;
 
@@ -407,9 +969,9 @@ function getInitials(name) {
 }
 
 
-/* =========================
-   Table
-========================= */
+/* ======================================================
+   TABLE
+====================================================== */
 
 .table-wrapper {
 
@@ -421,6 +983,8 @@ function getInitials(name) {
 table {
 
   width: 100%;
+
+  min-width: 850px;
 
   border-collapse: collapse;
 
@@ -436,7 +1000,9 @@ thead {
 
 th {
 
-  padding: 14px 18px;
+  padding:
+    14px
+    18px;
 
   text-align: left;
 
@@ -448,15 +1014,20 @@ th {
 
   text-transform: uppercase;
 
+  white-space: nowrap;
+
 }
 
 
 td {
 
-  padding: 15px 18px;
+  padding:
+    15px
+    18px;
 
   border-top:
-    1px solid #f1f5f9;
+    1px solid
+    #f1f5f9;
 
   color: #374151;
 
@@ -465,16 +1036,26 @@ td {
 }
 
 
-tbody tr:hover {
+tbody tr {
 
-  background: #fafafa;
+  transition:
+    background
+    0.2s ease;
 
 }
 
 
-/* =========================
+tbody tr:hover {
+
+  background:
+    #fafafa;
+
+}
+
+
+/* ======================================================
    ID
-========================= */
+====================================================== */
 
 .id-number {
 
@@ -485,9 +1066,9 @@ tbody tr:hover {
 }
 
 
-/* =========================
-   User
-========================= */
+/* ======================================================
+   USER
+====================================================== */
 
 .user-info {
 
@@ -497,6 +1078,8 @@ tbody tr:hover {
 
   gap: 10px;
 
+  min-width: 180px;
+
 }
 
 
@@ -505,6 +1088,8 @@ tbody tr:hover {
   width: 34px;
 
   height: 34px;
+
+  flex-shrink: 0;
 
   display: flex;
 
@@ -525,11 +1110,15 @@ tbody tr:hover {
 }
 
 
-/* =========================
-   Book
-========================= */
+.user-name {
 
-.book-name {
+  max-width: 180px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
 
   color: #374151;
 
@@ -538,31 +1127,62 @@ tbody tr:hover {
 }
 
 
-/* =========================
-   Late Days
-========================= */
+/* ======================================================
+   BOOK
+====================================================== */
+
+.book-name {
+
+  display: block;
+
+  max-width: 220px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: #374151;
+
+  font-weight: 500;
+
+}
+
+
+/* ======================================================
+   LATE DAYS
+====================================================== */
 
 .late-days {
 
   color: #dc2626;
 
+  font-weight: 500;
+
+  white-space: nowrap;
+
 }
 
 
-/* =========================
-   Amount
-========================= */
+/* ======================================================
+   AMOUNT
+====================================================== */
 
 .amount {
 
   color: #111827;
 
+  font-weight: 700;
+
+  white-space: nowrap;
+
 }
 
 
-/* =========================
-   Status
-========================= */
+/* ======================================================
+   STATUS
+====================================================== */
 
 .status-badge {
 
@@ -570,7 +1190,11 @@ tbody tr:hover {
 
   align-items: center;
 
-  padding: 5px 10px;
+  justify-content: center;
+
+  padding:
+    5px
+    10px;
 
   border-radius: 999px;
 
@@ -578,8 +1202,12 @@ tbody tr:hover {
 
   font-weight: 600;
 
+  white-space: nowrap;
+
 }
 
+
+/* PAID */
 
 .status-badge.paid {
 
@@ -590,6 +1218,8 @@ tbody tr:hover {
 }
 
 
+/* UNPAID */
+
 .status-badge.unpaid {
 
   background: #fee2e2;
@@ -599,9 +1229,31 @@ tbody tr:hover {
 }
 
 
-/* =========================
-   Actions
-========================= */
+/* PENDING */
+
+.status-badge.pending {
+
+  background: #fef3c7;
+
+  color: #b45309;
+
+}
+
+
+/* OVERDUE */
+
+.status-badge.overdue {
+
+  background: #ffedd5;
+
+  color: #c2410c;
+
+}
+
+
+/* ======================================================
+   ACTIONS
+====================================================== */
 
 .actions {
 
@@ -611,6 +1263,10 @@ tbody tr:hover {
 
 }
 
+
+/* ======================================================
+   ACTION BUTTON
+====================================================== */
 
 .action-btn {
 
@@ -632,134 +1288,241 @@ tbody tr:hover {
 
   font-size: 15px;
 
-  transition: 0.2s;
+  transition:
+    0.2s ease;
 
 }
 
 
-/* =========================
-   View Button
-========================= */
+/* ======================================================
+   VIEW
+====================================================== */
 
 .action-btn.view {
 
-  background: #eff6ff;
+  background:
+    #eff6ff;
 
-  color: #2563eb;
+  color:
+    #2563eb;
 
 }
 
 
 .action-btn.view:hover {
 
-  background: #dbeafe;
+  background:
+    #dbeafe;
+
+  transform:
+    translateY(-1px);
 
 }
 
 
-/* =========================
-   Paid Button
-========================= */
+/* ======================================================
+   PAID
+====================================================== */
 
 .action-btn.paid {
 
-  background: #ecfdf5;
+  background:
+    #ecfdf5;
 
-  color: #16a34a;
+  color:
+    #16a34a;
 
 }
 
 
 .action-btn.paid:hover {
 
-  background: #dcfce7;
+  background:
+    #dcfce7;
+
+  transform:
+    translateY(-1px);
 
 }
 
 
 .action-btn.paid:disabled {
 
-  opacity: 0.5;
+  opacity:
+    0.45;
 
-  cursor: not-allowed;
+  cursor:
+    not-allowed;
+
+  transform:
+    none;
 
 }
 
 
-/* =========================
-   Delete Button
-========================= */
+/* ======================================================
+   DELETE
+====================================================== */
 
 .action-btn.delete {
 
-  background: #fef2f2;
+  background:
+    #fef2f2;
 
-  color: #dc2626;
+  color:
+    #dc2626;
 
 }
 
 
 .action-btn.delete:hover {
 
-  background: #fee2e2;
+  background:
+    #fee2e2;
+
+  transform:
+    translateY(-1px);
 
 }
 
 
-/* =========================
-   Empty
-========================= */
+/* ======================================================
+   EMPTY
+====================================================== */
 
 .empty-state {
 
-  padding: 60px 20px;
+  padding:
+    60px
+    20px;
 
-  text-align: center;
+  text-align:
+    center;
 
 }
 
 
 .empty-icon {
 
-  width: 60px;
+  width:
+    60px;
 
-  height: 60px;
+  height:
+    60px;
 
-  margin: 0 auto 15px;
+  margin:
+    0 auto 15px;
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  justify-content: center;
+  justify-content:
+    center;
 
-  border-radius: 50%;
+  border-radius:
+    50%;
 
-  background: #f1f5f9;
+  background:
+    #f1f5f9;
 
-  color: #64748b;
+  color:
+    #64748b;
 
-  font-size: 28px;
+  font-size:
+    28px;
 
 }
 
 
 .empty-state h3 {
 
-  margin: 0;
+  margin:
+    0;
 
-  color: #374151;
+  color:
+    #374151;
+
+  font-size:
+    16px;
 
 }
 
 
 .empty-state p {
 
-  margin-top: 5px;
+  margin-top:
+    5px;
 
-  color: #9ca3af;
+  color:
+    #9ca3af;
 
-  font-size: 14px;
+  font-size:
+    14px;
+
+}
+
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+@media (max-width: 768px) {
+
+  .table-header {
+
+    padding:
+      16px;
+
+  }
+
+
+  .table-header h2 {
+
+    font-size:
+      16px;
+
+  }
+
+
+  .table-header p {
+
+    font-size:
+      12px;
+
+  }
+
+
+  .fine-count {
+
+    font-size:
+      12px;
+
+    padding:
+      5px
+      8px;
+
+  }
+
+
+  th {
+
+    padding:
+      12px
+      14px;
+
+  }
+
+
+  td {
+
+    padding:
+      13px
+      14px;
+
+  }
 
 }
 
