@@ -1,8 +1,10 @@
+
 // =====================================================
 // FINE SERVICE
 // =====================================================
 
-const API_URL = "https://librarymanagementsystem-ukyq.onrender.com/api/fine";
+const API_URL =
+  "https://librarymanagementsystem-ukyq.onrender.com/api/fine";
 
 
 // =====================================================
@@ -115,20 +117,24 @@ export async function getFines() {
 // User
 //
 // Backend currently returns all fines.
-// This function filters by logged-in userId.
+// This function filters by logged-in user.
 // =====================================================
 
 export async function getMyFines() {
 
   try {
 
+    // -------------------------------------------------
+    // GET ALL FINES
+    // -------------------------------------------------
+
     const fines =
       await getFines();
 
 
-    // -----------------------------------------------
-    // Get user from sessionStorage
-    // -----------------------------------------------
+    // -------------------------------------------------
+    // GET CURRENT USER
+    // -------------------------------------------------
 
     let userId = null;
 
@@ -146,7 +152,7 @@ export async function getMyFines() {
 
 
         userId =
-          user?.id ||
+          user?.id ??
           user?.userId;
 
       } catch (error) {
@@ -161,9 +167,9 @@ export async function getMyFines() {
     }
 
 
-    // -----------------------------------------------
-    // Fallback userId
-    // -----------------------------------------------
+    // -------------------------------------------------
+    // FALLBACK USER ID
+    // -------------------------------------------------
 
     if (!userId) {
 
@@ -173,14 +179,14 @@ export async function getMyFines() {
     }
 
 
-    // -----------------------------------------------
-    // No user ID
-    // -----------------------------------------------
+    // -------------------------------------------------
+    // NO USER ID
+    // -------------------------------------------------
 
     if (!userId) {
 
       console.warn(
-        "User ID not found."
+        "User ID not found in sessionStorage."
       );
 
       return [];
@@ -188,17 +194,39 @@ export async function getMyFines() {
     }
 
 
-    // -----------------------------------------------
-    // Filter current user's fines
-    // -----------------------------------------------
+    // -------------------------------------------------
+    // FILTER CURRENT USER'S FINES
+    // -------------------------------------------------
 
-    return fines.filter(
+    return fines.filter((fine) => {
 
-      fine =>
-        Number(fine?.userId) ===
+      if (!fine) {
+
+        return false;
+
+      }
+
+
+      // -----------------------------------------------
+      // Support different backend response structures
+      // -----------------------------------------------
+
+      const fineUserId =
+        fine?.userId ??
+        fine?.user?.id ??
+        fine?.user?.userId ??
+        fine?.borrower?.id ??
+        fine?.borrower?.userId ??
+        fine?.borrowing?.userId ??
+        fine?.borrowing?.user?.id;
+
+
+      return (
+        Number(fineUserId) ===
         Number(userId)
+      );
 
-    );
+    });
 
   } catch (error) {
 
