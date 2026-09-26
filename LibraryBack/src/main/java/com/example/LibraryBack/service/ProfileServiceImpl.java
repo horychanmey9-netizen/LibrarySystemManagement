@@ -10,6 +10,7 @@ import com.example.LibraryBack.mapper.ProfileMapper;
 import com.example.LibraryBack.repository.ProfileRepository;
 import com.example.LibraryBack.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,14 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
     private final ProfileMapper profileMapper;
 
+    @Value("${app.backend.url:http://localhost:8080}")
+    private String backendUrl;
+
+    @Value("${app.upload.dir:uploads/profile}")
+    private String uploadDirectory;
+
     private User getCurrentUser() {
+
         Authentication authentication =
                 SecurityContextHolder
                         .getContext()
@@ -45,31 +53,83 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private Gender parseGender(String genderStr) {
+
         if (genderStr == null || genderStr.trim().isEmpty()) {
             return null;
         }
+
         String clean = genderStr.trim();
-        for (Gender g : Gender.values()) {
-            if (g.name().equalsIgnoreCase(clean)) {
-                return g;
+
+        for (Gender gender : Gender.values()) {
+            if (gender.name().equalsIgnoreCase(clean)) {
+                return gender;
             }
         }
+
         return null;
     }
 
-    private void saveProfileImage(Profile profile, MultipartFile image) throws IOException {
-        String originalFileName = image.getOriginalFilename();
-        String fileName = UUID.randomUUID() + "_" + originalFileName;
+    private void saveProfileImage(
+            Profile profile,
+            MultipartFile image
+    ) throws IOException {
 
-        Path uploadPath = Paths.get("uploads/profile");
+        if (image == null || image.isEmpty()) {
+            return;
+        }
+
+        String originalFileName = image.getOriginalFilename();
+
+        if (originalFileName == null || originalFileName.isBlank()) {
+            originalFileName = "profile-image";
+        }
+
+        /*
+         * Remove unsafe characters from original filename.
+         */
+        originalFileName = Paths
+                .get(originalFileName)
+                .getFileName()
+                .toString()
+                .replaceAll("[^a-zA-Z0-9._-]", "_");
+
+        String fileName =
+                UUID.randomUUID()
+                        + "_"
+                        + originalFileName;
+
+        Path uploadPath = Paths.get(uploadDirectory);
+
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
         Path filePath = uploadPath.resolve(fileName);
-        Files.copy(image.getInputStream(), filePath);
 
-        String imageUrl = "http://localhost:8080/uploads/profile/" + fileName;
+        /*
+         * Save image to server filesystem.
+         */
+        Files.copy(
+                image.getInputStream(),
+                filePath
+        );
+
+        /*
+         * Save the public URL into PostgreSQL.
+         */
+        String cleanBackendUrl =
+                backendUrl.endsWith("/")
+                        ? backendUrl.substring(
+                        0,
+                        backendUrl.length() - 1
+                )
+                        : backendUrl;
+
+        String imageUrl =
+                cleanBackendUrl
+                        + "/uploads/profile/"
+                        + fileName;
+
         profile.setImage(imageUrl);
     }
 
@@ -80,9 +140,10 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileResponse getProfile() {
         User user = getCurrentUser();
 
-        Profile profile = profileRepository
-                .findByUserId(user.getId())
-                .orElse(null);
+        Profile profile =
+                profileRepository
+                        .findByUserId(user.getId())
+                        .orElse(null);
 
         if (profile == null) {
             return ProfileResponse.builder()
@@ -104,7 +165,11 @@ public class ProfileServiceImpl implements ProfileService {
             ProfileRequest profileRequest,
             MultipartFile image
     ) throws IOException {
-        return saveOrUpdateProfile(profileRequest, image);
+
+        return saveOrUpdateProfile(
+                profileRequest,
+                image
+        );
     }
 
     // =========================================
@@ -116,41 +181,88 @@ public class ProfileServiceImpl implements ProfileService {
             ProfileRequest profileRequest,
             MultipartFile image
     ) throws IOException {
-        return saveOrUpdateProfile(profileRequest, image);
-    }
 
+        return saveOrUpdateProfile(
+                profileRequest,
+                image
+        );
+    }
     private ProfileResponse saveOrUpdateProfile(
             ProfileRequest profileRequest,
             MultipartFile image
     ) throws IOException {
         User user = getCurrentUser();
 
-        Profile profile = profileRepository
-                .findByUserId(user.getId())
-                .orElseGet(() -> {
-                    Profile p = new Profile();
-                    p.setUser(user);
-                    return p;
-                });
+        Profile profile =
+                profileRepository
+                        .findByUserId(user.getId())
+                        .orElseGet(() -> {
 
-        // Update user name if provided
-        if (profileRequest.getName() != null && !profileRequest.getName().trim().isEmpty()) {
-            String updatedName = profileRequest.getName().trim();
+                            Profile newProfile =
+                                    new Profile();
+
+                            newProfile.setUser(user);
+
+                            return newProfile;
+                        });
+
+        // =========================================
+        // NAME
+        // =========================================
+
+        if (profileRequest.getName() != null
+                && !profileRequest.getName().trim().isEmpty()) {
+
+            String updatedName =
+                    profileRequest
+                            .getName()
+                            .trim();
+
             profile.setName(updatedName);
+
             user.setName(updatedName);
+
             userRepository.save(user);
         }
 
-        profile.setPhone(profileRequest.getPhone());
-        profile.setGender(parseGender(profileRequest.getGender()));
-        profile.setDateOfBirth(profileRequest.getDateOfBirth());
-        profile.setAddress(profileRequest.getAddress());
+        // =========================================
+        // OTHER PROFILE INFORMATION
+        // =========================================
+
+        profile.setPhone(
+                profileRequest.getPhone()
+        );
+
+        profile.setGender(
+                parseGender(
+                        profileRequest.getGender()
+                )
+        );
+
+        profile.setDateOfBirth(
+                profileRequest.getDateOfBirth()
+        );
+
+        profile.setAddress(
+                profileRequest.getAddress()
+        );
+
+        // =========================================
+        // PROFILE IMAGE
+        // =========================================
 
         if (image != null && !image.isEmpty()) {
-            saveProfileImage(profile, image);
-        }
 
-        Profile savedProfile = profileRepository.save(profile);
-        return profileMapper.toResponse(savedProfile);
+            saveProfileImage(
+                    profile,
+                    image
+            );
+        }
+        Profile savedProfile =
+                profileRepository.save(profile);
+
+        return profileMapper.toResponse(
+                savedProfile
+        );
     }
 }
