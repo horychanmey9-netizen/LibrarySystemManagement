@@ -266,7 +266,7 @@ import FineCard
 
 import {
   getMyFines
-} from "../../service/FineService";
+} from "../../service/FineService.js";
 
 
 export default {
