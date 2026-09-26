@@ -460,7 +460,7 @@ const loadProfile = async () => {
       } else {
 
         profileImage.value =
-          `http://localhost:8080${data.image}`;
+          `https://librarymanagementsystem-ukyq.onrender.com${data.image}`;
 
       }
 

@@ -832,7 +832,7 @@ function getBookImage(image) {
 
   // Backend upload path
 
-  return `http://localhost:8080/uploads/${image}`;
+  return `https://librarymanagementsystem-ukyq.onrender.com/uploads/${image}`;
 
 }
 

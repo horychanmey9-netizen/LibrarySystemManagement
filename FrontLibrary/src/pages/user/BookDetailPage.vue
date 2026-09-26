@@ -823,7 +823,7 @@ export default {
 
 
       // Backend path
-      return `http://localhost:8080${
+      return `https://librarymanagementsystem-ukyq.onrender.com${
         image.startsWith("/")
           ? ""
           : "/"
@@ -924,7 +924,7 @@ export default {
 
         const response =
           await fetch(
-            `http://localhost:8080/api/books/${this.bookId}`,
+            `https://librarymanagementsystem-ukyq.onrender.com/api/books/${this.bookId}`,
             {
               method: "GET",
 

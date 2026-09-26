@@ -856,12 +856,12 @@ function getImageUrl(image) {
 
   if (image.startsWith("/")) {
 
-    return `http://localhost:8080${image}`;
+    return `https://librarymanagementsystem-ukyq.onrender.com${image}`;
 
   }
 
 
-  return `http://localhost:8080/${image}`;
+  return `https://librarymanagementsystem-ukyq.onrender.com/${image}`;
 
 }
 

@@ -352,7 +352,7 @@ const resendOtp = async () => {
   try {
 
     const response = await fetch(
-      "http://localhost:8080/api/auth/resend-otp",
+      "https://librarymanagementsystem-ukyq.onrender.com/api/auth/resend-otp",
       {
         method: "POST",
 

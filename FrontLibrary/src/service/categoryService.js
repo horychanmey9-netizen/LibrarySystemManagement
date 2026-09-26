@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/category";
+const API_URL = "https://librarymanagementsystem-ukyq.onrender.com/api/category";
 
 // =====================================================
 // GET TOKEN

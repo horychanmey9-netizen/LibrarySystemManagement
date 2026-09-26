@@ -112,7 +112,7 @@
         loading.value = true;
 
         const response = await fetch(
-        "http://localhost:8080/api/auth/forgot-password",
+        "https://librarymanagementsystem-ukyq.onrender.com/api/auth/forgot-password",
         {
             method: "POST",
             headers: {

@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/auth";
+const API_URL = "https://librarymanagementsystem-ukyq.onrender.com/api/auth";
 
 // =========================
 // HELPER: READ RESPONSE

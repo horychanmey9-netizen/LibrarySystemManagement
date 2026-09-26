@@ -621,10 +621,10 @@ export default {
        * /uploads/books/book.jpg
        *
        * becomes:
-       * http://localhost:8080/uploads/books/book.jpg
+      * https://librarymanagementsystem-ukyq.onrender.com/uploads/books/book.jpg
        */
 
-      return `http://localhost:8080${
+      return `https://librarymanagementsystem-ukyq.onrender.com${
         image.startsWith("/")
           ? ""
           : "/"
