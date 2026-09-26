@@ -4,7 +4,7 @@
     <!-- =====================================================
          HERO BANNER
     ====================================================== -->
-    <section class="sm:px-6 lg:px-8">
+    <section class="pt-4 sm:px-6 lg:px-8">
       <div
         class="relative mx-auto max-w-7xl overflow-hidden rounded-2xl shadow-sm"
       >
