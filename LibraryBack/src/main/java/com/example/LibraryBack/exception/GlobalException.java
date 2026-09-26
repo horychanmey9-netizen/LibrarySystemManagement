@@ -25,5 +25,16 @@ public class GlobalException {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(e.getMessage());
     }
-
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<?> handleResponseStatusException(org.springframework.web.server.ResponseStatusException e){
+        return ResponseEntity
+                .status(e.getStatusCode())
+                .body(e.getReason());
+    }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException e){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+    }
 }

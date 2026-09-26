@@ -40,7 +40,7 @@ public class ProfileController {
         );
     }
 
-    @PutMapping("/updateProfile")
+    @RequestMapping(value = "/updateProfile", method = {RequestMethod.PUT, RequestMethod.POST})
     public ApiResponse<ProfileResponse> updateProfile(
             @ModelAttribute ProfileRequest profileRequest,
             @RequestParam(value = "image", required = false) MultipartFile image

@@ -99,6 +99,15 @@ const form = ref({
    COPY PROFILE INTO FORM
 ========================================================= */
 
+const normalizeGender = (val) => {
+  if (!val) return "";
+  const upper = String(val).toUpperCase();
+  if (upper === "MALE") return "Male";
+  if (upper === "FEMALE") return "Female";
+  if (upper === "OTHER") return "Other";
+  return val;
+};
+
 const syncForm = () => {
   form.value = {
     id: props.profile?.id || null,
@@ -110,7 +119,7 @@ const syncForm = () => {
       props.profile?.email || "",
 
     gender:
-      props.profile?.gender || "",
+      normalizeGender(props.profile?.gender),
 
     phone:
       props.profile?.phone || "",
@@ -575,8 +584,14 @@ const openTelegram = () => {
               <input
                 v-model="form.fullName"
                 type="text"
-                disabled
-                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 outline-none"
+                :disabled="!editing"
+                placeholder="Enter full name"
+                class="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition"
+                :class="
+                  editing
+                    ? 'border-slate-300 bg-white text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+                    : 'border-slate-200 bg-slate-50 text-slate-500'
+                "
               />
             </div>
 
@@ -643,15 +658,15 @@ const openTelegram = () => {
                   Select gender
                 </option>
 
-                <option value="MALE">
+                <option value="Male">
                   Male
                 </option>
 
-                <option value="FEMALE">
+                <option value="Female">
                   Female
                 </option>
 
-                <option value="OTHER">
+                <option value="Other">
                   Other
                 </option>
               </select>

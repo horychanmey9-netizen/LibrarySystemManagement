@@ -12,6 +12,7 @@ public interface ProfileMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "image", ignore = true)
+    @Mapping(target = "gender", ignore = true)
     Profile toEntity(ProfileRequest request);
 
     @Mapping(target = "userId", source = "user.id")

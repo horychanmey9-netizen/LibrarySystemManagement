@@ -111,12 +111,16 @@
             TelegramAccount account =
                     telegramAccountRepository
                             .findByUser_Id(user.getId())
-                            .orElseGet(TelegramAccount::new);
+                            .orElseGet(() -> TelegramAccount.builder()
+                                    .active(true)
+                                    .connected(false)
+                                    .build());
 
             account.setUser(user);
             account.setChatId(chatId);
             account.setUsername(username);
             account.setConnected(true);
+            account.setActive(true);
             account.setConnectedAt(LocalDateTime.now());
 
             telegramAccountRepository.save(account);

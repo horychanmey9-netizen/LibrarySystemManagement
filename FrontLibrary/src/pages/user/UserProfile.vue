@@ -17,7 +17,7 @@ import {
   getTelegramStatus,
   connectTelegram,
   disconnectTelegram,
-} from "../../service/telegramservice";
+} from "../../service/telegramService";
 
 /* =========================================================
    USER
@@ -93,50 +93,63 @@ const loadProfile = async () => {
 
     console.log("PROFILE RESPONSE:", response);
 
-    /*
-     * Adjust these fallbacks depending on your backend response.
-     */
+    const data = response?.data || response;
 
     profile.value = {
       id:
-        response?.id ||
-        user.value?.id ||
+        data?.id ||
         null,
 
       fullName:
-        response?.fullName ||
+        data?.name ||
+        data?.fullName ||
         user.value?.fullName ||
         user.value?.name ||
         "",
 
       email:
-        response?.email ||
+        data?.email ||
         user.value?.email ||
         "",
 
       gender:
-        response?.gender || "",
+        data?.gender || "",
 
       phone:
-        response?.phone || "",
+        data?.phone || "",
 
       address:
-        response?.address || "",
+        data?.address || "",
 
       dateOfBirth:
-        response?.dateOfBirth || "",
+        data?.dateOfBirth || "",
 
       avatar:
-        response?.avatar ||
-        response?.image ||
+        data?.image ||
+        data?.avatar ||
         "",
     };
   } catch (error) {
     console.error("Load profile error:", error);
 
-    errorMessage.value =
-      error?.message ||
-      "Failed to load profile.";
+    // If profile is not found yet for new account, initialize cleanly from user session
+    if (error?.message && error.message.toLowerCase().includes("not found")) {
+      profile.value = {
+        id: null,
+        fullName: user.value?.fullName || user.value?.name || "",
+        email: user.value?.email || "",
+        gender: "",
+        phone: "",
+        address: "",
+        dateOfBirth: "",
+        avatar: "",
+      };
+      errorMessage.value = "";
+    } else {
+      errorMessage.value =
+        error?.message ||
+        "Failed to load profile.";
+    }
   } finally {
     loading.value = false;
   }
@@ -155,6 +168,8 @@ const saveProfile = async (updatedProfile) => {
       updatedProfile?.imageFile || null;
 
     const payload = {
+      name: updatedProfile.fullName || updatedProfile.name || "",
+      fullName: updatedProfile.fullName || updatedProfile.name || "",
       phone: updatedProfile.phone || "",
       gender: updatedProfile.gender || "",
       dateOfBirth:
@@ -186,6 +201,8 @@ const saveProfile = async (updatedProfile) => {
       response
     );
 
+    const data = response?.data || response;
+
     /*
      * Update local profile.
      */
@@ -193,9 +210,15 @@ const saveProfile = async (updatedProfile) => {
     profile.value = {
       ...profile.value,
       ...updatedProfile,
+      id: data?.id || profile.value.id,
+      fullName:
+        data?.name ||
+        data?.fullName ||
+        updatedProfile?.fullName ||
+        profile.value.fullName,
       avatar:
-        response?.avatar ||
-        response?.image ||
+        data?.image ||
+        data?.avatar ||
         updatedProfile?.avatar ||
         profile.value.avatar,
     };
@@ -214,13 +237,11 @@ const saveProfile = async (updatedProfile) => {
       const updatedUser = {
         ...parsedUser,
         fullName:
-          updatedProfile.fullName ||
+          profile.value.fullName ||
           parsedUser.fullName,
-
-        email:
-          updatedProfile.email ||
-          parsedUser.email,
-
+        name:
+          profile.value.fullName ||
+          parsedUser.name,
         avatar:
           profile.value.avatar ||
           parsedUser.avatar,
@@ -345,16 +366,12 @@ const handleTelegramConnect =
       };
 
       /*
-       * Check immediately.
-       */
-
-      await loadTelegramStatus();
-
-      /*
-       * Telegram connection happens asynchronously
-       * through the Telegram bot webhook.
+       * Do NOT call loadTelegramStatus() here.
+       * The user hasn't opened Telegram yet so it
+       * will always return connected: false and
+       * confusingly reset the UI.
        *
-       * Therefore poll every 3 seconds.
+       * Start polling silently in the background.
        */
 
       startTelegramPolling();
@@ -424,6 +441,36 @@ const handleTelegramDisconnect =
   };
 
 /* =========================================================
+   SILENT STATUS CHECK (used during polling – no spinner)
+========================================================= */
+
+const silentLoadTelegramStatus = async () => {
+  try {
+    const response = await getTelegramStatus();
+
+    telegramStatus.value = {
+      connected: response?.connected || false,
+      chatId: response?.chatId || null,
+      username: response?.username || null,
+      connectedAt: response?.connectedAt || null,
+    };
+
+    if (telegramStatus.value.connected) {
+      telegramConnection.value = {
+        code: "",
+        botUsername: "",
+        telegramLink: "",
+        message: "",
+      };
+      stopTelegramPolling();
+    }
+  } catch (error) {
+    // Silently ignore polling errors
+    console.warn("Telegram silent poll error:", error);
+  }
+};
+
+/* =========================================================
    START TELEGRAM POLLING
 ========================================================= */
 
@@ -433,22 +480,10 @@ const startTelegramPolling = () => {
   telegramPolling =
     setInterval(async () => {
       /*
-       * Don't create another request while
-       * the previous request is loading.
+       * Use silent version so the spinner
+       * doesn't flash every 3 seconds.
        */
-
-      if (
-        telegramStatusLoading.value
-      ) {
-        return;
-      }
-
-      await loadTelegramStatus();
-
-      /*
-       * loadTelegramStatus automatically
-       * stops polling when connected.
-       */
+      await silentLoadTelegramStatus();
     }, 3000);
 };
 

@@ -94,7 +94,7 @@ import {
   getTelegramStatus,
   connectTelegram,
   disconnectTelegram,
-} from "../../service/telegramservice";
+} from "../../service/telegramService";
 
 
 // =========================================================
